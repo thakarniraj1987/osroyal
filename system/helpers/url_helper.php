@@ -155,7 +155,7 @@ if ( ! function_exists('anchor'))
 	 * @param	mixed	any attributes
 	 * @return	string
 	 */
-	function anchor($uri = '', $title = '', $attributes = '')
+	function anchor1($uri = '', $title = '', $attributes = '')
 	{
 		$title = (string) $title;
 
@@ -176,6 +176,17 @@ if ( ! function_exists('anchor'))
 		return '<a href="'.$site_url.'"'.$attributes.'>'.$title.'</a>';
 	}
 }
+
+function anchor($uri = '', $title = '', $attributes = '')
+{
+    $title = (string) $title;
+    $site_url = is_array($uri) ? site_url($uri) : (preg_match('#^(\w+:)?//#i', $uri) ? $uri : site_url($uri));
+    $title = ($title === '') ? $site_url : $title;
+    $attributes = ($attributes !== '') ? _stringify_attributes($attributes) : '';
+    return '<a href="'.$site_url.'"'.$attributes.'>'.$title.'</a>';
+}
+
+
 
 // ------------------------------------------------------------------------
 
