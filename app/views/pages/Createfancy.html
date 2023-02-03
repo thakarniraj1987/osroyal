@@ -60,11 +60,12 @@
                             <th><a ng-click="sort_by('');"><i class="glyphicon glyphicon-sort"></i></a>SNo</th>
                             <th><a ng-click="sort_by('matchName');"><i class="glyphicon glyphicon-sort"></i></a>Name</th>
                             <th><a ng-click="sort_by('MstDate');"><i class="glyphicon glyphicon-sort"></i></a>Date</th>
-                            <th><a ng-click="sort_by('countryCode');"><i class="glyphicon glyphicon-sort"></i></a>C.Code</th>
-                            <th><a ng-click="sort_by('marketCount');"><i class="glyphicon glyphicon-sort"></i></a>MarketCount</th>
-                            <th><a ng-click="sort_by('VolumeLimit');"><i class="glyphicon glyphicon-sort"></i></a>VolumeLimit</th>
+                            <th><a ng-click="sort_by('countryCode');"><i class="glyphicon glyphicon-sort"></i></a>Max Stack</th>
+                            <th><a ng-click="sort_by('maxStack');"><i class="glyphicon glyphicon-sort"></i></a>Min Stack</th>
+                            <th><a ng-click="sort_by('minStack');"><i class="glyphicon glyphicon-sort"></i></a>VolumeLimit</th>
                             <th><a ng-click="sort_by('OddsLimit');"><i class="glyphicon glyphicon-sort"></i></a>OddsLimit</th>
-                            <th>ScoreSetting</th>
+							<th>ScoreSetting</th>
+
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -72,15 +73,17 @@
                         <td data-label="Serial No">{{(currentPage-1)*entryLimit +$index+1}}</td>
                         <td data-label="Match">{{matche.matchName}}</td>
                         <td data-label="MstDate">{{matche.MstDate | date : "dd-MM-yyyy HH:mm"}}</td>
-                        <td data-label="FromTime">{{matche.countryCode}}</td>
-                        <td data-label="ToTime">{{matche.marketCount}}</td>
+                        <td data-label="maxStack">
+                            <input type="text" ng-model="matche.maxStack" class="form-control" ng-blur='changeStake(matche.maxStack,matche.MstCode,"max")' value="{{matche.maxStack}}" style="width: 100px" />
+                        </td>
+                        <td data-label="minStack"> <input type="text" ng-model="matche.minStack" class="form-control" ng-blur='changeStake(matche.minStack,matche.MstCode,"min")' value="{{matche.minStack}}" style="width: 100px" /></td>
                         <td data-label="VolumeLimit">
                             <input type="text" ng-model="matche.volumeLimit" class="form-control" ng-blur='changeVolumeLimit(matche.volumeLimit,matche.MstCode)' value="{{matche.volumeLimit}}" style="width: 100px" />
                         </td>
                         <td data-label="OddsLimit">
                             <input type="text" ng-model="matche.oddsLimit" class="form-control" ng-blur='changeOddsLimit(matche.oddsLimit,matche.MstCode)' value="{{matche.oddsLimit}}" style="width: 100px" />
                         </td>
-                        <td data-label="VolumeLimit">
+                         <td data-label="VolumeLimit">
                             <input type="text" ng-model="matche.scoreboard_id"  class="form-control" ng-blur='addScorekey(matche.MstCode,matche.scoreboard_id)'  style="width: 100px" />
                         </td>
                         <td data-label="Action" style="background-color: {{matche.SportID==4?'#736089':'#FDF9D6'}}" class="switch-icon">
@@ -113,7 +116,8 @@
             </div>
 			</div>
         </div>
-        <div class="lst_master_top clearfix">
+    </div>
+    <div class="lst_master_top clearfix">
 
             <div class="col-lg-12 col-md-12 col-sm-12 lst_top_table">
 
@@ -132,11 +136,11 @@
 
                             </tr>
                             </thead>
-                            <tr  ng-repeat="score in scoredata">
+                            <tr  ng-repeat="(key, value) in scoredata">
                                 <td data-label="Serial No">{{$index+1}}</td>
-                                <td data-label="Match">{{score.match_id}}</td>
-                                <td data-label="MstDate">{{score.match_date | date : "dd-MM-yyyy HH:mm"}}</td>
-                                <td data-label="FromTime">{{score.match_name}}</td>
+                                <td data-label="Match">{{key}}</td>
+                                <td data-label="MstDate">{{value.date | date : "dd-MM-yyyy HH:mm"}}</td>
+                                <td data-label="FromTime">{{value.title}}</td>
                               <!--  <td data-label="FromTime"><button ng-click="addScorekey(key)">Add</button></td>-->
 
                             </tr>
@@ -153,6 +157,5 @@
 
             </div>
         </div>
-    </div>
 </div>
 </div>

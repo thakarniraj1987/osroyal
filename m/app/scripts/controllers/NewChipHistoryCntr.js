@@ -93,7 +93,7 @@ app.controller('NewChipHistoryCntr', function ($scope, $http, $filter, sessionSe
                 CrDr: $scope.txtType,
                 Chips: $scope.txtChip,
                 IsFree: 2,
-                Narration: $scope.remark + "[]",
+                Narration: $scope.remark==undefined ? '' :$scope.remark,
                 HelperID: sessionService.get('HelperID')
             }
             $http({

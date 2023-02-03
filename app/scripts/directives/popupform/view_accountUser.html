@@ -1,7 +1,7 @@
 ﻿<md-dialog class="dial-width-650">
     <md-toolbar>
         <div class="md-toolbar-tools">
-            <h2>View Account For {{node.mstrname}}</h2>
+            <h2>View Account For {{node.mstrname}} {{node.usetype}}</h2>
             <span flex></span>
             <md-button class="md-icon-button" ng-click="hide()">
                 <md-icon md-svg-src="app/images/close.svg" aria-label="Close dialog"></md-icon>
@@ -11,7 +11,7 @@
     <md-dialog-content>
         <div class="md-dialog-content">
             <div class="clearfix">
-                <form name="updateAc" id="updateAc" method="post" ng-submit="UpdateViewAccount(user,node)">{{user | json}}
+                <form name="updateAc" id="updateAc" method="post" ng-submit="UpdateViewAccount(user,node)">
                     <div class="popup-form-box col-lg-12 col-md-12 col-sm-12 col-xs-12 clearfix">
                         <div style="border-bottom:solid 2px GREEN; font-size:14px; padding-bottom:9px; margin-bottom:15px; color:GREEN; font-weight:bold; text-transform:uppercase;">User<!-- {{node}} --></div>
                         <div class="popup-inp-box col-lg-3 col-md-3 col-sm-3 col-xs-12">

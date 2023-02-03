@@ -124,19 +124,18 @@ function formatDate(date) {
 
 
    $scope.saveMatch = function (paramsd) {
-
-    debugger
+        
         $scope.loading = true;
         var NewOpenDate = $filter('date')(paramsd.eventDate , 'yyyy-MM-dd HH:mm:ss');
 
-debugger
+
         var formData = 
         { 
-            seriesId: paramsd.seriesId, 
-            matchId: paramsd.MstCode, 
-            matchName: paramsd.matchName, 
+            seriesId: paramsd.SeriesId, 
+            matchId: paramsd.eventId, 
+            matchName: paramsd.eventName, 
             openDate: paramsd.eventDate,
-            sportId: paramsd.SportID, 
+            sportId: paramsd.EventTypeId, 
             HelperID: sessionService.get('HelperID'),
             marketId: paramsd.marketId,
             marketName: paramsd.marketName,
@@ -145,8 +144,10 @@ debugger
             selectionId2:  paramsd.selectionId2,
             runnerName2:  paramsd.runnerName2,
             selectionId3:  paramsd.selectionId3,
-            runnerName3:  paramsd.runnerName3
-         }
+            runnerName3:  paramsd.runnerName3,
+            scoreboard_id:paramsd.scoreboard_id
+
+        }
         var url = BASE_URL + "Geteventcntr/saveSportMatch";
         $http.post(url, formData).success(function (response) {
           

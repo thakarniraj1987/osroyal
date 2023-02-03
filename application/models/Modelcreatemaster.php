@@ -10,12 +10,13 @@ class Modelcreatemaster extends CI_Model
 		$_POST = json_decode(file_get_contents('php://input'), true);
 	}
 
-	function updatescorekey($key,$matchId)//sourabh 30-nov-2016
-	{
-		$dataArray = array('scoreboard_id' => $key);
-    	$this->db->where('MstCode',$matchId);
-        $this->db->update('matchmst', $dataArray);
-        return true; 
+	function findUserType($userId=NULL){
+		$this->db->select('usetype');
+		$this->db->from('createmaster user');
+		$this->db->where('user.mstrid', $userId);
+		$query = $this->db->get();
+		$result = $query->row_array();	
+		return $result['usetype'];
 	}
 
 	function userParent($userId=NULL){
@@ -161,13 +162,14 @@ class Modelcreatemaster extends CI_Model
 
 	function updateUserBalLiablity($userId){
 
-		$chipModel = $this->model_load_model('Chip_model');	
+		$chipModel = $this->model_load_model('Chip_model');
 		$data = $chipModel->getLiability($userId);
 
 		$dataArray = array('liability' => $data[0]['Liability'],'balance' => $data[0]['Balance'],'p_l'=>$data[0]['chipspnl'],'freechips'=>$data[0]['FreeChip'],'chip'=>$data[0]['Chip'],'sessionLiability'=>$data[0]['sessionLiability'],'unmatchliability'=>$data[0]['unmatchliability']);
 
 		$this->db->where('mstrid',$userId);	
 		$isUpdated = $this->db->update('createmaster', $dataArray);
+
       	return $isUpdated;
 	}
 	function getDealerInfo(){
@@ -1054,12 +1056,7 @@ class Modelcreatemaster extends CI_Model
 						$max_market_liability = MAX_MARKET_LIABLITY;
 					}
 
-					/*
-					//start the Max fancy Id From match Fancy
-					$row = $this->db->query('SELECT MAX(MFancyID) AS `maxid` FROM `matchfancy`')->row();
-					$maxid = $row->maxid+1; 
-					//End of Match Fancy */
-					$insertData = array('super_admin_fancy_id'=>$data['super_admin_fancy_id'],'HeadName'=> $data['HeadName'],'TypeID'=> $data['fancyType'],'MatchID'=> $data['mid'],'Remarks'=>$data['remarks'],'date'=>$data['date'],'time'=>$data['time'],'SessInptYes'=>$data['inputYes'],'SessInptNo'=>$data['inputNo'],'ind_fancy_selection_id'=>$data['ind_fancy_selection_id'],'SprtId'=>$data['sid'],'rateDiff'=>$data['RateDiff'],'pointDiff'=>$data['PointDiff'],'MaxStake'=>$data['MaxStake'],'NoValume'=>100,'YesValume'=>100,'active'=>1,'is_indian_fancy'=>0,'fancy_mode'=>'A','max_session_bet_liability'=>$max_session_bet_liability,'max_session_liability'=>$max_session_liability);
+					$insertData = array('super_admin_fancy_id'=>$data['super_admin_fancy_id'],'HeadName'=> $data['HeadName'],'TypeID'=> $data['fancyType'],'MatchID'=> $data['mid'],'Remarks'=>$data['remarks'],'date'=>$data['date'],'time'=>$data['time'],'SessInptYes'=>$data['inputYes'],'SessInptNo'=>$data['inputNo'],'ind_fancy_selection_id'=>$data['ind_fancy_selection_id'],'SprtId'=>$data['sid'],'rateDiff'=>$data['RateDiff'],'pointDiff'=>$data['PointDiff'],'MaxStake'=>$data['MaxStake'],'NoValume'=>100,'YesValume'=>100,'active'=>1,'is_indian_fancy'=>1,'fancy_mode'=>'A','max_session_bet_liability'=>$max_session_bet_liability,'max_session_liability'=>$max_session_liability);
 					/*start*/
 					$this->db->trans_begin();
 					/*Get Match Name*/
@@ -1081,7 +1078,7 @@ class Modelcreatemaster extends CI_Model
 					     return false;
 					}else{
 					    $this->db->trans_commit();
-					    return 1;
+					    return $creFancyId;
 					}
 			}
 			return false;
@@ -1118,7 +1115,7 @@ class Modelcreatemaster extends CI_Model
 					}
 					else{
 					    $this->db->trans_commit();
-					    return 1;
+					    return $creFancyId;
 					}
 				/*}		
 				else{
@@ -1126,19 +1123,11 @@ class Modelcreatemaster extends CI_Model
 				}*/
 			}else if($_POST['fancyType']==2){
 
-				/*$num=$this->chkMatchFancy($_POST['mid'],$_POST['fancyType']);
-				if($num==0){*/
-					//start the Max fancy Id From match Fancy
-						$row = $this->db->query('SELECT MAX(MFancyID) AS `maxid` FROM `matchfancy`')->row();
-						
-						    $maxid = $row->maxid+1; 
-						/*,'FancyID'=>$maxid*/
-					//End of Match Fancy
-					$insertData = array('HeadName'=> $_POST['HeadName'],'TypeID'=> $_POST['fancyType'],'MatchID'=> $_POST['mid'],'Remarks'=>$_POST['remarks'],'date'=>$_POST['date'],'time'=>$_POST['time'],'SessInptYes'=>$_POST['inputYes'],'SessInptNo'=>$_POST['inputNo'],'MFancyID'=>$maxid,'SprtId'=>$_POST['sid'],'rateDiff'=>$_POST['RateDiff'],'pointDiff'=>$_POST['PointDiff'],'MaxStake'=>$_POST['MaxStake'],'NoValume'=>$_POST['NoLayRange'],'YesValume'=>$_POST['YesLayRange']);
+				$row = $this->db->query('SELECT MAX(MFancyID) AS `maxid` FROM `matchfancy`')->row();
+				$maxid = $row->maxid+1;
 
-					//$query=$this->db->insert('matchfancy', $insertData);
-					/*start*/
-					$this->db->trans_begin();
+				 $insertData = array('HeadName'=> $_POST['HeadName'],'TypeID'=> $_POST['fancyType'],'MatchID'=> $_POST['mid'],'Remarks'=>$_POST['remarks'],'date'=>$_POST['date'],'time'=>$_POST['time'],'SessInptYes'=>$_POST['inputYes'],'SessInptNo'=>$_POST['inputNo'],'MFancyID'=>$maxid,'SprtId'=>$_POST['sid'],'rateDiff'=>$_POST['RateDiff'],'pointDiff'=>$_POST['PointDiff'],'MaxStake'=>$_POST['MaxStake'],'NoValume'=>$_POST['NoLayRange'],'YesValume'=>$_POST['YesLayRange']);
+                $this->db->trans_begin();
 					/*Get Match Name*/
 						$MatchName=$this->getMatchNameById($_POST['mid']);
 						$Name=$MatchName[0]->matchName;
@@ -1172,66 +1161,9 @@ class Modelcreatemaster extends CI_Model
 					}
 					else{
 					    $this->db->trans_commit();
-					    return 1;
+					    return $creFancyId;
 					}
-					/*end*/
-					//return true;	
-				/*}else{
 
-					$Fancy=$this->GetFancyByIdnType($_POST['mid'],$_POST['fancyType']);
-					
-					$fancyId=$Fancy[0]['ID'];
-					$MatchID=$Fancy[0]['MatchID'];
-					$HeadName=$Fancy[0]['HeadName'];
-					$TypeID=$Fancy[0]['TypeID'];
-					$Remarks=$Fancy[0]['Remarks'];
-					$date=$Fancy[0]['date'];
-					$time=$Fancy[0]['time'];
-					$SessInptYes=$Fancy[0]['SessInptYes'];
-					$SessInptNo=$Fancy[0]['SessInptNo'];
-					$insertData = array('HeadName'=> $HeadName,'TypeID'=> $TypeID,'MatchID'=> $MatchID,'Remarks'=>$Remarks,'date'=>$date,'time'=>$time,'SessInptYes'=>$SessInptYes,'SessInptNo'=>$SessInptNo,'MatchFancyId'=>$fancyId);
-					//Start Transaction
-
-					$this->db->trans_begin();
-
-					$insertQuery=$this->db->insert('tblsessionfancy', $insertData);
-					$dataArray =  array('HeadName'=> $_POST['HeadName'],'TypeID'=> $_POST['fancyType'],'MatchID'=> $_POST['mid'],'Remarks'=>$_POST['remarks'],'date'=>$_POST['date'],'time'=>$_POST['time'],'SessInptYes'=>$_POST['inputYes'],'SessInptNo'=>$_POST['inputNo'],'active'=>1);
-		    		//Update The session Fancy
-		    		$this->db->where('MatchID',$_POST['mid']);
-		    		$this->db->where('TypeID',$_POST['fancyType']);
-		    		
-		            $UpdateQuery=$this->db->update('matchfancy', $dataArray);
-		            $creFancyId=$this->db->insert_id();
-					//start user working table save the data By Manish 02/1/2017
-			        	$wortype="Session Fancy";
-			        	$remarks="Fancy Type>>".$_POST['fancyType'].">>Fancy Name >>".$_POST['HeadName'].">> Match ID >>".$_POST['mid'];
-			        	$userWrkingArray = array(
-									            'woruser' 			=> $_POST['HeadName'],
-									            'wormode' 			=> 0,
-									            'wordate' 			=> $_POST['date'],
-									            'wortype' 			=> $wortype,
-									            'worcode' 			=> $creFancyId,
-									            'worsysn' 			=> $_SERVER['REMOTE_ADDR'],
-									            'worrema'			=> $remarks,
-									            'worcudt'			=> date('Y-m-d H:i:s',now()),
-									        );
-			        	$condition=$this->db->insert('userworkin', $userWrkingArray);
-			        //End of useworking table
-		           if ($this->db->trans_status() === FALSE)
-					{
-					    $this->db->trans_rollback();
-					     return false;
-					}
-					else
-					{
-					    $this->db->trans_commit();
-					    return true;
-					}*/
-		           //Complete Transaction
-					
-				//}
-				
-				
 
 			}else if ($_POST['fancyType']==3) {
 				/*$num=$this->chkMatchFancy($_POST['mid'],$_POST['fancyType']);
@@ -1272,7 +1204,7 @@ class Modelcreatemaster extends CI_Model
 					}
 					else{
 					    $this->db->trans_commit();
-					    return 1;
+					    return $creFancyId;
 					}
 					/*end*/
 				/*}else{
@@ -1860,8 +1792,8 @@ class Modelcreatemaster extends CI_Model
 								);
 			//print_r($dataArray);
             if($userType==1){
-                $dataArray['admin_session_delay']=$_POST['session_delay'];
-                $dataArray['admin_set_timeout']=$_POST['set_timeout'];
+                $dataArray['master_session_delay']=$_POST['session_delay'];
+                $dataArray['master_set_timeout']=$_POST['set_timeout'];
             }
 			$this->db->trans_begin();
 
@@ -1878,7 +1810,7 @@ class Modelcreatemaster extends CI_Model
                     $sessionColoumKey = 'dealer_session_delay';
                     $oddsColoumKey = 'dealer_set_timeout';
                 }
-
+                //print_r($this->checkChildIds($_POST['id']));die;
                 //$this->db->where('parentId',$_POST['id']);
                 $this->db->where_in('parentId', $this->checkChildIds($_POST['id']));
                 $q1=$this->db->update('createmaster', [$sessionColoumKey=>$_POST['session_delay'],$oddsColoumKey=>$_POST['set_timeout']]);
@@ -1997,28 +1929,31 @@ class Modelcreatemaster extends CI_Model
         return true; 
 	}
 	function suspendFancy(){
-
-		//print_r($_POST);die();
-		$row = $this->db->query('SELECT MAX(MFancyID) AS `maxid` FROM `matchfancy`')->row();						
-		$maxid = $row->maxid+1; 
-		$dataArray = array( 'active' => $_POST['status'],'SessInptYes'=>$_POST['YesVal'],'SessInptNo'=>$_POST['NoVal'],'MaxStake'=>$_POST['MaxStake'],'NoValume'=>$_POST['NoValume'],'YesValume'=>$_POST['YesValume'],'pointDiff'=>$_POST['pointDiff'],'rateDiff'=>$_POST['rateDiff'],'MFancyID'=>$maxid);
-
-		if(!empty($_POST['fancy_mode'])){
-			$dataArray['fancy_mode'] = $_POST['fancy_mode'];
-		}
-
-			//print_r($dataArray);die();
-		$this->db->where('ID',$_POST['FancyId']);
-		$this->db->where('result',NULL);
-		$query=$this->db->update('matchfancy', $dataArray);
-		$dataArray1 = array('DisplayMsg'=>'');
-		$this->db->where('MatchID',$_POST['matchId']);
-		
-		$query1=$this->db->update('matchfancy', $dataArray1);
-		$str = $this->db->last_query();
-	//	print_r($str);
-		
-		return $query; 
+        try {
+            $redis = new Redis();
+            $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+            $key = $this->db->database.'ind_' . $_POST['matchId'] . '_'.$_POST['FancyId'];
+            //echo $this->db->database.'ind_' . $_POST['matchId'] . '_'.$_POST['FancyId'];die;
+            $sessionOdds = json_decode($redis->get($key),true);
+            $sessionOdds['active'] = $_POST['status'];
+            $sessionOdds['SessInptYes'] = $_POST['YesVal'];
+            $sessionOdds['SessInptNo'] = $_POST['NoVal'];
+            $sessionOdds['MaxStake'] = $_POST['MaxStake'];
+            $sessionOdds['NoValume'] = $_POST['NoValume'];
+            $sessionOdds['YesValume'] = $_POST['YesValume'];
+            $sessionOdds['pointDiff'] = $_POST['pointDiff'];
+            $sessionOdds['rateDiff'] = $_POST['rateDiff'];
+            $sessionOdds['DisplayMsg'] = '';
+            if(!empty($_POST['fancy_mode'])){
+                $sessionOdds['fancy_mode'] = $_POST['fancy_mode'];
+            }
+           // print_r($sessionOdds);die;
+            $redis->set($key, json_encode($sessionOdds));
+            $redis->close();
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
 	}
 	function updateVolumeLimit($limit,$matchId)//sourabh 30-nov-2016
 	{
@@ -2027,6 +1962,17 @@ class Modelcreatemaster extends CI_Model
         $this->db->update('matchmst', $dataArray);
         return true; 
 	}
+
+    function updateMinAndMaxStackLimit()//sourabh 30-nov-2016
+    {
+
+        $dataArray = array($_POST['key'] => $_POST['value']);
+        $this->db->where('MstCode',$_POST['match_id']);
+        $this->db->update('matchmst', $dataArray);
+        //echo $this->db->last_query();die;
+        return true;
+    }
+
 	function sumOfOdds($MarketId,$userId,$userType,$matchId)//sourabh 161226 change
 	{
 	if($userId==null)$userId1=0;else $userId1=$userId;
@@ -2329,7 +2275,7 @@ GROUP BY b.mstrid, usetype, mstruserid, mstrname, ChildID");
 		}
 
 		function getMatchOddsLimitByMatches($matchId){
-			$this->db->select('matchmst.MstCode as match_id,0 as result,IFNULL(matchmst.scoreboard_id,"") scoreboard_id,matchmst.oddsLimit,matchmst.volumeLimit');
+			$this->db->select('matchmst.MstCode as match_id,0 as result,matchmst.oddsLimit,matchmst.volumeLimit');
 			$this->db->from('matchmst');
 			$this->db->where_in('MstCode', $matchId);
 			$query = $this->db->get();
@@ -2705,7 +2651,15 @@ GROUP BY b.mstrid, usetype, mstruserid, mstrname, ChildID");
 		}
 		return $result;
 	}
+    function activeUser(){
 
+        $this->db->select('mstrid,usetype,parentId');
+        $this->db->from('createmaster');
+        $this->db->where('active',1);
+        $query = $this->db->get();
+        $res = $query->result_array();
+        return count($res);
+    }
 	function checkAuthUser($username,$password){
 		$result = array();
 		$this->db->select('mstrid');
@@ -2959,19 +2913,21 @@ GROUP BY b.mstrid, usetype, mstruserid, mstrname, ChildID");
 		return $res;
 	}
 	function manageManualOdds($data){
-	    if($data < 10){
+	    return $data;
+	    /*if($data < 10){
 	        return '1.0'.$data;
         }else{
            return '1.'.$data;
-        }
+        }*/
     }
 
     function manageManualOddsLay($data){
-        if($data >= 100){
+        return $this->manageManualOdds($data);
+        /*if($data >= 100){
             return 2;
         }else{
             return $this->manageManualOdds($data);
-        }
+        }*/
     }
 
     function saveManualMatchOdds(){
@@ -2983,14 +2939,14 @@ GROUP BY b.mstrid, usetype, mstruserid, mstrname, ChildID");
         $cur_date 	= date('Y-m-d H:i:s',now());
         $insertData = array(
             'market_id' 	=> $market_id,
-            'team1_back' 	=> !empty($_POST['team1_back']) ? $this->manageManualOdds($_POST['team1_back']) : 1,
-            'team1_lay' 	=> !empty($_POST['team1_lay']) ? ($this->manageManualOddsLay($_POST['team1_lay']) ) : 1,
+            'team1_back' 	=> !empty($_POST['team1_back']) ? $this->manageManualOdds($_POST['team1_back']) : 0,
+            'team1_lay' 	=> !empty($_POST['team1_lay']) ? ($this->manageManualOddsLay($_POST['team1_lay']) ) : 0,
             'active_team1' 	=> !empty($_POST['active_team1'])  ? '1'  : '0',
-            'team2_back' 	=> !empty($_POST['team2_back']) ? $this->manageManualOdds($_POST['team2_back'] ) : 1,
-            'team2_lay' 	=> !empty($_POST['team2_lay']) ? ($this->manageManualOddsLay($_POST['team2_lay'] )): 1,
+            'team2_back' 	=> !empty($_POST['team2_back']) ? $this->manageManualOdds($_POST['team2_back'] ) : 0,
+            'team2_lay' 	=> !empty($_POST['team2_lay']) ? ($this->manageManualOddsLay($_POST['team2_lay'] )): 0,
             'active_team2' 	=> !empty($_POST['active_team2'])  ? '1' : '0',
-            'draw_back' 	=> !empty($_POST['draw_back']) ? $this->manageManualOdds($_POST['draw_back']  ): 1,
-            'draw_lay' 		=> !empty($_POST['draw_lay']) ? ($this->manageManualOddsLay($_POST['draw_lay']  )): 1,
+            'draw_back' 	=> !empty($_POST['draw_back']) ? $this->manageManualOdds($_POST['draw_back']  ): 0,
+            'draw_lay' 		=> !empty($_POST['draw_lay']) ? ($this->manageManualOddsLay($_POST['draw_lay']  )): 0,
             'active_draw' 		=> !empty($_POST['active_draw'])  ? '1'  : '0',
             'dlay_time' 		=> !empty($_POST['dlay_time']) ? $_POST['dlay_time']  : 0,
             'updatedOn'		=> $cur_date
@@ -2998,6 +2954,20 @@ GROUP BY b.mstrid, usetype, mstruserid, mstrname, ChildID");
        // $this->updateUnmatchManualBets();
         $redis->set($market_id,json_encode($insertData));
 
+        return true;
+    }
+
+    function saveManualMarketStack(){
+        $manualMarketDetaisl = $this->manualMatchOddsDetails($_POST['market_id']);
+        $min_stack = !empty($_POST['min_stack'])  ? $_POST['min_stack']  : 0;
+        $max_stack = !empty($_POST['max_stack'])  ? $_POST['max_stack']  : 0;
+        $manualMarketDetaisl['min_stack']=$min_stack;
+        $manualMarketDetaisl['max_stack']=$max_stack;
+        $redis = new Redis();
+        $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+
+        $redis->set($_POST['market_id'],json_encode($manualMarketDetaisl));
+        $this->db->update("market",['min_stack'=>$min_stack,'max_stack'=>$max_stack],['Id'=>$_POST['market_id']]);
         return true;
     }
 
@@ -3151,6 +3121,16 @@ GROUP BY b.mstrid, usetype, mstruserid, mstrname, ChildID");
     function updateBetAllowedOnManualMatch($market_id, $status){
         $updateData = array(
             'isBetAllowedOnManualMatchOdds' => $status
+        );
+
+        $this->db->where('Id', $market_id);
+        $res = $this->db->update('market', $updateData);
+        return $res;
+    }
+
+    function updateIsRs($market_id, $status){
+        $updateData = array(
+            'isRs' => $status
         );
 
         $this->db->where('Id', $market_id);

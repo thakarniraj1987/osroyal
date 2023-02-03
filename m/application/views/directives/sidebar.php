@@ -17,7 +17,7 @@
         <span>Markets </span>
       </label>
       <input id="tab2" class="tab-inp" type="radio" name="tabs" ng-model="treeAcc" ng-value="true" ng-checked="treeAcc"/>
-      <label for="tab2" class="tab-label" ng-click="treeAcc=1" ng-hide="sessionusetype==3">
+      <label for="tab2" class="tab-label" ng-click="treeAcc=1" ng-hide="sessionusetype==3" ng-if="IsShowMenu('user')">
        <button type="button" class="user-ref-btn" ng-click="refresh_tree()">
           <i class="glyphicon glyphicon-refresh"></i>
         </button>
@@ -44,11 +44,12 @@
 
 <li ng-show="IsShowMenu('onePageReportSetting')"><a onclick="myfun()" ng-show="$root.HelperAllRights==angular.isUndefinedOrNull || $root.HelperAllRights.UpdateUser==1" href="" ui-sref="dashboard.OnePageRprt"><i class="fa fa-file" aria-hidden="true"></i>  One Page Report</a> </li>
 <li ng-show="IsShowMenu('scheduleMatch')"><a onclick="myfun()" ng-show="$root.HelperAllRights==angular.isUndefinedOrNull || $root.HelperAllRights.UpdateUser==1" href="" ui-sref="dashboard.Matches"><i class="fa fa-file" aria-hidden="true"></i>  Schedule Match</a> </li>
-<li ng-show="IsShowMenu('Collection')"><a onclick="myfun()" ng-show="$root.HelperAllRights==angular.isUndefinedOrNull || $root.HelperAllRights.UpdateUser==1" href="" ui-sref="dashboard.CollectionReport"><i class="fa fa-file" aria-hidden="true"></i>  Collection Report</a> </li>
+<li ng-show="false"><a onclick="myfun()" ng-show="$root.HelperAllRights==angular.isUndefinedOrNull || $root.HelperAllRights.UpdateUser==1" href="" ui-sref="dashboard.CollectionReport"><i class="fa fa-file" aria-hidden="true"></i>  Collection Report</a> </li>
 <li ng-show="IsShowMenu('seriesMatch')"><a onclick="myfun()" ng-show="$root.HelperAllRights==angular.isUndefinedOrNull || $root.HelperAllRights.UpdateUser==1" href="" ui-sref="dashboard.SeriesMatches"><i class="fa fa-list" aria-hidden="true"></i>Manage Series/Matches</a> </li>
             <li ng-click="ShowHideAng(-1)"><a href=""><i class="fa fa-cog" aria-hidden="true"></i> Application Settings <i class="fa fa-angle-left pull-right"></i></a>
             <ul class="treeview-menu">
-              <li  ng-show="IsShowMenu('fancy')"><a onclick="myfun()" href="" ui-sref="dashboard.ApkVersion"><i class="fa fa-cog" aria-hidden="true"></i>Apk Setting</a> </li>
+			
+             <!--  <li  ng-show="IsShowMenu('fancy')"><a onclick="myfun()" href="" ui-sref="dashboard.ApkVersion"><i class="fa fa-cog" aria-hidden="true"></i>Apk Setting</a> </li> -->
               <li  ng-show="IsShowMenu('term')"><a onclick="myfun()" href="" ui-sref="dashboard.TermCondition"><i class="fa fa-cog" aria-hidden="true"></i>Term & Condition</a> </li>
               <li ng-show="IsShowMenu('settlementEntryList')" ui-sref-active="treeview active"> <a onclick="myfun()" ui-sref="dashboard.DelChipLst">Settlement Entry List</a> </li>
               <li ng-show="IsShowMenu('sportSetting')" ui-sref-active="treeview active"> <a onclick="myfun()" ui-sref="dashboard.sportSetting">Sports Setting</a> </li>

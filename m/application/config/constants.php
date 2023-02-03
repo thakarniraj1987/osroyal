@@ -89,12 +89,15 @@ define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
 define('DEFAULT_PAGING_LIMIT', 10);
 define('ONE_REPORT_PAGING_LIMIT', 15);
 
-define('CONFIG_UNMATCHED', 'Y');
+define('CONFIG_UNMATCHED', 'N');
 define('CONFIG_LOGIN_TIME_OUT', 1800); 
 
-define('ONE_CLICK_STAKE_OPTION', '[50,100,200]');
-define('MATCH_STAKE_OPTION', '[1000,5000,10000,25000,50000,100000,150000]');
-define('SESSION_STAKE_OPTION', '[500,1000,2000,5000,10000,15000,25000,50000]');
+define('MIN_STAKE', '5');
+define('MAX_STAKE', '999999999999999999999999');
+define('ONE_CLICK_STAKE_OPTION', '[5,10,20]');
+define('MATCH_STAKE_OPTION', '[20,50,100,200,500,1000,2000]');
+define('SESSION_STAKE_OPTION', '[20,50,100,200,500,1000,2000]');
+
 
 define('BETFAIR_APP_KEY', 'pULrrs5uJ2CUBeMY'); // Betfair app key  
 define('BETFAIR_USERNAME', 'dannybillqwe@yandex.com'); // Betfair username
@@ -130,7 +133,6 @@ define('ERROR_RECORD_NOT_ACTIVE', 14);
 define('ERROR_RECORD_NOT_ACTIVE_MSG', 'Record not active');
 define('REDIS_UN_MATCH_BET_SERVER', '127.0.0.1');
 
-
 define('BETFAIR_SPORT_CRICKET', 4); 
 define('BETFAIR_SPORT_TENNIS', 2);  
 define('BETFAIR_SPORT_SOCCER', 1); 
@@ -139,7 +141,8 @@ define('BR_LIVE_SESSION_URL','http://139.162.242.237/betfair/betting_apis/market
 define('BR_LIVE_ODDS_URL','http://139.162.242.237/betfair/betting_apis/odds.php?');
 define('BR_LIVE_SERIES_URL','http://139.162.242.237/betfair/betting_apis/series.php?series_id=');
 define('BR_LIVE_MATCHES_URL','http://139.162.242.237/betfair/betting_apis/matches.php?');
-define('BR_LIVE_RESULT_URL','http://139.162.242.237/betfair/betting_apis/result.php?');
+//define('BR_LIVE_RESULT_URL','http://139.162.242.237/betfair/betting_apis/result.php?');
+define('BR_LIVE_RESULT_URL','http://109.74.202.195/api/v1/betting_api/result.php?');
 define('BR_LIVE_MATCHES_ODDS_URL','http://139.162.242.237/betfair/betting_apis/multi_market.php?');
 define('BR_LIVE_CRICKET_SOCKET_URL','http://139.162.242.237/cricket_data.php');
 define('BR_LIVE_SOCCER_SOCKET_URL','http://139.162.242.237/soccer_data.php');

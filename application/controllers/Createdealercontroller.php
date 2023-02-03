@@ -74,7 +74,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 			$data['userList']=$this->Modelcreatemaster->get_userList($userType);
 			$data['menuList']=$this->Modelcreatemaster->get_menuList();
-			
 			$this->output->set_content_type('application/json')->set_output(json_encode($data));
 
 		}

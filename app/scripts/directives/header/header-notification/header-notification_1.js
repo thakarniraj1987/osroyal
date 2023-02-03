@@ -1,16 +1,12 @@
 'use strict';
-angular.module('ApsilonApp').directive('headerNotification', ['$timeout', function ($timeout) {
+(function(){
+app.directive('headerNotification', ['$timeout', function ($timeout) {
     return {
-        templateUrl: 'app/scripts/directives/header/header-notification/header-notification.html?var='+Math.random(),
+        templateUrl: 'app/scripts/directives/header/header-notification/header-notification.html',
         restrict: 'E',
         replace: true,
         scope: {},
         controller: function ($scope, $http, loginService, $mdDialog, sessionService, $rootScope, get_userser, Dialog,$state) {
-            $scope.$on('$locationChangeStart', function (event, next, current) {
-                //alert("State Change");
-             ///event.preventDefault();
-            });
-
             $scope.subAdmin= sessionService.get('subAdmin');
             $scope.GetUsrBalance=function(){
                   $http.get('Chipscntrl/getChipDataById/' + sessionService.get('user_id')).success(function (data, status, headers, config) {
@@ -40,6 +36,7 @@ angular.module('ApsilonApp').directive('headerNotification', ['$timeout', functi
 
             $scope.upBal="";
             $scope.callbal=1;
+            $scope.callAdminRole=1;
             $scope.callSubAdminRole=function()
             {
                 $timeout(function(){
@@ -50,10 +47,11 @@ angular.module('ApsilonApp').directive('headerNotification', ['$timeout', functi
 
                             sessionService.set('subAdminRole',JSON.stringify(data.data));
                             $scope.callSubAdminRole();
+                            $scope.callAdminRole=2;
                         });
                     }
 
-                },10000);
+                },$scope.callAdminRole==1 ? 0 : 10000);
 
 
             }
@@ -102,6 +100,9 @@ angular.module('ApsilonApp').directive('headerNotification', ['$timeout', functi
                                 $scope.updateBal();
                             }
                         });
+                    }
+                    else {
+                        loginService.logout();
                     }
 
 
@@ -342,6 +343,6 @@ if(localStorage.length > 1){
     }
 }]);
 
-
+})();
 
 

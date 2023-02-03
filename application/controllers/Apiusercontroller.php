@@ -26,16 +26,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		       }  
 		}
 
-		function scoreboard($key=''){
-		    $str = $this->httpGet("http://167.99.198.2:3001/api/matches/score/$key");
-		    echo $str;
-		}
-
 		/**
 		 * [checkAuthentication check user authentication by headers]
 		 * @return [type] [description]
 		 */
-	/*	function checkAuthentication(){
+		function checkAuthentication(){
 
 			$this->load->model('Modelcreatemaster');
 
@@ -73,8 +68,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					$this->output->set_status_header(412)->set_content_type('application/json')->set_output(json_encode($response));
 					exit();
 			}
-		}   */
- 
+		}
+
 		function favourite(){	
 
 			$this->load->model('Modelfavouritemarket');
@@ -180,7 +175,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			$matchStacks = json_decode($match,true);
 			$sessionStacks = json_decode($session,true);
 			$oneClickStacks = json_decode($oneclick,true);
-
+            $devicetype = $this->input->request_headers();
 			$response["code"] = 0;
             $response["data"]=[];
 			$response["error"] = false;
@@ -196,16 +191,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         		$dbMatches = $this->Modeleventlst->mobileGetUserFavouriteMatchLst(BETFAIR_SPORT_CRICKET,$user_id,$seriesId);
 
 				$filterMatches = array();
-				$dbMatch = array();
 				foreach($dbMatches as $cricketDbMatch){
 					$dbMatch = array('matchName'=>$cricketDbMatch['matchName'],'series_name'=>$cricketDbMatch['series_name'],'matchid'=>$cricketDbMatch['matchid'],'marketid'=>$cricketDbMatch['marketid'],'max_bet_liability'=>$cricketDbMatch['max_bet_liability'],'max_market_liability'=>$cricketDbMatch['max_market_liability'],'visibility'=>$cricketDbMatch['visibility'],'matchdate'=>$cricketDbMatch['MstDate'],'sportname'=>$cricketDbMatch['sportname'],'is_favourite'=>$cricketDbMatch['is_favourite'],'SportId'=>$cricketDbMatch['SportId'],'socket_url'=>$cricketDbMatch['socket_url'],'sport_image'=>$cricketDbMatch['sport_image'],'is_manual'=>$cricketDbMatch['is_manual'],'isfancy'=>$cricketDbMatch['isfancy'],'isBetAllowedOnManualMatchOdds'=>$cricketDbMatch['isBetAllowedOnManualMatchOdds'],'day'=>$cricketDbMatch['day']);
 					$cricketIds[] = $dbMatch['marketid'];
 					$allMarketIds[] = $dbMatch['marketid'];
-				//	$resultDeclare = $this->Modelmatchmst->result($dbMatch['matchid']);
-					$resultDeclare = $cricketDbMatch['active'];
-				//	$volumeLimit = $this->Modelcreatemaster->getMatchOddsLimitByMatches($dbMatch['matchid']);
-					$volumeLimit = array('match_id'=>$dbMatch['matchid'],'result'=>0,'oddsLimit'=>$cricketDbMatch['oddsLimit'],'volumeLimit'=>$cricketDbMatch['volumeLimit']);
-
+					$resultDeclare = $this->Modelmatchmst->result($dbMatch['matchid']);
+					$volumeLimit = $this->Modelcreatemaster->getMatchOddsLimitByMatches($dbMatch['matchid']);
 
 					if($dbMatch['is_manual']==0){
                         if(!empty($cricketDbMatch['runner_json'])){
@@ -214,14 +205,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             $backArr = @$runnerArr[0]['back'];
                             if(@$backArr[0]['price']=='--'){
                                 $dbMatch['runners'] = $runnerArr;
-                                $dbMatch['IsMatchDisable'] = false;
+                                $dbMatch['IsMatchDisable'] = true;
                             }else{
                                 $dbMatch['runners'] = $runnerArr;
-                                $dbMatch['IsMatchDisable'] = false;
+                                $dbMatch['IsMatchDisable'] = true;
                             }
                         }else{
                             $dbMatch['runners'] = array();
-                            $dbMatch['IsMatchDisable'] = false;
+                            $dbMatch['IsMatchDisable'] = true;
                         }
                     }
                     else{
@@ -250,43 +241,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     }
 
 
-
-
 					$dbMatch['volumeLimit'] = $volumeLimit;
 					$dbMatch['selection'] = array(); 
 					$dbMatch['result'] = $resultDeclare;
+
                     $temp = array();
                     $temp['marketId'] = $dbMatch['marketid'];
 
-                    $runners = $this->Betentrymodel->sumOfOdds($dbMatch['marketid'],$user_id,$user_type,$dbMatch['matchid']);
-                    $formatRunner = array();
-                    foreach($runners as $runner){
-                        $formatRunner[] = array('winValue'=>$runner['winValue'],'lossValue'=>$runner['lossValue'],'selectionId'=>$runner['SelectionId']);
+
+                    if((!empty($devicetype['inplay']) &&  in_array($dbMatch['marketid'],explode(',',$devicetype['inplay']))) or !empty($devicetype['devicetype']) ) {
+                        $runners = $this->Betentrymodel->sumOfOdds($dbMatch['marketid'], $user_id, $user_type, $dbMatch['matchid']);
+                        $formatRunner = array();
+                        foreach ($runners as $runner) {
+                            $formatRunner[] = array('winValue' => $runner['winValue'], 'lossValue' => $runner['lossValue'], 'selectionId' => $runner['SelectionId']);
+                        }
+                        $temp['runners'] = $formatRunner;
+                        $dbMatch['win_loss'] = $temp;
+                    }else{
+                        $temp['runners'] = array();
+                        $dbMatch['win_loss'] = (object)array();
                     }
-                    $temp['runners'] = $formatRunner;
-                    $dbMatch['win_loss'] = $temp;
+
                     $filterMatches[] = $dbMatch;
 
 				}
-
-			
-				/*  $redisCUrl = BETFAIR_ODDS_URL.implode(',', $cricketIds);
-					$redisCJson = $this->httpGet($redisCUrl);
-					$redisCMarketArr = json_decode($redisCJson,true);
-					$redisCArr = array();
-					foreach($redisCMarketArr as $ra){
-						$marketId = $ra['marketId'];
-						$redisCArr[$marketId] = $ra;
-					}  
-
-			
-					$filterMatchesApi = array();
-					foreach ($filterMatches as $fmatch) {
-						$fmatch['runners'] = $redisCArr[$fmatch['marketid']]['runners']; 
-						$filterMatchesApi[] = $fmatch;
-					}   */
-
-			
 
                     $cricket = array();
                     $cricket['sportname'] = 'Cricket';
@@ -301,16 +279,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				$dbMatches = $this->Modeleventlst->mobileGetUserFavouriteMatchLst(BETFAIR_SPORT_TENNIS,$user_id,$seriesId);
 
 				$filterMatches = array();
-				$dbMatch = array();
 				foreach($dbMatches as $tennisDbMatch){
 					$dbMatch = array('matchName'=>$tennisDbMatch['matchName'],'series_name'=>$tennisDbMatch['series_name'],'matchid'=>$tennisDbMatch['matchid'],'marketid'=>$tennisDbMatch['marketid'],'max_bet_liability'=>$tennisDbMatch['max_bet_liability'],'max_market_liability'=>$tennisDbMatch['max_market_liability'],'visibility'=>$tennisDbMatch['visibility'],'matchdate'=>$tennisDbMatch['MstDate'],'sportname'=>$tennisDbMatch['sportname'],'is_favourite'=>$tennisDbMatch['is_favourite'],'SportId'=>$tennisDbMatch['SportId'],'socket_url'=>$tennisDbMatch['socket_url'],'sport_image'=>$tennisDbMatch['sport_image'],'is_active'=>$tennisDbMatch['active'],'is_manual'=>$tennisDbMatch['is_manual'],'isfancy'=>$tennisDbMatch['isfancy'],'isBetAllowedOnManualMatchOdds'=>$tennisDbMatch['isBetAllowedOnManualMatchOdds'],'day'=>$tennisDbMatch['day']);
 					$tennisIds[] = $dbMatch['marketid'];
 					$allMarketIds[] = $dbMatch['marketid'];
 
-				//	$resultDeclare = $this->Modelmatchmst->result($dbMatch['matchid']);
-					$resultDeclare = $tennisDbMatch['active'];
-				//	$volumeLimit = $this->Modelcreatemaster->getMatchOddsLimitByMatches($dbMatch['matchid']);
-					$volumeLimit = array('match_id'=>$dbMatch['matchid'],'result'=>0,'oddsLimit'=>$tennisDbMatch['oddsLimit'],'volumeLimit'=>$tennisDbMatch['volumeLimit']);
+					$resultDeclare = $this->Modelmatchmst->result($dbMatch['matchid']);
+					$volumeLimit = $this->Modelcreatemaster->getMatchOddsLimitByMatches($dbMatch['matchid']);
 
                     if($dbMatch['is_manual']==0){
                         if(!empty($tennisDbMatch['runner_json'])){
@@ -319,14 +294,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             $backArr = @$runnerArr[0]['back'];
                             if(@$backArr[0]['price']=='--'){
                                 $dbMatch['runners'] = $runnerArr;
-                                $dbMatch['IsMatchDisable'] = false;
+                                $dbMatch['IsMatchDisable'] = true;
                             }else{
                                 $dbMatch['runners'] = $runnerArr;
-                                $dbMatch['IsMatchDisable'] = false;
+                                $dbMatch['IsMatchDisable'] = true;
                             }
                         }else{
                             $dbMatch['runners'] = array();
-                            $dbMatch['IsMatchDisable'] = false;
+                            $dbMatch['IsMatchDisable'] = true;
                         }
                     }
                     else{
@@ -358,21 +333,26 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					$dbMatch['volumeLimit'] = $volumeLimit;
 					$dbMatch['selection'] = array(); 
 					$dbMatch['result'] = $resultDeclare;
+
                     $temp = array();
                     $temp['marketId'] = $dbMatch['marketid'];
 
-                    $runners = $this->Betentrymodel->sumOfOdds($dbMatch['marketid'],$user_id,$user_type,$dbMatch['matchid']);
-                    $formatRunner = array();
-                    foreach($runners as $runner){
-                        $formatRunner[] = array('winValue'=>$runner['winValue'],'lossValue'=>$runner['lossValue'],'selectionId'=>$runner['SelectionId']);
+                    if((!empty($devicetype['inplay']) &&  in_array($dbMatch['marketid'],explode(',',$devicetype['inplay']))) or !empty($devicetype['devicetype']) ) {
+                        $runners = $this->Betentrymodel->sumOfOdds($dbMatch['marketid'], $user_id, $user_type, $dbMatch['matchid']);
+
+                        $formatRunner = array();
+                        foreach ($runners as $runner) {
+                            $formatRunner[] = array('winValue' => $runner['winValue'], 'lossValue' => $runner['lossValue'], 'selectionId' => $runner['SelectionId']);
+                        }
+                        $temp['runners'] = $formatRunner;
+                        $dbMatch['win_loss'] = $temp;
+                    }else{
+                        $temp['runners'] = array();
+                        $dbMatch['win_loss'] = (object)array();
                     }
-                    $temp['runners'] = $formatRunner;
-                    $dbMatch['win_loss'] = $temp;
-				//	$dbMarkets = explode(',', $dbMatch['marketid']);
-				//	$matched = array_intersect($marketIds,$dbMarkets);
-				//	if(!empty($matched)){
+
 						$filterMatches[] = $dbMatch;
-				//	}
+
 				}
 
                     $tennis = array();
@@ -387,34 +367,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			if($sportId == 0 || $sportId == 1){
 
 				$dbMatches = $this->Modeleventlst->mobileGetUserFavouriteMatchLst(BETFAIR_SPORT_SOCCER,$user_id,$seriesId);
-			/*	$sessionToken = $this->Modelcreatemaster->findBetfairToken();
-				$MarketId1 = $this->Modeleventlst->getUserMatchOdds($sportId);
-				$betfairMatchesJson = $this->getMarketBookUser($this->APP_KEY, $sessionToken, $MarketId1[0]['ids']);
-				$betfairMatches = json_decode($betfairMatchesJson,true); */
 
-			/*	$soccerUrl = BR_LIVE_MATCHES_ODDS_URL . 'event_id='.BETFAIR_SPORT_SOCCER;
-				$matchesJson = $this->httpGet($soccerUrl);
-				$matches = json_decode($matchesJson,true); */
-
-			//	$marketIds = array();
-			//	foreach($matches['result'] as $match){
-				//	if(isset($bfmatch['status']) && $bfmatch['status'] == 'OPEN'){
-			//			$marketIds[] = $match['id'];
-				//	}	
-			//	}
 
 				$filterMatches = array();
-				$dbMatch = array();
 				foreach($dbMatches as $soccerDbMatch){
 					$dbMatch = array('matchName'=>$soccerDbMatch['matchName'],'series_name'=>$soccerDbMatch['series_name'],'matchid'=>$soccerDbMatch['matchid'],'marketid'=>$soccerDbMatch['marketid'],'max_bet_liability'=>$soccerDbMatch['max_bet_liability'],'max_market_liability'=>$soccerDbMatch['max_market_liability'],'visibility'=>$soccerDbMatch['visibility'],'matchdate'=>$soccerDbMatch['MstDate'],'sportname'=>$soccerDbMatch['sportname'],'is_favourite'=>$soccerDbMatch['is_favourite'],'SportId'=>$soccerDbMatch['SportId'],'socket_url'=>$soccerDbMatch['socket_url'],'sport_image'=>$soccerDbMatch['sport_image'],'is_manual'=>$soccerDbMatch['is_manual'],'isfancy'=>$soccerDbMatch['isfancy'],'isBetAllowedOnManualMatchOdds'=>$soccerDbMatch['isBetAllowedOnManualMatchOdds'],'day'=>$soccerDbMatch['day']);
 					$soccerIds[] = $dbMatch['marketid'];
 					$allMarketIds[] = $dbMatch['marketid'];
 
-				//	$resultDeclare = $this->Modelmatchmst->result($dbMatch['matchid']);
-					$resultDeclare = $soccerDbMatch['active'];
-				//	$volumeLimit = $this->Modelcreatemaster->getMatchOddsLimitByMatches($dbMatch['matchid']);
-					$volumeLimit = array('match_id'=>$dbMatch['matchid'],'result'=>0,'oddsLimit'=>$soccerDbMatch['oddsLimit'],'volumeLimit'=>$soccerDbMatch['volumeLimit']);
-
+					$resultDeclare = $this->Modelmatchmst->result($dbMatch['matchid']);
+					$volumeLimit = $this->Modelcreatemaster->getMatchOddsLimitByMatches($dbMatch['matchid']);
 
                     if($dbMatch['is_manual']==0){
                         if(!empty($soccerDbMatch['runner_json'])){
@@ -423,14 +385,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             $backArr = @$runnerArr[0]['back'];
                             if(@$backArr[0]['price']=='--'){
                                 $dbMatch['runners'] = $runnerArr;
-                                $dbMatch['IsMatchDisable'] = false;
+                                $dbMatch['IsMatchDisable'] = true;
                             }else{
                                 $dbMatch['runners'] = $runnerArr;
-                                $dbMatch['IsMatchDisable'] = false;
+                                $dbMatch['IsMatchDisable'] = true;
                             }
                         }else{
                             $dbMatch['runners'] = array();
-                            $dbMatch['IsMatchDisable'] = false;
+                            $dbMatch['IsMatchDisable'] = true;
                         }
                     }
                     else{
@@ -461,22 +423,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					$dbMatch['volumeLimit'] = $volumeLimit;
 					$dbMatch['selection'] = array(); 
 					$dbMatch['result'] = $resultDeclare;
-                    $temp = array();
+
+
+					$temp = array();
                     $temp['marketId'] = $dbMatch['marketid'];
 
-                    $runners = $this->Betentrymodel->sumOfOdds($dbMatch['marketid'],$user_id,$user_type,$dbMatch['matchid']);
-                    $formatRunner = array();
-                    foreach($runners as $runner){
-                        $formatRunner[] = array('winValue'=>$runner['winValue'],'lossValue'=>$runner['lossValue'],'selectionId'=>$runner['SelectionId']);
+                    if((!empty($devicetype['inplay']) &&  in_array($dbMatch['marketid'],explode(',',$devicetype['inplay']))) or !empty($devicetype['devicetype']) ) {
+                        $runners = $this->Betentrymodel->sumOfOdds($dbMatch['marketid'], $user_id, $user_type, $dbMatch['matchid']);
+
+                        $formatRunner = array();
+                        foreach ($runners as $runner) {
+                            $formatRunner[] = array('winValue' => $runner['winValue'], 'lossValue' => $runner['lossValue'], 'selectionId' => $runner['SelectionId']);
+                        }
+                        $temp['runners'] = $formatRunner;
+                        $dbMatch['win_loss'] = $temp;
+                    }else{
+                        $temp['runners'] = array();
+                        $dbMatch['win_loss'] = (object)array();
                     }
-                    $temp['runners'] = $formatRunner;
-                    $dbMatch['win_loss'] = $temp;
-			//		$dbMarkets = explode(',', $dbMatch['marketid']);
-				//	$matched = array_intersect($marketIds,$dbMarkets);
-				//	if(!empty($matched)){
-						
+
 						$filterMatches[] = $dbMatch;
-				//	}
+
 				}
 
                     $soccer = array();
@@ -493,9 +460,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         	$response["market_ids"][] = array('SportId'=>1,'marketids'=>implode(',', $soccerIds));
 
         	$response["all_market_ids"] = implode(',', $allMarketIds);
-
-
-
+        	
 			$this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
 		}
 
@@ -512,6 +477,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			
 			$user_id = $this->globalUserId;
 			$user_type = $this->globalUserType;
+            $devicetype = $this->input->request_headers();
 
 			$userSetting = $this->Modelcreatemaster->viewUserAcData($user_id);
 
@@ -589,7 +555,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					}else{
 						$dbMatch['runners'] = array();
 						$dbMatch['IsMatchDisable'] = true;
-					}	
+					}
 
 				//	$dbMatch['marketRunner'] = array();
 					$dbMatch['volumeLimit'] = $volumeLimit;
@@ -601,12 +567,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					$temp['marketId'] = $dbMatch['marketid'];
 
 					$runners = $this->Betentrymodel->sumOfOdds($dbMatch['marketid'],$user_id,$user_type,$dbMatch['matchid']);
-					$formatRunner = array();
-					foreach($runners as $runner){
-						$formatRunner[] = array('winValue'=>$runner['winValue'],'lossValue'=>$runner['lossValue'],'selectionId'=>$runner['SelectionId']);
-					}
-					$temp['runners'] = $formatRunner;
-					$dbMatch['win_loss'] = $temp;
+
+                    $formatRunner = array();
+                    foreach ($runners as $runner) {
+                        $formatRunner[] = array('winValue' => $runner['winValue'], 'lossValue' => $runner['lossValue'], 'selectionId' => $runner['SelectionId']);
+                    }
+                    $temp['runners'] = $formatRunner;
+                    $dbMatch['win_loss'] = $temp;
+
 					// End Market win and loss
 
 
@@ -679,12 +647,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					$temp['marketId'] = $dbMatch['marketid'];
 
 					$runners = $this->Betentrymodel->sumOfOdds($dbMatch['marketid'],$user_id,$user_type,$dbMatch['matchid']);
-					$formatRunner = array();
-					foreach($runners as $runner){
-						$formatRunner[] = array('winValue'=>$runner['winValue'],'lossValue'=>$runner['lossValue'],'selectionId'=>$runner['SelectionId']);
-					}
-					$temp['runners'] = $formatRunner;
-					$dbMatch['win_loss'] = $temp;
+
+                    $formatRunner = array();
+                    foreach ($runners as $runner) {
+                        $formatRunner[] = array('winValue' => $runner['winValue'], 'lossValue' => $runner['lossValue'], 'selectionId' => $runner['SelectionId']);
+                    }
+                    $temp['runners'] = $formatRunner;
+                    $dbMatch['win_loss'] = $temp;
+
 					// End Market win and loss
 
 				//	$dbMarkets = explode(',', $dbMatch['marketid']);
@@ -756,12 +726,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					$temp['marketId'] = $dbMatch['marketid'];
 
 					$runners = $this->Betentrymodel->sumOfOdds($dbMatch['marketid'],$user_id,$user_type,$dbMatch['matchid']);
-					$formatRunner = array();
-					foreach($runners as $runner){
-						$formatRunner[] = array('winValue'=>$runner['winValue'],'lossValue'=>$runner['lossValue'],'selectionId'=>$runner['SelectionId']);
-					}
-					$temp['runners'] = $formatRunner;
-					$dbMatch['win_loss'] = $temp;
+
+                    $formatRunner = array();
+                    foreach ($runners as $runner) {
+                        $formatRunner[] = array('winValue' => $runner['winValue'], 'lossValue' => $runner['lossValue'], 'selectionId' => $runner['SelectionId']);
+                    }
+                    $temp['runners'] = $formatRunner;
+                    $dbMatch['win_loss'] = $temp;
+
 					// End Market win and loss
 					
 			//		$dbMarkets = explode(',', $dbMatch['marketid']);
@@ -801,10 +773,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }
             }
 
-            $redisArr = array();
 
+			
 		//	echo $redisUrl;
-        //	print_r($redisArr);die;
+        //  print_r($redisArr);die;
 		//	echo 'End'.time();
 
 		//	echo $redisUrl;
@@ -812,7 +784,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 			$returnData = array();
 			foreach($_POST['bet_slip'] as $data){
-
                 if(IS_MULTI_BET=='N' and $data['isManual']!=1){
                 	$globalDelay = 0;
                     if($data['is_session_fancy']=='Y'){
@@ -833,25 +804,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                 }
                 //echo "<pre>";print_r($data);die;
+                //echo "<pre>";print_r($data);die;
+
+                $redisUrl = EXCH_BACK_LAY_BY_MARKETS_URL.'?back_lay_ids='.$_POST['back_lay_ids']; 
+                $redisJson = $this->httpGet($redisUrl);
+                $redisArr = json_decode($redisJson,true);
+                //echo "<pre>";print_r($redisArr);die;
 				if($data['is_session_fancy']=='Y'){
-
-					$sessOddArr = $this->getIndFancyAdmin($data['matchId']);
-		             	if(!empty($sessOddArr['session'])){
-			                foreach($sessOddArr['session'] as $sessOdd){
-			                	if($sessOdd['SelectionId']==$data['ind_fancy_selection_id']){
-			                		$sessionBackKey = $data['MarketId'].'_s'.$data['ind_fancy_selection_id'].'_back';
-			                		$sessionLayKey = $data['MarketId'].'_s'.$data['ind_fancy_selection_id'].'_lay';
-			                		$sessionBackPrice = $sessOdd['BackPrice1'];	
-			                		$sessionBackSize = $sessOdd['BackSize1'];
-			                		$sessionLayPrice = $sessOdd['LayPrice1'];
-			                		$sessionLaySize = $sessOdd['LaySize1'];
-			                		$redisArr[$sessionBackKey] = "$sessionBackPrice,$sessionBackSize";
-									$redisArr[$sessionLayKey] = "$sessionLayPrice,$sessionLaySize";
-			                	}
-			                }
-	            	}
-
-
 
 					$data['OddsNumber'] = $data['priceVal'];
 					$data['betValue'] = $data['stake'];
@@ -861,9 +820,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					$data['deviceInformation'] = $data['deviceInfo'];
 
 					$validate = $this->Betentrymodel->validateSessionSaveBet($data,$redisArr);
-
-				//	print_r($validate);
-
+                    //print_r($data);die;
 					$tempData = array();
 					if(!empty($validate)){
 
@@ -907,33 +864,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				}
 				else{
 
-				$marketIds = explode('_', $_POST['back_lay_ids']);
-
-				$gameArr = explode('.', $marketIds[0]);
-	            if($gameArr[0]=='9991'){
-	            	$redisUrl = BETFAIR_BOOKMAKER_ODDS_URL.$marketIds[0];
-	            }else{
-	                $redisUrl = BETFAIR_ODDS_URL.$marketIds[0];
-	            }	
-				
-				$redisJson = $this->httpGet($redisUrl);
-				$redisMarketArr = json_decode($redisJson,true);
-				
-				foreach($redisMarketArr as $ra){
-					$marketId = $ra['marketId'];
-					foreach($ra['runners'] as $r){
-						$selectionId = $r['selectionId'];
-						$backKey = $marketId.'_'.$selectionId.'_back';
-						$layKey = $marketId.'_'.$selectionId.'_lay';
-						$backPrice = !empty($r['ex']['availableToBack'][0]['price']) ? $r['ex']['availableToBack'][0]['price'] : 0;
-						$backSize = !empty($r['ex']['availableToBack'][0]['size']) ? $r['ex']['availableToBack'][0]['size'] : 0; 
-						$layPrice = !empty($r['ex']['availableToLay'][0]['price']) ? $r['ex']['availableToLay'][0]['price'] : 0;
-						$laySize = !empty($r['ex']['availableToLay'][0]['size']) ? $r['ex']['availableToLay'][0]['size'] : 0;
-						$redisArr[$backKey] = "$backPrice,$backSize";
-						$redisArr[$layKey] = "$layPrice,$laySize";
-					}
-				}
-
 				$data['loginId'] = $userId;
 				$data['UserTypeId'] = $this->globalUserType;
 				$data['ApiVal'] = 0;
@@ -959,23 +889,44 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     }elseif ($data['teamName']=='team_2'){
                         $team = 'draw_';
                     }
-                     $priceValTemp = $data['priceVal']+1;
+                     $priceValTemp = $data['priceVal'];
+                   // echo "<pre>";print_r($manualMatchOddsDetails);die;
+
+                    //echo strlen($manualMatchOddsDetails[$team.'lay']);die;
                    // echo $data['isback'];die;
                     if($data['isback']==1){
+                        if($data['IsRs']==false){
+                            if(strlen($manualMatchOddsDetails[$team.'back'])==1){
+                                $manualMatchOddsDetails[$team.'back'] = $manualMatchOddsDetails[$team.'back']/100;
+                            }elseif (strlen($manualMatchOddsDetails[$team.'back'])==2){
+                                $manualMatchOddsDetails[$team.'back'] = $manualMatchOddsDetails[$team.'back']/100;
+                            }else{
+                                $manualMatchOddsDetails[$team.'back'] = $manualMatchOddsDetails[$team.'back']/10000;
+                            }
+                        } //echo $manualMatchOddsDetails[$team.'back'] , $priceValTemp;
                         if($manualMatchOddsDetails[$team.'back'] == $priceValTemp){ //echo 'if1';
-                         
-                            $p_l = ($stake * $priceValTemp) - $stake;
+
+                            $p_l = ($stake * ($priceValTemp+1)) - $stake;
                             $isMatched =  1;
                         }else{
-                            $p_l = ($stake * $priceValTemp) - $stake;
+                            $p_l = ($stake * ($priceValTemp+1)) - $stake;
                             $isMatched = 0;
                         }
                     }else{
+                        if($data['IsRs']==false){
+                            if(strlen($manualMatchOddsDetails[$team.'lay'])==1){
+                                $manualMatchOddsDetails[$team.'lay'] = $manualMatchOddsDetails[$team.'lay']/100;
+                            }elseif (strlen($manualMatchOddsDetails[$team.'lay'])==2){
+                                $manualMatchOddsDetails[$team.'lay'] = $manualMatchOddsDetails[$team.'lay']/100;
+                            }else{
+                                $manualMatchOddsDetails[$team.'lay'] = $manualMatchOddsDetails[$team.'lay']/10000;
+                            }
+                        }
                         if($manualMatchOddsDetails[$team.'lay'] == $priceValTemp){// echo 'if2';
-                            $p_l = ($stake * $priceValTemp) - $stake;
+                            $p_l = ($stake * ($priceValTemp+1)) - $stake;
                             $isMatched = 1;
                         }else{
-                            $p_l = ($stake * $priceValTemp) - $stake;
+                            $p_l = ($stake * ($priceValTemp+1)) - $stake;
                             $isMatched = 0;
                         }
                     }
@@ -985,8 +936,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     $data['type'] = 'auto';
                     if($data['isback']==1){
                         $backKey = $data['MarketId'].'_'.$data['selectionId'].'_back';
-                        $redisArr[$backKey] = explode(',',$redisArr[$backKey])[0];
+                        $data['betfair_status'] = explode(',',$redisArr[$backKey])[2];
+                        $redisArr[$backKey] = (float)explode(',',$redisArr[$backKey])[0];
 
+                     //   echo "<pre>";print_r($data);die;
                         if($redisArr[$backKey] > $priceVal){ // echo 'if1';
                             $priceVal = $redisArr[$backKey];
                             $p_l = ($priceVal * $stake) - $stake;
@@ -1001,7 +954,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     }
                     else{
                         $layKey = $data['MarketId'].'_'.$data['selectionId'].'_lay';
-                        $redisArr[$layKey] = explode(',',$redisArr[$layKey])[0];
+                        $data['betfair_status'] = explode(',',$redisArr[$layKey])[2];
+                        $redisArr[$layKey] = (float)explode(',',$redisArr[$layKey])[0];
+
                         if($redisArr[$layKey] < $priceVal){ //echo 'if1';
                             $priceVal = $redisArr[$layKey];
                             $p_l = ($stake * $priceVal) - $stake;
@@ -1027,22 +982,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 
 
-
 				$response = array();
 
 				$validate = $this->Betentrymodel->mobileValidateSaveBet($data);
-
-			//	print_r($validate);die;
+				
+				
+				
 				$tempData = array();
 				if(!empty($validate)){
 
 					$tempData['unique_id'] = $data['unique_id'];
 					$tempData['result'] = $validate;
+					
+					 
 
 				}else{
-
+ 
                     $unMatchRedis = [];
-
 					$condition=$this->Betentrymodel->mobileSave_bet($data);
                     //print_r($condition);die;
 					if ($condition[0]['resultV']==0) {
@@ -1060,6 +1016,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						if($data['isMatched']==0){
                             $unMatchRedis[]=$condition[0]['resultV'];
                         }
+                        $this->load->model('Betentrymodel');
+
+                        $this->Betentrymodel->saveOddsProfitLoss($userId, $condition[0]['LID'], $_POST['matchId'], $data['MarketId']);
 
 					}
 					else {
@@ -1082,12 +1041,83 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     $this->Betentrymodel->updateUnMatchDataOnRedis();
                 }
 			}
-			    //echo time();die;
-			//$this->Modelcreatemaster->updateUserBalLiablity($userId);
-                //echo "-".time();die;
+
 			$this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($returnData));
 
 		}
+
+        function save_make_bet(){
+
+		    if(MAKE_BAT_URL=='N'){
+                $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode(array('error'=>true,'code'=>0,'message'=>'not allow')));
+            }
+            $this->load->model('Betentrymodel');
+            $this->load->model('Modeltblbets');
+            $this->load->model('Modelcreatemaster');
+            $this->load->model('Modellstmaster');
+            $userId = $_POST['user_id'];
+            $data = $_POST;
+
+
+
+            $data['loginId'] =  $_POST['user_id'];
+            $data['UserTypeId'] = 3;
+            $data['ApiVal'] = 0;
+            if($_POST['isback'] == 0){
+                $isBack = 1;
+            }else{
+                $isBack = 0;
+            }
+
+            $data['isback'] = $isBack;
+            $priceVal = $_POST['priceVal'];
+            $stake = $_POST['stake'];
+            $isMatched = 1;
+
+
+            $data['type'] = 'auto';
+            $p_l = ($stake * $priceVal) - $stake;
+
+            $data['p_l'] = $p_l;
+            $data['priceVal'] = $priceVal;
+            $data['isMatched'] = $isMatched;
+            $data['stake'] = $stake;
+
+
+            $response = array();
+
+            $tempData = array();
+            $unMatchRedis = [];
+
+            $condition=$this->Betentrymodel->mobileSave_bet($data);
+
+            if ($condition[0]['resultV']==0) {
+
+                $response = array();
+                $response["code"] = 0;
+                $response["error"] = false;
+                $response["message"] = $condition[0]['retMess'];
+                //	$response["data"] = $rvData;
+                $response["data"] = array('RunnerValue'=>'');
+
+                $this->load->model('Betentrymodel');
+
+                $this->Betentrymodel->saveOddsProfitLoss($userId, $condition[0]['LID'], $_POST['matchId'], $data['MarketId']);
+                $this->Modelcreatemaster->updateUserBalLiablity($userId);
+            }
+            else {
+                $id = $condition[0]['resultV'];
+                $this->Modeltblbets->deleteBet($id);
+
+                $response = array();
+                $response["code"] = -6;
+                $response["error"] = true;
+                $response["message"] = $condition[0]['retMess'];
+            }
+
+            $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
+
+        }
 
 		function save_multi_bet(){
 

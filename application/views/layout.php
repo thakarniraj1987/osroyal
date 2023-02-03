@@ -20,13 +20,6 @@ if(isset($_GET['login/'])){
   
 ?>
 <!DOCTYPE html>
-
-<!--<script>
-
-        document.getElementById('mainWrapper').style.backgroundImage="http://139.162.219.17/app/assets/newscreen/images/Soccer.png";
-
-</script>-->
-
 <html class="no-js" ng-app="ApsilonApp" manifest="app/assets/html5appcache.appcache">
   <head>
       <meta http-equiv="cache-control" content="max-age=0" />
@@ -37,77 +30,40 @@ if(isset($_GET['login/'])){
       <?php if ($_SERVER['REQUEST_SCHEME']=='https') { ?>
           <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
       <?php } ?>
-     <!-- <meta http-equiv="cache-control" content="max-age=0" />
-      <meta http-equiv="cache-control" content="no-cache" />
-      <meta http-equiv="expires" content="0" />
-      <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />-->
-     <!-- <meta http-equiv="pragma" content="no-cache" />-->
+  
       <script> var BASE_URL = "<?php echo site_url(); ?>";</script>
 <title>	<?php echo $this->config->item('title'); ?></title>
       <meta charset="utf-8"/> 
       <meta name="description" content=""/> 
       <meta name="viewport" content="meta name=”viewport” content=”width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-
-     <!--  <link rel="stylesheet" href="app/styles/libs/loading-bar.min.css"/>
-      <link rel="stylesheet" href="app/dist/ng-slim-scroll.css"/> -->
-      
-        <!--  
-        Comm_minify        
-        
-          <link rel="stylesheet" href="app/dist/angular-tree-widget.css"/>
-          <link rel="stylesheet" href="app/assets/css/AdminLTE.min.css?ver=1.1"/>
-      <link rel="stylesheet" href="app/assets/css/angular-material.css" />
-      -->
-      
-    <!-- <link rel="stylesheet" href="app/assets/css/comm_minify.css?ver=1.1"/>-->
+ 
       <link defer="defer" rel="stylesheet" type="text/css" href="app/assets/css/AllMix.css" />
 	<link rel="stylesheet" ng-if="userType==3" type="text/css" href="app/assets/newscreen/vendor/bootstrap/css/bootstrap.min.css">
 
 	 <link defer="defer" rel="stylesheet" type="text/css"  href="app/assets/newscreen/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
 
-	<link defer="defer" rel="stylesheet" type="text/css" href="app/assets/newscreen/fonts/iconic/css/material-design-iconic-font.min.css">
+	<link defer="defer" rel="stylesheet" type="text/css" href="app/assets/newscreen/fonts/iconic/css/material-design-iconic-font.min.css"> 
 
-<!--	<link rel="stylesheet" type="text/css"  href="app/assets/newscreen/vendor/animate/animate.css"> -->
-
-
-
-    <link defer="defer" rel="stylesheet" type="text/css" href="app/assets/newscreen/css/main.css">
+    <link defer="defer" rel="stylesheet" type="text/css" href="app/assets/newscreen/css/main.css"> 
     
-
-   <!--  ng-class="usertype == 1 ? 'master-header-page' : (usertype == 2 ? 'dealer-header-page' :(usertype == 3 ? 'user-header-page' :'' ) )-->
-     
-     
-      <!--   <link rel="stylesheet" type="text/css" ng-if="userType==0 || userType==1 || userType==2" href="app/assets/css/bootstrap.min.css" />-->
       <link rel="stylesheet" type="text/css" ng-if="userType==0 || userType==1 || userType==2" href="app/assets/css/my-style.css" />
-    <!-- <link rel="stylesheet" type="text/css" ng-if="userType==0 || userType==1 || userType==2" href="app/assets/newscreen/css/admin.css" />-->
-      <link rel="stylesheet" type="text/css" ng-if="userType==0 || userType==1 || userType==2" href="app/assets/newscreen/css/AMD.css" />
-
-       
-<!--     <link rel="stylesheet" type="text/css" ng-if="userType==0 || userType==1 || userType==2" href="app/assets/css/responsive.css" />-->
-     
-     
-<!--    <link rel="stylesheet" type="text/css" ng-if="userType==0 || userType==1 || userType==2" href="app/assets/newscreen/css/custom.css" />-->
-
-    
-    
+  
+      <link rel="stylesheet" type="text/css" ng-if="userType==0 || userType==1 || userType==2" href="app/assets/newscreen/css/AMD.css" /> 
+    <link rel="stylesheet" type="text/css" ng-if="userType==0 || userType==1 || userType==2"  href="app/assets/newscreen/css/master.css" />
     
      <link rel="stylesheet" type="text/css" ng-if="userType==3" href="app/assets/newscreen/css/userstyle.css" />
 
 <link href="app/assets/css/responsive.css" rel="stylesheet" type="text/css"/>
-  
-<!-- <?php /*if ($type==''){ */?>
-<link rel="stylesheet" type="text/css"  href="app/assets/newscreen/css/login.css">	  
-	  
-	  --><?php /*} */?>
+<!--<link rel="stylesheet" type="text/css" href="app/assets/newscreen/css/theme2.css" />-->
 
+  
+<?php if ($type==''){ ?>
+<link rel="stylesheet" type="text/css"  href="app/assets/newscreen/css/login.css">	
+	  <?php } ?>
 
   </head>
   
-
-  
-  
-  
-  
+ 
   
 
   <body class="skin-blue sidebar-mini" id="mainWrapper">
@@ -120,7 +76,7 @@ if(isset($_GET['login/'])){
  <div class="footer_area" ng-if="$root.userType!=undefined && $root.userType!=0"  ng-controller="commonCtrl">
       <div class="footer_nav">
       <ul>
-      <li><a data-toggle="modal"  ng-click="ShowTerAndCondition()">Term and Condition</a> © {{getYear()}} </li>
+      <li><a data-toggle="modal"  ng-click="ShowTerAndCondition()">Terms and Conditions</a> © {{getYear()}} </li>
       <li class="flogo"> | <img src="app/images/f-logo.png" alt="Logo"> </li>
       </ul>
       </div>
@@ -132,7 +88,7 @@ if(isset($_GET['login/'])){
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Term & Condition</h4>
+        <h4 class="modal-title">Terms & Conditions</h4>
         <button type="button" class="close" data-dismiss="modal">&times;</button>
       </div>
       <div class="modal-body">
@@ -145,57 +101,39 @@ if(isset($_GET['login/'])){
 
   </div>
 </div>
-  <!-- javascript Links -->
-    <!-- <script src="https://use.fontawesome.com/3bf12dcdf0.js"></script> -->
+ 
     <script type="text/javascript" src="app/dist/jquery-latest.min.js" ></script>
      <script src="app/js/libs/rtsplayer.js" ></script>
-     <!--<script type="text/javascript" src="app/assets/js/Roboto.js" ></script>-->
-
-   <!-- <script type="text/javascript" src="app/dist/agGrid.js" ></script>
-
-      <script type="text/javascript" src="app/lib/angular.min.js" ></script>-->
+   
 
    <script  type="text/javascript" src="app/dist/agGrid.js" ></script>
    <script type="text/javascript" src="https://code.angularjs.org/1.4.9/angular.min.js"></script>
 
-     <!-- <script type="text/javascript" src="app/js/libs/angular-ui-router.min.js" ></script>
-      <script type="text/javascript" src="app/lib/angular-aria.min.js" ></script>
-      <script type="text/javascript" src="app/lib/angular-material.js" ></script>
-       <script type="text/javascript" src="app/lib/angular-animate.min.js" ></script>-->
+ 
    <script  type="text/javascript" src="app/js/libs/ocLazyLoad.min.js" ></script>
 
    <script  type="text/javascript" src="app/dist/AllMixV2.js" ></script>
    <script  type="text/javascript" src="app/dist/AllMix.js" ></script>
       <script type="text/javascript" src="app/scripts/app_9.js?var=<?php echo $s=(RAND() * (10 - 1) + 1)?>" ></script>
-
-
-      <!--	<script src="app/assets/newscreen/vendor/bootstrap/js/popper.js" ></script>-->
-
-     <!--  <script type="text/javascript" src="app/js/libs/loading-bar.min.js" ></script> -->
+   <script ng-if="userType==0" type="text/javascript" src="app/scripts/directives/sidebar/sidebar_1.js"></script>
+   <script ng-if="userType==1" type="text/javascript" src="app/scripts/directives/header/dealerheader.js"></script>
+   <script ng-if="userType==2" type="text/javascript" src="app/scripts/directives/header/masterheader.js"></script>
+   <script ng-if="userType==3" type="text/javascript" src="app/scripts/directives/header/userheader.js"></script>
+   <script ng-if="userType==3" type="text/javascript" src="app/scripts/directives/sidebar/userrightbar.js"></script>
+ 
       <script  type="text/javascript" src="app/assets/js/ui-bootstrap-tpls-0.10.0.min.js" ></script>
-  <!--<script  src="app/js/manualdatetime.js" ></script>-->
+  
       <script  type="text/javascript" src="app/scripts/controllers/Form.js" ></script>
       <script  type="text/javascript" src="app/scripts/services/sessionService.js" ></script>
       <script  type="text/javascript" src="app/scripts/services/loginService.js" ></script>
-     <!-- <script type="text/javascript" src="app/assets/js/app.min.js" ></script>-->
-
-     <!-- <script type="text/javascript" src="app/js/res.js" ></script>-->
-
-
-<!--===============================================================================================-->
-   <!--<script src="app/assets/newscreen/vendor/animsition/js/animsition.min.js" ></script>-->
-<!--===============================================================================================-->
-
-	<!--<script src="app/assets/newscreen/vendor/bootstrap/js/bootstrap.min.js" ></script>-->
+    
    <script   src="app/assets/newscreen/vendor/bootstrap/js/bootstrap.min.js"></script>
+ 
 
-  <!--<script src="app/assets/newscreen/js/main.js" ></script>-->
-
-
-
-
+   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsmpeg-player@2.1.6/build/JSMpeg.min.js"></script>
  	  <script>
-
+       //   var baseUrl=BASE_URL.substring(0, BASE_URL.lastIndexOf("/") );
+         // var socket = io.connect(baseUrl+':4005');
 	    $(function () {
     var top = 190;
     $(window).scroll(function (event) {

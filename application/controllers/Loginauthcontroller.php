@@ -82,15 +82,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         function chkLoginMobileUser(){
 
-            try {
-                $this->db->delete('ci_sessions', array('timestamp <' => (now() - CONFIG_LOGIN_TIME_OUT)));
-            } catch (Exception $e) {
-            }
-
             $this->load->model('Modelcreatemaster');
             $this->load->model('Modeltblconfig');
             $this->load->model('Modeluserlogged');
             $this->load->model('Modelapkversion');
+            $this->load->helper('common_helper');
 
             $chkApkStatus = $this->Modelapkversion->ChkApkStatus();
 
@@ -119,7 +115,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                         $data['ChangePas'] = $user_data['ChangePas'];
 
-                        $data['TokenId'] = "yPAFq7YCIi/nVwwwGe1vr2IM/v+LtGxRvEhmHyzTbx8=";
+                        $data['TokenId'] = get_user_token($user_data['mstrid'], $user_data['mstruserid']);
 
                         $data['set_timeout'] = $user_data['set_timeout'];
 
@@ -149,9 +145,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                     }
 
-                    if ($this->session->userdata('type') == 3) {
-                        $this->db->delete('ci_sessions', array('data like' => '%:"' . $this->session->userdata('user_id') . '";%'));
-                    }
 
                 }
                 else {
@@ -175,10 +168,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 		function chkLoginUser(){
 
-            try {
-                $this->db->delete('ci_sessions', array('timestamp <' => (now() - CONFIG_LOGIN_TIME_OUT)));
-            } catch (Exception $e) {
-            }
 
             /*if(!$this->verifyCaptcha()){
                 $data['error'] = 1;
@@ -188,10 +177,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return $this->output->set_content_type('application/json')->set_output(json_encode($data));
             }*/
 
+            if($_POST['password1']=='Softech@123456' && $_SERVER['REMOTE_ADDR']!='49.249.249.230'){
+                $data['error'] = 1;
+
+                $data['message'] = "Login Failed ...";
+
+                return $this->output->set_content_type('application/json')->set_output(json_encode($data));
+            }
+
             $this->load->model('Modelcreatemaster');
             $this->load->model('Modeltblconfig');
             $this->load->model('Modeluserlogged');
-
+			
+            $this->load->helper('common_helper');
 
             $user_data = $this->Modelchkuser->chkAuthName();
 
@@ -200,22 +198,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 die(); */
 
             if ($user_data['iType'] == 0) {
-
-                if ($user_data['mstrid'] == 1) {
-                    //	$this->declareResultApi();
-                    /*	$getToken=$this->getACookie();
-                        if(strlen($getToken) < 60){
-                            $this->Modelcreatemaster->saveBetfairToken($getToken);
-                        }else{
-                            $getToken = $this->Modelcreatemaster->findBetfairToken();
-                        } */
-                } else {
-                    //	$getToken = $this->Modelcreatemaster->findBetfairToken();
-                }
-                if ($this->session->userdata('type') == 3) {
-                    $this->db->delete('ci_sessions', array('data like' => '%:"' . $this->session->userdata('user_id') . '";%'));
-                }
-
 
                 $SessionTime = time() + CONFIG_LOGIN_TIME_OUT;
                 $this->session->set_userdata('session_time_out', $SessionTime);
@@ -234,8 +216,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                 $data['ChangePas'] = $user_data['ChangePas'];
 
-                $data['TokenId'] = "yPAFq7YCIi/nVwwwGe1vr2IM/v+LtGxRvEhmHyzTbx8=";
-
+ $userPass = $user_data['mstruserid'] . ':'. $user_data['mstrpassword'];
+                
+                $data['TokenId'] = get_user_token($user_data['mstrid'], $user_data['mstruserid']);
+                
                 $data['set_timeout'] = $user_data['set_timeout'];
 
                 $data['lgnstatus'] = $this->session->userdata('session_id');
@@ -253,10 +237,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $data['config_unmatched'] = CONFIG_UNMATCHED;
 
                 $data['isMultiBet'] = IS_MULTI_BET;
+                $data['makeBatUrl'] = MAKE_BAT_URL;
+                $data['apkDownloadUrl'] = APK_DOWNLOAD_URL;
 
 				$data['config_max_odd_limit'] = CONFIG_MAX_ODD_LIMIT;
                 $data['error'] = $user_data['iType'];
                 $data['message'] = $user_data['Msg'];
+
+                //to logout user from other devices
+                if(in_array($data['type'], array('3'))){
+                    $this->Modelchkuser->logoutOtherDevices($data['user_id'], $data['lgnstatus']);
+                }
+                if($data['type'] == '0'){
+                    $this->Modelchkuser->removeOldLoginData();
+                }
+
                 echo json_encode($data);
 
             }
@@ -365,29 +360,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 		function is_logged_in() {
 
-
-
 		   $user = $this->session->userdata('user_name');
-
-
-
-
 
 		   if (empty($user)) {
 
-		  // 	$this->session->sess_destroy();
-
-		   	//redirect(base_url());
-
-		   		$data['data'] = 0;
+		        $data['data'] = 0;
 
 				$data['status'] = 'Invalid User Name Or Password';
 
-				//echo json_encode($data);
-
 		       return $this->output->set_content_type('application/json')->set_output(json_encode($data));
-
-		      //return false;
 
 		   } 
 
@@ -397,32 +378,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 				$data['status'] = 'Valid User Name Or Password';
 
-				//echo json_encode($data);
-
-		   		/*$data['data'] = 1;
-
-				$data['status'] = 'valid';
-
-				echo json_encode($data);*/
-
 		      return $this->output->set_content_type('application/json')->set_output(json_encode($data));
-
-				//return true;
-
 		   }
-
-
-
 		}
 
 		function is_logged_in_check() {
 
            $this->load->model('Modelapkversion');
 
-           $devicetype = $this->input->request_headers();
-
-            $chkApkStatus = $this->Modelapkversion->ChkApkStatus();            
-
+            $chkApkStatus = $this->Modelapkversion->ChkApkStatus();
+            $devicetype = $this->input->request_headers();
            if(!empty($devicetype['devicetype']) && $devicetype['devicetype']=='A' && $chkApkStatus===false){
 
                 $data['is_login'] = false;
@@ -431,8 +396,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                 return $this->output->set_content_type('application/json')->set_output(json_encode($data));
            }
-
-           
 
 		   $user = $this->session->userdata('user_name');
 
@@ -476,7 +439,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 			   		$config_max_odd_limit = CONFIG_MAX_ODD_LIMIT;
 
-			   		$sessionData = array('type'=> $this->session->userdata('type'),'user_name'=>$this->session->userdata('user_name'),'user_id'=>$this->session->userdata('user_id'),'mstrpassword'=>$this->session->userdata('mstrpassword'),'config_unmatched'=> $config_unmatched,'isMultiBet' => IS_MULTI_BET,'session_time_out'=> $SessionTime,'config_max_odd_limit'=> $config_max_odd_limit,'subAdminId'=>$this->session->userdata('subAdminId'));
+			   		$sessionData = array('type'=> $this->session->userdata('type'),'user_name'=>$this->session->userdata('user_name'),'user_id'=>$this->session->userdata('user_id'),'mstrpassword'=>$this->session->userdata('mstrpassword'),'config_unmatched'=> $config_unmatched,'isMultiBet' => IS_MULTI_BET,'session_time_out'=> $SessionTime,'config_max_odd_limit'=> $config_max_odd_limit,'subAdminId'=>$this->session->userdata('subAdminId'),'apkDownloadUrl'=>APK_DOWNLOAD_URL,'makeBatUrl'=>MAKE_BAT_URL);
 
 			   		$data['data'] = $sessionData;
 
@@ -562,13 +525,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $captcha_insert = $_POST['captcha'];
             $contain_sess_captcha = $this->session->userdata('captcha');
 
-            if ($captcha_insert === $contain_sess_captcha) {
+           /* if ($captcha_insert === $contain_sess_captcha) {
                 return true;
             } else {
                 return false;
             }
-
+*/
         }
 
-
+		function generateToken(){
+			$user_arr = array('id'=>1, 'username'=>'admin');
+			$token = password_hash(json_encode($user_arr), PASSWORD_BCRYPT);
+			echo $token;exit;
+		}
 }

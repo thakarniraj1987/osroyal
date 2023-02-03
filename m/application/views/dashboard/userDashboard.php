@@ -3,13 +3,26 @@
     <div class="load-box" ng-show="loading">
             <img id="mySpinner" src="app/images/loading1.gif" />
         </div>
+		
+		
+		
+		
+		<div id="my-welcome-message"> <a id="fvpp-close">✖</a>
+ <img src="app/assets/img/popup21white.jpg">
+</div>
+		
+		
+		
     <div class="row padding">
 <div class="col-md-12 inplay">
  <div class="sport_blk newdesign">
  
+
+ <div class="inpaygames"> 
  
- <div class="inpaygames" style="display:none;"> 
  
+
+  
   <div  ng-class="{'mat-stat':(match.inplay && match.status=='OPEN')}">
   
   
@@ -21,7 +34,17 @@
   </div>
  
  </div>
-  <div class="market_tr"  ng-repeat="marketitems in BindArrayItems track by $index">
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  <div class="market_tr" id='sportids'  ng-repeat="marketitems in FBindArrayItems track by $index">
     <h1 class="binding" ng-if="marketitems.sportData.length>0">{{marketitems.id}}<span class="starts-in-label ng-binding ng-scope" ng-if="globalStartsInLabel">Betting from 30mins before start</span> </h1>
             <div class="clearfix"></div>
 <div ng-if="marketitems.sportData.length==0 && false">
@@ -69,7 +92,9 @@
                                                     
                                                     <i  ng-if="marketitem.is_favourite=='Y'" ng-click="setUnfavourite(marketitem,$index)" class="fa fa-star" aria-hidden="true"></i></a> 
                                                     
-                                                    <a ng-click="ClearAllTimeOut()" href="javascript:void(0)" ui-sref-active-eq="active" ui-sref="userDashboard.Matchodds({'MatchId': marketitem.matchid,'matchName':marketitem.matchName,'date':marketitem.matchdate,'sportId':marketitem.SportId})"><img class="sportsicons" src="app/images/sportsicon/{{marketitems.id}}.png">  {{marketitem.matchName}}
+                                                    <a ng-click="ClearAllTimeOut()" href="javascript:void(0)" ui-sref-active-eq="active" ui-sref="userDashboard.Matchodds({'MatchId': marketitem.matchid,'matchName':marketitem.matchName,'date':marketitem.matchdate,'sportId':marketitem.SportId})">
+													
+													<img class="sportsicons" src="app/images/sportsicon/{{marketitems.id}}.png">  {{marketitem.matchName}}
                             <span ng-if="marketitem.day>1" class="commonbtn">{{marketitem.day}} Day </span>
                                                    
                                                     <br />
@@ -160,8 +185,58 @@
 
 
 
-
-
       </div>  
-      
+ <h1 class="binding ng-binding ng-scope" >LIVE CASINO<!-- ngIf: globalStartsInLabel --> </h1>     
+
+ 
+  
+  <div class="upcominggames">
+  <ul>
+  <li> <img src="/uploads/Diamondexch-One-Day-Teen-Patti-Betting-Id-Account.jpg"> <br> <span>  5Five Cricket </span> </li>  
+  <li> <img src="/uploads/Diamondexch-One-Day-Teen-Patti-Betting-Id-Account.jpg"> <br><span>  Andar-Bahar-2  </span> </li>
+   <li> <img src="/uploads/Diamondexch-20-20-Dragon-Tiger-Betting-Id-Account.jpg"> <br> <span> Dragon Tiger   </span> </li>
+    <li> <img src="/uploads/Diamondexch-Andar-Bahar-Betting-Id-Account-1.jpg"> <br> <span> Baccarat 2  </span> </li>
+	 <li> <img src="/uploads/Diamondexch-Worli-Matka-Betting-Id-Account.jpg"> <br><span>  Baccarat  </span> </li>
+	  <li> <img src="/uploads/Diamondexch-32-Cards-B-Betting-Id-Account.jpg"> <br> <span> Lucky 7 - B </span> </li>
+	   <li> <img src="/uploads/Diamondexch-20-20-Dragon-Tiger-Betting-Id-Account.jpg"> <br> <span> Teenpatti 2.0  </span>  </li>
+	    <li> <img src="/uploads/Diamondexch-Lottery-Betting-Id-Account.jpg"> <br> <span> Casino Meter  </span> </li>
+		 <li> <img src="/uploads/Diamondexch-Baccarat-Betting-Id-Account.png"> <br> <span> Casino War   </span> </li>
+ <li> <img src="/uploads/Diamondexch-Baccarat-Betting-Id-Account.png"> <br> <span>  20-20 DTL   </span> </li>		 
+<li> <img src="/uploads/Diamondexch-One-Day-Teen-Patti-Betting-Id-Account.jpg"> <br><span> Open Teenpatti   </span> </li>		 
+<li> <img src="/uploads/Diamondexch-One-Day-Teen-Patti-Betting-Id-Account.jpg"> <br><span>   Test Teenpatti  </span> </li>		 		 
+<li> <img src="/uploads/Diamondexch-One-Day-Teen-Patti-Betting-Id-Account.jpg"> <br><span>  32 Cards B </span> </li>	
+<li> <img src="/uploads/Diamondexch-32-Cards-B-Betting-Id-Account.jpg"> <br> <span> 32 Cards A </span> </li>
+<li> <img src="/uploads/Diamondexch-Andar-Bahar-Betting-Id-Account-1.jpg"> <br> <span>  Andar Bahar  </span> </li>
+ <li> <img src="/uploads/Diamondexch-Worli-Matka-Betting-Id-Account.jpg"> <br><span>   Instant Worli </span> </li>
+ <li> <img src="/uploads/Diamondexch-Worli-Matka-Betting-Id-Account.jpg"> <br><span>   Worli Matka </span> </li>	 
+	<li> <img src="/uploads/Diamondexch-Lottery-Betting-Id-Account.jpg"> <br> <span>  Lottery  </span> </li>	 
+  </ul>
+  
+  </div>
 </div>
+<div id="fvpp-blackout" ></div>
+
+ <script>
+$(document).ready(function() {
+    if(localStorage.getItem('popState2')!= 'shown'){	
+        localStorage.setItem('popState2','shown');
+	 
+		
+		$("#fvpp-blackout").fadeIn();	
+        $("#my-welcome-message").fadeIn();
+    }
+
+    $(document).on("click", "#fvpp-close, #my-welcome-message", function() // You are clicking the close button
+    {
+    $('#my-welcome-message').fadeOut(); // Now the pop up is hiden.
+	$("#fvpp-blackout").fadeOut();
+    });
+    $('#my-welcome-message').click(function(e) 
+    {
+    $('#my-welcome-message').fadeOut(); 
+	$("#fvpp-blackout").fadeOut();
+    });
+});
+
+
+ </script>

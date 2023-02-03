@@ -38,7 +38,7 @@ app.controller('Chiphistorycntr', function ($scope, $http, $filter, sessionServi
 
     ];
     function ageCellRendererFunc(params) {
-        //
+        //debugger;
         var eSpan = document.createElement('a');
         console.log(params);
         eSpan.innerHTML = '' + params.data.narration;
@@ -57,7 +57,7 @@ app.controller('Chiphistorycntr', function ($scope, $http, $filter, sessionServi
 
         //alert('code worked' + params.data.narration);
         $http.get( BASE_URL+'Betentrycntr/Chip_history/' + params.data.UserID + '/' + sessionStorage.type + '/' + params.data.MatchId + '/' + params.data.MarketId + '/' + params.data.oppAcID).success(function (data, status, headers, config) {
-            //
+            //debugger;
             $scope.chip_data = data.chips_data;
             setRowData(data.chips_data, '');
             this.gridOptions.api.sizeColumnsToFit();
@@ -182,7 +182,7 @@ app.controller('Chiphistorycntr', function ($scope, $http, $filter, sessionServi
 
         $http.get( BASE_URL+'Betentrycntr/Chip_leger/' + sessionStorage.user_id + '/' + sessionStorage.type + '/' + drpdwn + '/' + fromDate + '/' + toDate).success(function (data, status, headers, config) {
             $scope.chips_lgr = data.chips_lgr;
-            //
+            //debugger;
             setRowData(data.chips_lgr, 'lgr');
             $scope.gridOptionslgr.api.sizeColumnsToFit();
             //var allColumnIds = [];

@@ -192,6 +192,7 @@ $scope.setDateFun=function(type)
 
     $scope.ChipLeger = function (from_date, to_date, slctType, withParent) {
         //alert("HI");
+
 	  $scope.loading=true;
         $scope.legershow = true;
         $scope.hstshow = false;
@@ -204,8 +205,23 @@ $scope.setDateFun=function(type)
             var fromDate = "";
             var toDate = "";
         } else if (from_date != angular.isUndefinedOrNull && to_date != angular.isUndefinedOrNull) {
-            var fromDate = $filter('date')(from_date, 'yyyy-MM-dd');
-            var toDate = $filter('date')(to_date, 'yyyy-MM-dd');
+            if(from_date==0)
+            {
+                var fromDate = "";
+            }
+            else {
+                var fromDate = $filter('date')(from_date, 'yyyy-MM-dd');
+            }
+
+            if(toDate==0)
+            {
+                var toDate = "";
+            }
+            else {
+                var toDate = $filter('date')(to_date, 'yyyy-MM-dd');
+            }
+
+
         }
 
 

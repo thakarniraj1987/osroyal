@@ -11,13 +11,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		function index(){ 
 			$this->output->set_content_type('application/json')->set_output(json_encode($data)); 
 		}
-		function delete_all(){
+		function delete_all-@gkk(){
 		$this->load->model('Modelcreatemaster');			
 			$this->Modelcreatemaster->Tuncate_matchlst();
 			echo json_encode(array('error' => 0 ,'message' => 'Data Deleted '));
 		}
 
-		function delete_all_bet(){
+		function delete_all_bet-@gkk(){
 
 			$this->load->model('Modelcreatemaster');			
 			$result = $this->Modelcreatemaster->insertChipsAfterBetTruncate();

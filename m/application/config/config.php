@@ -358,8 +358,8 @@ $config['encryption_key'] = '';
 |
 */
 
-$config['sess_driver'] = 'files';
-// $config['sess_save_path'] = 'tcp://'.REDIS_UN_MATCH_BET_SERVER.':6379';
+$config['sess_driver'] = 'redis';
+$config['sess_save_path'] = 'tcp://'.REDIS_UN_MATCH_BET_SERVER.':6379';
 
 
 /*

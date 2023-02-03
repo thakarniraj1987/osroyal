@@ -2,15 +2,19 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php/$1 [L]
-<IfModule mod_headers.c>
-    Header always append X-Frame-Options SAMEORIGIN
+RewriteCond %{REQUEST_METHOD} OPTIONS
+<ifModule mod_headers.c>
+    #Header always set Access-Control-Allow-Origin "*"
+	Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS, DELETE, PUT"
+	Header always set Access-Control-Max-Age "100000000"
+	Header always set Access-Control-Allow-Headers "Authorization, UserName, Password, *"
+
+    Header always append X-Frame-Options "*"
     Header set X-Content-Type-Options nosniff
     Header set X-XSS-Protection "1; mode=block"
-    Header set Access-Control-Allow-Origin SAMEORIGIN
-    Header set Access-Control-Allow-Methods "*"
     Header always edit Set-Cookie (.*) "$1; SameSite=Lax"
     Header set Content-Security-Policy "self"
-</IfModule>
+</ifModule>
 
 
 RewriteEngine on
@@ -18,7 +22,7 @@ RewriteBase /
 # Check if this is the noredirect query string
 RewriteCond %{QUERY_STRING} (^|&)m=0(&|$)
 # Set a cookie, and skip the next rule
-RewriteRule ^ - [CO=mredir:0:betdip.com]
+RewriteRule ^ - [CO=mredir:0:gullybets.com]
 
 # Check if this looks like a mobile device
 # (You could add another [OR] to the second one and add in what you
@@ -38,7 +42,7 @@ RewriteCond %{HTTP_USER_AGENT} "symbian|midp|wap|phone|pocket|mobile|pda|psp" [N
 RewriteCond %{HTTP_USER_AGENT} !macintosh [NC]
 
 # Check if we're not already on the mobile site
-RewriteCond %{HTTP_HOST}          !^/m
+ RewriteCond %{HTTP_HOST}          !^/m
 # Can not read and write cookie in same request, must duplicate condition
 RewriteCond %{QUERY_STRING} !(^|&)m=0(&|$) 
 
@@ -47,5 +51,8 @@ RewriteCond %{HTTP_COOKIE}        !^.*mredir=0.*$ [NC]
 
 # Now redirect to the mobile site
 
-RewriteCond %{REQUEST_URI} ^/$
-RewriteRule ^ m/ [R,L]
+ RewriteCond %{REQUEST_URI} ^/$
+ RewriteRule ^ m/ [R,L]
+ 
+ 
+

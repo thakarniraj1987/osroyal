@@ -81,7 +81,7 @@
             return {
                 restrict: "E",
                 scope: { nodes: '=', tree: '=', options: '=?' },
-
+                
                 template: '<ul>'
                             + '<li ng-repeat="node in nodes | nodeFilter:options.filter" class="node">'
                                 + '<i class="tree-node-ico pointer" ng-class="{\'tree-node-expanded\': !node.expanded && (node.children | nodeFilter:options.filter).length > 0,\'tree-node-collapsed\':node.expanded && (node.children | nodeFilter:options.filter).length > 0}" ng-click="toggleNode(node)"></i>'
@@ -108,7 +108,7 @@
                         scope.toggleModal22 = function(btnClicked1,id){
 
                           alert('Plaz'+btnClicked1);
-
+                          
                             scope.buttonClicked1 = btnClicked1;
                             alert('Plaz'+scope.buttonClicked1);
 
@@ -173,19 +173,19 @@
                 }
             }
         }]).directive('modal1', function () {
-
+           
             return {
 
-              template: '<div class="modal fade">' +
-                  '<div class="modal-dialog">' +
-                    '<div class="modal-content">' +
-                      '<div class="modal-header">' +
-                        '<button type="button" class="close" data-dismiss="modal1" aria-hidden="true">&times;</button>' +
-                        '<h4 class="modal-title">Create NewUser </h4>' +
-                      '</div>' +
-                      '<div class="modal-body" ng-transclude></div>' +
-                    '</div>' +
-                  '</div>' +
+              template: '<div class="modal fade">' + 
+                  '<div class="modal-dialog">' + 
+                    '<div class="modal-content">' + 
+                      '<div class="modal-header">' + 
+                        '<button type="button" class="close" data-dismiss="modal1" aria-hidden="true">&times;</button>' + 
+                        '<h4 class="modal-title">Create NewUser </h4>' + 
+                      '</div>' + 
+                      '<div class="modal-body" ng-transclude></div>' + 
+                    '</div>' + 
+                  '</div>' + 
                 '</div>',
               restrict: 'E',
               transclude: true,

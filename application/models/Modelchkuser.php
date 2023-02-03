@@ -102,5 +102,42 @@ class Modelchkuser extends CI_Model
 		$this->db->where('mstrid', $userId);
 		$query = $this->db->get();
 	}
+
+    function logoutOtherDevices($userId, $sessionId){
+        $this->db->select('session_id');
+        $this->db->from('userlogged');
+        $this->db->where('loguser', $userId);
+        $this->db->where('session_id !=', $sessionId);
+       // $this->db->where('online', 1);
+
+        $query = $this->db->get();
+        $res = $query->result_array();
+
+        foreach ($res as $value) {
+
+            try {
+                $redis = new Redis();
+                $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                $redisKey = 'ci_session:' . $value['session_id'];
+                $redis->delete($redisKey);
+                $redis->close();
+            } catch (Exception $e) {
+            }
+
+            $this->db->trans_start();
+            $logoutdata = array('logendt' => date('Y-m-d H:i:s',now()),	'online'  => 0);
+            $this->db->where('loguser', $userId);
+            $this->db->where('session_id', $value['session_id']);
+            $this->db->limit(1);
+            $query=$this->db->update('userlogged', $logoutdata);
+            $this->db->trans_complete();
+        }
+        return true;
+    }
+
+    function removeOldLoginData(){
+        return $query = $this->db->query("DELETE FROM `userlogged` WHERE logstdt < NOW() - INTERVAL 24 HOUR;");
+        return true;
+    }
 	
 }

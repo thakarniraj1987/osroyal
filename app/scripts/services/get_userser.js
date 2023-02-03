@@ -260,21 +260,28 @@ var $promise = $http({ method: 'GET', url: surlArray[indurl].url, headers: { 'Co
 	
         },//178.79.168.73
 	getSocketDataApiDetail:function(market_ids, $callback){
-        var url='';  
+
+        var url='';
+		
+		if($rootScope.GApiPath=="https://my.betdip.com/ExchangeController/"){
+			
+			url=$rootScope.GApiPath+'get_match_betfair_session?market_id='+market_ids;
+			
+		}else {
+		
         if($rootScope.Provider=='betfair')
         {
-            url=$rootScope.GApiPath+'listMarketBookOdds/'+market_ids;  
-
-            //  url=$rootScope.GApiPath+'get_match_betfair_session.php?market_id='+market_ids;
+            url=$rootScope.GApiPath+'get_match_betfair_session.php?market_id='+market_ids;
         }
         else
         {
-            url=$rootScope.GApiPath+'listMarketBookOdds/'+market_ids;  
-
-            //url=$rootScope.GApiPath+'get_match_betfair_session.php?market_id='+market_ids;
+            url=$rootScope.GApiPath+'get_match_betfair_session.php?market_id='+market_ids;
         }
-
-        
+		
+		
+		}
+		
+		
 		$.ajax({
             url: url,
             type: 'GET',
@@ -294,16 +301,23 @@ var $promise = $http({ method: 'GET', url: surlArray[indurl].url, headers: { 'Co
 	
         },
 	getSocketDataHomeApi:function(market_ids, $callback){
-    //    debugger;
-        var url=''; 
-        if($rootScope.Provider=='betfair') 
+        var url='';
+		
+		
+		if($rootScope.GApiPath=="https://my.betdip.com/ExchangeController/"){
+			
+			url=$rootScope.GApiPath+'get_odds_by_market_ids?market_id='+market_ids;
+			
+		}else {
+        if($rootScope.Provider=='betfair')
         {
-            url=$rootScope.GApiPath+'listMarketBookOdds/'+market_ids;  
+            url=$rootScope.GApiPath+'get_odds_by_market_ids.php?market_id='+market_ids;
         }
         else
         {
-            url=$rootScope.GApiPath+'listMarketBookOdds/'+market_ids;  
+            url=$rootScope.GApiPath+'get_odds_by_market_ids.php?market_id='+market_ids;
         }
+		}
 		$.ajax({
 			url:url,
 			type:'GET',
@@ -335,7 +349,7 @@ var $promise = $http({ method: 'GET', url: $rootScope.apiSession, headers: { 'Co
             });
         },
         getSelectionList:function(selection_id, $callback){
-            var $promise = $http({ method: 'GET', url:$rootScope.GApiPath+"fetch_data?Action=listMarketRunner&MarketID?market_sel_id="+selection_id});
+            var $promise = $http({ method: 'GET', url:$rootScope.GApiPath+"get_selectionname_by_market_ids.php?market_sel_id="+selection_id});
 
             $promise.then(function (response) {
 

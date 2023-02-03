@@ -19,6 +19,7 @@ $scope.bindTennis=[];
 $rootScope.MatchStack=[];
 $rootScope.SessionStack=[];
 $scope.MatchWinLossArr=[];
+$scope.InplayMarketId=[];
 var obj=[{'id':'Cricket','sportData':$scope.bindCricket},{'id':'Soccer','sportData':$scope.bindSoccer},{'id':'Tennis','sportData':$scope.bindTennis}];
 $scope.BindArrayItems=obj;
 var ajaxTimerC="";
@@ -279,6 +280,15 @@ $scope.CallCricketSocket=function(data)
 								$scope.bindCricket[i].inplay=$scope.socketCricket[ind].inPlay;
 								//$scope.bindCricket[i].matchdate=$scope.socketCricket[ind].event.openDate;
 								//$scope.bindCricket[i].runners=$scope.socketCricket[ind].runners;
+                                  if($scope.bindCricket[i].status=="OPEN" && $scope.bindCricket[i].inplay)
+                                  {
+
+                                      var indc=$scope.InplayMarketId.findIndex(x=>x==$scope.bindCricket[i].marketid);
+                                      if(indc==-1)
+                                      {
+                                          $scope.InplayMarketId.push($scope.bindCricket[i].marketid);
+                                      }
+                                  }
                                   if($scope.bindCricket[i].runners.length>0)
                                   {
                                       $scope.SetSelectionName(4,i,$scope.socketCricket[ind]);
@@ -321,6 +331,15 @@ $scope.CallTennisSocket=function(data)
 								$scope.bindTennis[i].inplay=$scope.socketTennis[ind].inPlay;
 								//$scope.bindTennis[i].matchdate=$scope.socketTennis[ind].event.openDate;
 								//$scope.bindTennis[i].runners=$scope.socketTennis[ind].runners;
+                                  if($scope.bindTennis[i].status=="OPEN" && $scope.bindTennis[i].inplay)
+                                  {
+                                      $scope.bindTennis[i].Sort=0;
+                                      var indt=$scope.InplayMarketId.findIndex(x=>x==$scope.bindTennis[i].marketid);
+                                      if(indt==-1)
+                                      {
+                                          $scope.InplayMarketId.push($scope.bindTennis[i].marketid);
+                                      }
+                                  }
                                   if($scope.bindTennis[i].runners.length>0)
                                   {
                                       $scope.SetSelectionName(2,i,$scope.socketTennis[ind]);
@@ -362,6 +381,15 @@ $scope.CallSoccerSocket=function(data)
 								$scope.bindSoccer[i].inplay=$scope.socketSoccer[ind].inPlay;
 								//$scope.bindSoccer[i].matchdate=$scope.socketSoccer[ind].event.openDate;
 								//$scope.bindSoccer[i].runners=$scope.socketSoccer[ind].runners;
+                                  if($scope.bindSoccer[i].status=="OPEN" && $scope.bindSoccer[i].inplay)
+                                  {
+                                      $scope.bindSoccer[i].Sort=0;
+                                      var inds=$scope.InplayMarketId.findIndex(x=>x==$scope.bindSoccer[i].marketid);
+                                      if(inds==-1)
+                                      {
+                                          $scope.InplayMarketId.push($scope.bindSoccer[i].marketid);
+                                      }
+                                  }
 
                                   if($scope.bindSoccer[i].runners.length>0)
                                   {
@@ -623,6 +651,7 @@ $scope.SocketMarket = function(j,newData,type)
                     $scope.loading = true;
 
                 }
+                $http.defaults.headers.common['inplay']=$scope.InplayMarketId.join(',');
                 $http({
                     method: 'GET',
                     url: BASE_URL+'Apiusercontroller/getFavouriteMatchLst/'+sportId,

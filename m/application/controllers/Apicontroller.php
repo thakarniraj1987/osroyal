@@ -899,102 +899,122 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		 * [get_indian_session get indian session]
 		 * @return [json] [response]
 		 */
-		function get_indian_session($matchId=null){
-			
-			$this->load->model('Modelmarket');
-			$this->load->model('Modelmatchfancy');
+		   function get_indian_session($matchId=null){
 
-			$response = array();
-			
-			$matchMarket = $this->Modelmarket->findMarketIdByMatch($matchId);
+        $this->load->model('Modelmarket');
+        $this->load->model('Modelmatchfancy');
 
-			if(!empty($matchMarket)){
+        $response = array();
+        //$matchData = $this->Modelmarket->getMatchByMarketId($matchId);
 
-				$marketId = $matchMarket['marketId'];  
-			//	$getSessionOdds = $this->getIndFancyByMatchId($matchId);
-				$sessOddArr = $this->getIndFancyAdmin($marketId);
-			//	print_r($sessOddArr);die;
+        //print_r($matchId);die();
 
-			//	$sessOddArr = json_decode($getSessionOdds,true);
+        $matchMarket = $this->Modelmarket->findMarketIdByMatch($matchId);
 
-				$activeSess = $this->Modelmatchfancy->addedSession($matchId);
+        if(!empty($matchId)){
 
-				$checkActive = array();
+            $marketId = $matchMarket['marketId'];
 
-				foreach($activeSess as $aSess){
-					$checkActive[] = $aSess['ind_fancy_selection_id'];					
-				}
+            //	$getSessionOdds = $this->getIndFancyByMatchId($matchId);
 
-			//	print_r($sessOddArr);
-				$indianSession = array();
-				if(!empty($sessOddArr['data']['session'])){
-					foreach($sessOddArr['data']['session'] as $sessOdd){
-						if(in_array($sessOdd['SelectionId'], $checkActive)){
-							$sessOdd = array_merge($sessOdd,array('is_exists'=>1,'match_id'=>$matchId));	
-						}else{
-							$sessOdd = array_merge($sessOdd,array('is_exists'=>0,'match_id'=>$matchId));	
-						}
-						$indianSession[] = $sessOdd;
-					}
-					$response["code"] = 0;
-					$response["error"] = false;
-	        		$response["message"] = "Session fancy listing";
-					$response["data"] = $indianSession;
-				}else{
-					$response["code"] = 1;
-					$response["error"] = true;
-        			$response["message"] = 'Session fancy has not been created for this match';
-				}
-			}else{
-				$response["code"] = 1;
-				$response["error"] = true;
-        		$response["message"] = 'Please actived match odd market';
-			} 
+            $sessOddArr = $this->getIndFancyAdmin($marketId);
 
-			$this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
-			
-		}
+            //	print_r($sessOddArr);die;
 
-		/**
-		 * [save_indian_session save indian session]
-		 * params : {"SelectionId":"27","RunnerName":"FALL OF 1ST WKT HAMP ADV","LayPrice1":"125","LaySize1":"110","BackPrice1":"125","BackSize1":"95","GameStatus":"","FinalStatus":"OPEN","is_exists":0,"match_id":"28772000"}
-		 */
-		function save_indian_session(){
+            //	$sessOddArr = json_decode($getSessionOdds,true);
 
-			$post = $_POST;
-			$data = array('HeadName'=>$post['RunnerName'],'remarks'=>'INDIAN_SESSION_FANCY','mid'=>$post['match_id'],'fancyType'=>2,'date'=>date('Y-m-d'),'time'=>date('H:i'),'inputYes'=> $post['BackPrice1'],'inputNo'=> $post['LayPrice1'],'sid'=>4,'NoLayRange'=>$post['LaySize1'],'YesLayRange'=>$post['BackSize1'],'RateDiff'=>1,'MaxStake'=>10000000000000000,'PointDiff'=>10,'ind_fancy_selection_id'=>$post['SelectionId']);
-			
-			$this->load->model('Modelcreatemaster');
-			$this->load->model('Modelmatchfancy');
+            $activeSess = $this->Modelmatchfancy->addedSession($matchId);
+            //echo "<pre>"; print_r($activeSess);die;
+            $checkActive = array();
+            $decliredSessionIds = [];
+
+            foreach($activeSess as $aSess){
+                $checkActive[] = $aSess['ind_fancy_selection_id'];
+                if($aSess['result']!=''){
+                    $decliredSessionIds[] = $aSess['ind_fancy_selection_id'];
+                }
+            }
+
+            //	print_r($checkActive);
+            $indianSession = array();
+            if(!empty($sessOddArr['data']['session'])){
+                foreach($sessOddArr['data']['session'] as $sessOdd){
+                    if(!in_array($sessOdd['SelectionId'], $decliredSessionIds)){
+                        if(in_array($sessOdd['SelectionId'], $checkActive)){
+                            $sessOdd = array_merge($sessOdd,array('is_exists'=>1,'match_id'=>$matchId));
+                        }else{
+                            $sessOdd = array_merge($sessOdd,array('is_exists'=>0,'match_id'=>$matchId));
+                        }
+                        $indianSession[] = $sessOdd;
+                    }
+
+                }
+                $response["code"] = 0;
+                $response["error"] = false;
+                $response["message"] = "Session fancy listing";
+                $response["data"] = $indianSession;
+            }else{
+                $response["code"] = 1;
+                $response["error"] = true;
+                $response["message"] = 'Session fancy has not been created for this match';
+            }
+        }else{
+            $response["code"] = 1;
+            $response["error"] = true;
+            $response["message"] = 'Please actived match odd market';
+        }
+
+        $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
+
+    }
+
+    /**
+     * [save_indian_session save indian session]
+     * params : {"SelectionId":"27","RunnerName":"FALL OF 1ST WKT HAMP ADV","LayPrice1":"125","LaySize1":"110","BackPrice1":"125","BackSize1":"95","GameStatus":"","FinalStatus":"OPEN","is_exists":0,"match_id":"28772000"}
+     */
+    function save_indian_session(){
+
+        $post = $_POST;
+        $data = array('super_admin_fancy_id'=>$post['super_admin_fancy_id'],'HeadName'=>$post['RunnerName'],'remarks'=>'INDIAN_SESSION_FANCY','mid'=>$post['match_id'],'fancyType'=>2,'date'=>date('Y-m-d'),'time'=>date('H:i'),'inputYes'=> $post['BackPrice1'],'inputNo'=> $post['LayPrice1'],'sid'=>4,'NoLayRange'=>$post['LaySize1'],'YesLayRange'=>$post['BackSize1'],'RateDiff'=>1,'MaxStake'=>10000000000000000,'PointDiff'=>10,'ind_fancy_selection_id'=>$post['SelectionId']);
+
+        $this->load->model('Modelcreatemaster');
+        $this->load->model('Modelmatchfancy');
 
 
-			$chkSession = $this->Modelmatchfancy->checkSessionStatus($data['mid'],$data['ind_fancy_selection_id']);
+        $chkSession = $this->Modelmatchfancy->checkSessionStatus($data['mid'],$data['ind_fancy_selection_id']);
 
-			if(empty($chkSession)){
+        if(empty($chkSession)){
 
-				$result = $this->Modelcreatemaster->mb_saveFancy($data);
+            $id = $this->Modelcreatemaster->mb_saveFancy($data);
 
-				if (!empty($result)) {
-					$response["code"] = 0;
-					$response["error"] = false;
-	    			$response["message"] = 'Indian session saved successfully';
-	    			$this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
-				}else{
-					$response["code"] = 1;
-					$response["error"] = true;
-	        		$response["message"] = 'Error';
-	        		$this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
-				}
+            try {
+                $redis = new Redis();
+                $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                $result = $this->Modelmatchfancy->selectFancyById($id);
+                $redis->set($this->db->database.'ind_' . $post['match_id'] . '_' . $id, json_encode($result));
+                $redis->close();
+            } catch (Exception $e) {
+            }
+            if (!empty($result)) {
+                $response["code"] = 0;
+                $response["error"] = false;
+                $response["message"] = 'Indian session saved successfully';
+                $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
+            }else{
+                $response["code"] = 1;
+                $response["error"] = true;
+                $response["message"] = 'Error';
+                $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
+            }
 
-			}else{
-				$response["code"] = 1;
-				$response["error"] = true;
-	    		$response["message"] = 'Already exists';
-	    		$this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
-			}
+        }else{
+            $response["code"] = 1;
+            $response["error"] = true;
+            $response["message"] = 'Already exists';
+            $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
+        }
 
-		}
-
+    }
 		/**
 		 * [matchLstIndianSessionPublic indian session match listing]
 		 * @param  [int] $matchId [match id]

@@ -55,7 +55,7 @@ class Modeltblbets extends CI_Model
 		}
 		$uIds = array_unique($userIds);
 
-		foreach($uIds as $uid){ 
+		foreach($uIds as $uid){
 			$cmModel->updateUserBalLiablity($uid);
 		}
 		
@@ -149,6 +149,17 @@ class Modeltblbets extends CI_Model
 			$selectionName = $row['selectionName'];
 		}
 		return $selectionName;
+	}
+
+	//stores pl into p_l_by_match_detail table from tblchipdet table
+	function savePlByMatchDetail($matchId){
+		$query = $this->db->query("call p_l_by_match_detail($matchId)");
+		return true;
+	}
+
+	function deleteSessionBet($id=0){
+		$query = $this->db->query("DELETE FROM bet_entry WHERE bet_id = $id LIMIT 1;");
+		return true;
 	}
 
 }

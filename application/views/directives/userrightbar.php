@@ -8,24 +8,9 @@
         </div>
   <div>
         <div class="account_overview mobilebox right_account"> 
-        <div class="livetv_heading collapsed" data-toggle="collapse" data-target="#livetv" aria-expanded="true">Live TV</div>
-
-        <div class=" collapse" id="livetv">
-            <video ng-if="false"   width="320" height="240" autoplay controls src="http://109.237.26.156:8021/1">
-
-            </video>
-             <div  ng-if="$root.IsShowTv=='Y'">
-
-
-                                <input type="radio" name="TV" onclick="ChangeFrame(1)" />TV1
-                                <input type="radio" name="TV" onclick="ChangeFrame(2)" />TV2
-                                <input type="radio" name="TV" onclick="ChangeFrame(3)" />TV3
-                                <input type="radio" name="TV" onclick="ChangeFrame(4)" />TV4
-                                <a style="cursor:pointer;color:red;font-size:20px;" onclick="ChangeFrame(0)">X</a>
-                            </div>
-                            <div  ng-if="$root.IsShowTv=='Y'" id="dvPlayer">
-                            </div>
-        </div>
+		
+		
+	
 
         
        <div class="dropdown">
@@ -52,7 +37,7 @@
 			  <span class="switch-label" data-on="On" data-off="Off"></span>
 			  <span class="switch-handle"></span> 
 		  </label>
-		  <small class='clickbet'> 1 Click Betting  </small>
+		  <small class='clickbet'> 1 Click Betting </small>
 		  
       <form id="form1" name="form1" ng-init="isEdit=true">
        <div class="iner_form">
@@ -91,9 +76,7 @@ ng-model="one_click_stack[$index]" required></li>
 <a href="javascript:void(0)" title="Edit Stakes" data-toggle="modal" data-target="#edit_popup" ng-click="CallOnclickSetting()">Edit Stakes</a> 
 	  </span>
 	  </li>
-  </ul>
-  
-  <div class="edit_stakes">
+  </ul> <div class="edit_stakes">
   <div class="modal" tabindex="-1" role="dialog" id="edit_popup">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -136,7 +119,8 @@ ng-model="one_click_stack[$index]" required></li>
     <div class="form-group">
       <label ng-show="back.is_session_fancy=='N'">Odds</label>
       <label ng-show="back.is_session_fancy!='N'">{{back.isback==1 ? 'No':'Yes'}}</label>
-      <input type="number" ng-change="updateLiability(back)" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" min="0" step="0.01" ng-model="back.priceVal" class="form-control numclass" ng-disabled="back.is_session_fancy!='N'">
+      <input ng-if="back.step!=angular.isUndefindOrNull" type="number" ng-change="updateLiability(back)" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" min="0" step="{{back.step}}" ng-model="back.priceVal" class="form-control numclass" ng-disabled="back.is_session_fancy!='N'">
+        <input ng-if="back.step==angular.isUndefindOrNull" type="number" ng-change="updateLiability(back)" ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" min="0" step="0.01" ng-model="back.priceVal" class="form-control numclass" ng-disabled="back.is_session_fancy!='N'">
 	  <span class="error" ng-show="back.isMaxOdds">Max odds is {{config_max_odd_limit}}.</span>
     </div>
   </li>
@@ -179,49 +163,7 @@ ng-model="one_click_stack[$index]" required></li>
 </p>
  </div>	  
  
- <div ng-if="false" class="smg_texfill" ng-repeat="lay in layArray" >
-  <div class="sigma_olomouc">
-  <label class="before_lay">Lay</label>
-  <a href="#"> {{lay.MatchName}}</a>
-  </div>
-  <div class="bet_back bet_lay">
-  <span class="selection_name">{{lay.placeName}} </span>
-  <div class="bet_fields clearfix">
-  
-  <ul class="odds_tex">
-  <li>
-    <div class="form-group">
-      <label>Odds</label>
-      <input type="number" ng-model="lay.priceVal" class="form-control numclass" value="0">
-    </div>
-  </li>
-  <li>
-    <div class="form-group" ng-init="lay.stake=0">
-      <label>Stake{{((lay.priceVal*lay.stake)-lay.stake)}}</label>
-      <input type="number" ng-change="updateLiability(lay.stake)"  ng-model="lay.stake" placeholder="0" class="form-control numclass">
-      <span ng-show="lay.isError">Please Enter stack.</span>
-    </div>
-  </li>
-  <li>
-    <div class="form-group">
-      <label>Liability</label>
-	<input type="hidden" ng-init="lay.p_l=((lay.priceVal*lay.stake)-lay.stake)" ng-model="lay.p_l">
-       <span ng-init="lay.p_l=((lay.priceVal*lay.stake)-lay.stake)">{{(lay.priceVal*lay.stake)-lay.stake | number:2}}</span>
-    </div>
-  </li>
-     <i ng-click="RemoveBackLay(lay.unique_id,lay.isback)" class="fa fa-window-close"></i>
-  </ul>
-  
-  <div class="first_row" ng-if="$index==0">
-  <ul>
-  <li ng-repeat="betbutton in $root.MatchStack track by $index">
- <button  type="button" ng-click="lay.stake=betbutton;addStake(lay.p_l)" class="btn num-btns">{{betbutton}}</button></li>
- <li><button type="button" ng-click="lay.stake=0"> Clear</button></li>
-  </ul>
-  </div>
-  </div>
-  </div>
-  </div>
+
   
   <div class="liability" ng-show="BackLayArray.length>0 && betslipinfo == true" >
   <span>Liability: {{$root.total_liability}}</span>
@@ -297,36 +239,11 @@ ng-model="one_click_stack[$index]" required></li>
                                                             <td ng-if="USERTYPE==0">{{unMatchedData.MasterName}}</td>
                                                             <td ng-if="USERTYPE==0 || USERTYPE==1">{{unMatchedData.ParantName}}</td>
                                                             <td ng-if="USERTYPE==0 || USERTYPE==1 ||USERTYPE==2">{{unMatchedData.userName}}</td>
-                                                            <td>{{unMatchedData.Odds}}</td>
+                                                            <td>{{OddReturn(unMatchedData.Odds)}}</td>
                                                             <td>{{unMatchedData.Stack}}</td>
                                                              <td>{{unMatchedData.P_L}}</td>
-                                     <tr ng-if="false">
-                                      <td>{{unMatchedData.P_L}}</td>
-					<td >
-					<table>
-					<tbody>
-					<thead ng-if="$index==0">
-                                                        <tr>
-                    					  <th></th>
-                                                            <th>Runner</th>
-                                                            <th ng-if="USERTYPE==0">Master</th>
-                                                            <th ng-if="USERTYPE==0 || USERTYPE==1">Dealer</th>
-                                                            <th ng-if="USERTYPE==0 || USERTYPE==1 ||USERTYPE==2">Client</th>
-                                                            <th>odds </th>
-                                                            <th>stack</th>
-                                                            <th>P&l</th>
-                                                        </tr>
-                                                    </thead>
-					<tr>
-					<td><span class="fa fa-trash" ng-click="deleteUser(unMatchedData.MstCode,unMatchedData.UserId)"></span></td>
-					 <td>{{unMatchedData.selectionName}}
-                                                                                                      </td>
-                                                            <td ng-if="USERTYPE==0">{{unMatchedData.MasterName}}</td>
-                                                            <td ng-if="USERTYPE==0 || USERTYPE==1">{{unMatchedData.ParantName}}</td>
-                                                            <td ng-if="USERTYPE==0 || USERTYPE==1 ||USERTYPE==2">{{unMatchedData.userName}}</td>
-                                                            <td>{{unMatchedData.Odds}}</td>
-                                                            <td>{{unMatchedData.Stack}}</td>
-                                                            <td>{{unMatchedData.P_L}}</td>
+
+
 					</tr>
 <tr>
                                          <td colspan="7">  {{unMatchedData.MstDate}}</td>
@@ -378,48 +295,15 @@ ng-model="one_click_stack[$index]" required></li>
                                                                                                            </thead>
                                     <tr ng-repeat='unMatchedData in (UserData | filter : {"IsMatched":"1"})' ng-class="{'bet_lay': unMatchedData.isBack == 1 , 'bet_back': unMatchedData.isBack == 0}">
                                     <td>{{unMatchedData.selectionName}} <br>
-                                     {{unMatchedData.MstDate}}
+                                     {{unMatchedData.MstDate}} <span class="red" ng-if="unMatchedData.void==1"> <br>-> Void</span>
                                     </td>
                                                     <td ng-if="USERTYPE==0">{{unMatchedData.MasterName}}</td>
                                           <td ng-if="USERTYPE==0 || USERTYPE==1">{{unMatchedData.ParantName}}</td>
                                               <td ng-if="USERTYPE==0 || USERTYPE==1 ||USERTYPE==2">{{unMatchedData.userName}}</td>
-                                                                                                                     <td>{{unMatchedData.Odds}}</td>
+                                                                                                                     <td>{{OddReturn(unMatchedData.Odds)}}</td>
                                                                                                                      <td>{{unMatchedData.Stack}}</td>
                                                                                                                      <td>{{unMatchedData.P_L}}</td>
                                             </tr>
-                                      <tr ng-if="false">
-                                         <td colspan="8">  {{unMatchedData.MstDate}}</td>
-                                        <td >
-                                           <table>
-                                           <thead ng-if="$index==0">
-                                                                               <tr>
-                                                                                   <th>Runner</th>
-                                                                                   <th ng-if="USERTYPE==0">Master</th>
-                                                                                   <th ng-if="USERTYPE==0 || USERTYPE==1">Dealer</th>
-                                                                                   <th ng-if="USERTYPE==0 || USERTYPE==1 ||USERTYPE==2">Client</th>
-                                                                                   <th>odds </th>
-                                                                                   <th>stack</th>
-                                                                                   <th>P&l</th>
-                                                                               </tr>
-                                                                           </thead>
-                                                                                <tbody>
-                                                                                <tr>
-                                                                                <td>{{unMatchedData.selectionName}}</td>
-                <td ng-if="USERTYPE==0">{{unMatchedData.MasterName}}</td>
-      <td ng-if="USERTYPE==0 || USERTYPE==1">{{unMatchedData.ParantName}}</td>
-          <td ng-if="USERTYPE==0 || USERTYPE==1 ||USERTYPE==2">{{unMatchedData.userName}}</td>
-                                                                                 <td>{{unMatchedData.Odds}}</td>
-                                                                                 <td>{{unMatchedData.Stack}}</td>
-                                                                                 <td>{{unMatchedData.P_L}}</td>
-        </tr>
-  <tr>
-     <td colspan="8">  {{unMatchedData.MstDate}}</td>
-                                                                                    </tr>
-                                                                                </tbody>
-                                                                                </table>
-                                        </td>
-
-                                    </tr>
                                 </tbody>
                             </table>
                         </div>

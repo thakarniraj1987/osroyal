@@ -1,5 +1,5 @@
 ﻿'use strict';
-var app = angular.module('ApsilonApp');
+
 app.directive("limitToMax", function() {
   return {
 restrict: 'A',
@@ -24,7 +24,8 @@ oldVal = null;
     }
   };
 });
-app.directive('sidebar', ['$location', '$timeout', function ($window, $http, sessionService, $timeout, get_userser) {
+(function(){
+app.directive('sidebar', [function () {
     return {
         templateUrl: 'directives/sidebar',
         restrict: 'E',
@@ -42,14 +43,14 @@ app.directive('sidebar', ['$location', '$timeout', function ($window, $http, ses
         },
         controller: ['$scope', '$http', '$timeout', '$mdDialog', 'sessionService', '$rootScope', 'get_userser', 'Dialog','$state',function ($scope, $http, $timeout, $mdDialog, sessionService, $rootScope, get_userser, Dialog,$state) {
 	    $scope.IsPopupShow=false;
-	    $scope.cancelseries=null; 
+	    $scope.cancelseries=null;
             $scope.chkMarketPP = false;
             $scope.chkMarketPPF = false;
             var tempTree=[];
             $scope.txtSearch={};
             $scope.refresh_tree = function () {
                 $http.get('Lstsavemstrcontroller/lstSaveMaster/' + sessionService.get('user_id') + '/' + sessionService.get('type') + '/' + sessionService.get('HelperID') + '/' + sessionService.get('Helperype')).success(function (data, status, headers, config) {
-                   
+
 			 $scope.treeNodes = data.tree;
                     tempTree=data.tree;
                 });
@@ -98,7 +99,7 @@ var t = false
 
 $('ff').focus(function () {
     var $this = $(this)
-    
+
     t = setInterval(
 
     function () {
@@ -110,7 +111,7 @@ $('ff').focus(function () {
             if ($this.val() > 2) {
                 $this.val(2)
             }
-          
+
         }
     }, 50)
 })
@@ -350,7 +351,7 @@ $('ff').focus(function () {
                         });
 
                 };
-                $scope.submitForm_Users = function (user, node) { 
+                $scope.submitForm_Users = function (user, node) {
                     if($scope.chkUser==false)
                        prntScope.submitForm_Users(user, node);
                     else{
@@ -377,18 +378,18 @@ $('ff').focus(function () {
                 $scope.showViewAccountForm();
             };
             function showViewSettingController($scope, $mdDialog, prntScope, node, currentScope1, Dialog) {
-		
+
                 $http.get('Chipscntrl/GetChipDetectById/' + node.id).success(function (data, status, headers, config) {
-                    
+
                     $scope.DetectedVal = data.jsonData;
                     if(data.jsonData.length==0){
                         $scope.DetectedVal=0;
                     }else{
                         $scope.DetectedVal = parseFloat(data.jsonData[0].value);
                     }
-                    
+
                 });
-		
+
                 $scope.sessionusetype = sessionService.get('type');
                 $scope.currentScope1 = currentScope1;
                 $scope.node = node;
@@ -402,13 +403,13 @@ $('ff').focus(function () {
 
                     $scope.tblParner = response.data.userPrtnrShip;
 	       // if(response.data.userPrtnrShip.length > 1){
-            
+
                     $scope.ID = response.data.userPrtnrShip[0].ID;
                     $scope.TypeID = response.data.userPrtnrShip[0].TypeID;
                     $scope.ParentID = response.data.userPrtnrShip[0].ParentID;
                     $scope.UserID = response.data.userPrtnrShip[0].UserID;
                     $scope.Admin = parseFloat(response.data.userPrtnrShip[0].Admin);
-                   
+
                     $scope.Master = parseFloat(response.data.userPrtnrShip[0].Master);
                     $scope.Dealer = parseFloat(response.data.userPrtnrShip[0].Dealer);
                     $scope.Dealer_old = parseFloat(response.data.userPrtnrShip[0].Dealer);
@@ -435,23 +436,23 @@ $('ff').focus(function () {
 
                 $scope.changePartnerShipVal=function(admin,masterVal,Dealer){
                     $scope.Dealer;
-                    
+
                      var masterVal = document.getElementById('Dealer_new').value;
-                    
+
                     $scope.Master=$scope.Dealer_old-parseInt(masterVal);
                     //alert(''+masterVal+'||'+e.key);
 
                 }
                 $scope.updatePartnerShip = function (Admin, Master, Dealer, ID) {
-                   
+
                     if ($scope.sessionusetype==1) {
                         var Master=$scope.Dealer_old-parseInt(Dealer);
                         var sumofVal = parseFloat(Admin) + parseFloat(Master) + parseFloat(Dealer)+Master;
                     }else{
                         var sumofVal = parseFloat(Admin) + parseFloat(Master) + parseFloat(Dealer);
                     }
-                  
-                   
+
+
                     if (sumofVal == 100 && Admin>=0 && Master >=0 && Dealer>=0) {
                         $http.get('Createmastercontroller/updatePartnerShip/' + Admin + '/' + Master + '/' + Dealer + '/' + ID + '/' + sessionService.get('HelperID')).success(function (data1, status, headers, config) {
                             Dialog.autohide(data1.message, 1000);
@@ -465,19 +466,19 @@ $('ff').focus(function () {
                     }
                 }
                 $scope.updatePartnerShipMaster = function (Admin, Master, Dealer, ID) {
-                     
+
                         if(parseInt($scope.Dealer_old)>parseInt(Dealer)){
-                           var MasterRem=$scope.Dealer_old-parseInt(Dealer); 
+                           var MasterRem=$scope.Dealer_old-parseInt(Dealer);
                            var newMas=parseInt(Master)+MasterRem;
                        }else{
                            var MasterRem=parseInt(Dealer)-parseInt($scope.Dealer_old);
                            var newMas=parseInt(Master)-MasterRem;
                        }
-                       
+
                         var sumofVal = parseFloat(Admin) + parseFloat(newMas) + parseFloat(Dealer);
-                   
-                   
-                  
+
+
+
                     if (sumofVal == 100 && newMas>=0) {
                         $http.get('Createmastercontroller/updatePartnerShip/' + Admin + '/' + newMas + '/' + Dealer + '/' + ID + '/' + sessionService.get('HelperID')).success(function (data1, status, headers, config) {
                             Dialog.autohide(data1.message, 1000);
@@ -492,7 +493,7 @@ $('ff').focus(function () {
                 }
                 // $scope.Commission='';
                 $scope.updateCommission = function (oddsComm, sessionComm, otherComm,DetectedAmt, ID,Type) {
-                    
+
 			//alert(oddsComm)
                     if (oddsComm<=100 && sessionComm<=100 && otherComm<=100) {
                         $http.get('Createmastercontroller/updateCommission/' + oddsComm + '/' + sessionComm + '/' + otherComm + '/' + ID + '/' + sessionService.get('HelperID')).success(function (data1, status, headers, config) {
@@ -500,20 +501,20 @@ $('ff').focus(function () {
                             prntScope.refresh_tree();
                         });
                         if(Type==3){
-                            
+
 
                             $http.get('Chipscntrl/updateUserDetection/' + DetectedAmt + '/' + ID+'/'+Type ).success(function (data1, status, headers, config) {
                                //alert(data1);
-                            });  
+                            });
                         }
-                        
+
                     }else{
                         alert("Invalid Commition Value");
                     }
-                   
+
                 }
                 $scope.UpdateViewAccount = function (user, node, currentScope1) {
-                    
+
 
                     if (node.usetype==1 || node.usetype==2 || node.usetype==0) {
                         var userId = document.getElementById('vewMod2ID').value;
@@ -526,7 +527,7 @@ $('ff').focus(function () {
                        // var maxLoss = document.getElementById('maxLoss1').value;
                         var maxStake = 0;
                         var remarks =  document.getElementById('remarks').value;
-                        var InPlayStack = 0; 
+                        var InPlayStack = 0;
 			var nofuser= document.getElementById('nouser').value;
                     }else{
                         var userId = document.getElementById('vewMod2ID').value;
@@ -538,10 +539,10 @@ $('ff').focus(function () {
                         var maxStake = document.getElementById('maxStake1').value;
                         var remarks =  document.getElementById('remarks').value;
                         var maxsessionStake=document.getElementById('sessionStake1').value;
-                        var InPlayStack = document.getElementById('InPlayStack').value; 
+                        var InPlayStack = document.getElementById('InPlayStack').value;
 			           // var nofuser= document.getElementById('nouser').value;
                     }
-                    
+
                     var userInfo = {
                         id: node.id,
                         userId: userId,
@@ -633,7 +634,7 @@ $('ff').focus(function () {
                     fullscreen: false,
                 });
             };
-            function showSettlementController($scope, $mdDialog, prntScope, node, currentScope1) //sourabh 
+            function showSettlementController($scope, $mdDialog, prntScope, node, currentScope1) //sourabh
             {
                 $scope.node = node;
                 $scope.userType = node.usetype;
@@ -671,7 +672,7 @@ $('ff').focus(function () {
                 }
                 $scope.hide = function () { $mdDialog.hide(); };
             }
-            function showFreeChipsController($scope, $mdDialog, prntScope, node, currentScope1) //sourabh 
+            function showFreeChipsController($scope, $mdDialog, prntScope, node, currentScope1) //sourabh
             {
                 $scope.node = node;
                 $scope.userType = node.usetype;
@@ -811,11 +812,11 @@ $('ff').focus(function () {
                     case "3": return "dashboard.Userdashboard"; break;
                 }
             }
-            $http.get('Geteventcntr/GetSportFrmDatabase').success(function (data, status, headers, config) {
+           /* $http.get('Geteventcntr/GetSportFrmDatabase').success(function (data, status, headers, config) {
                 $scope.sprtData = data.sportData;
             }).error(function (data, status, header, config) {
                 $scope.ResponseDetails = "Data: " + data + "<br />status: " + status + "<br />headers: " + jsonFilter(header) + "<br />config: " + jsonFilter(config);
-            });
+            });*/
             $scope.message = "";
             $scope.setNodeToTable = function (node) {
                 $rootScope.$broadcast('test_dir', { userData: node });
@@ -1304,7 +1305,7 @@ $('ff').focus(function () {
                 if (user.userType_id==user.SltUsrType_id) {
                      var oldPassword = document.getElementById('old_pass').value;
                 };
-               
+
                 var newPassword = user.newPassword;
                 var cnfnewPassword = user.cnfnewPassword;
                 var passwordData = {
@@ -1417,7 +1418,7 @@ $('ff').focus(function () {
 			create_no_of_child:user.create_no_of_child,
 
 
-                       
+
                     }
                 }else{
                     var formData = {
@@ -1558,13 +1559,13 @@ $('ff').focus(function () {
 			}
 			$scope.dropdownInplay['field_'+ind]=!$scope.dropdownInplay['field_'+ind];
 		}
-		
+
                 root.xPosi = evt.clientX;
                 root.yPosi = evt.clientY;
             }
             $scope.buttonClicked = "";
             $scope.viewModelToggle = function (btnClicked, id) {
-		
+
                 $scope.buttonClicked2 = btnClicked;
                 $scope.displayViewModel = !$scope.displayViewModel;
                 $scope.modShHd = 2;
@@ -1581,7 +1582,7 @@ $('ff').focus(function () {
                 });
             };
             $scope.getMatchMarket = function (sportsId, matchId) {
-                
+
                 $scope.accordion = sportsId;
                 $scope.accordionLv1 = matchId;
                 $scope.MatchId = matchId;
@@ -1600,16 +1601,16 @@ $('ff').focus(function () {
                 });
             }
            $scope.ShowHideAng = function (sportsId) {
-				
+
 		//$timeout.cancel($scope.cancelseries);
-				
+
                 $scope.accordion = sportsId;
                 $scope.sportsId = sportsId;
                 $scope.accordionLv2 = 0;
-			 
+
                 if ($scope.sessionusetype != 0 || sportsId == 7 ) {
                     $scope.getSeriesMatch(sportsId, 0);
-				 
+
                 }
                 else {
 			if(sportsId>0 && sportsId != 7 ){
@@ -1617,7 +1618,7 @@ $('ff').focus(function () {
                     $http.get('Geteventcntr/getSeriesLst/' + sportsId).success(function (data, status, headers, config) {
                         $scope.GetSeriesData = data.seriesLst;
                         $rootScope.GetSeriesData = data.seriesLst.length;
-					 
+
                     });
 			}
                 }
@@ -1630,15 +1631,15 @@ $('ff').focus(function () {
 		$scope.oldSportID=0;
 		$scope.seriesClicked=false;
             $scope.getSeriesMatch = function (sportsId, seriesId) {
-		
+
 		if($scope.oldSeriesId != seriesId || $scope.oldSportID != sportsId){
 			$scope.oldSeriesId=seriesId;
 			$scope.oldSportID=sportsId;
 	 		$scope.inPlay = [];
 			$scope.upComing = [];
-			
-			
-	
+
+
+
 		}
                 $scope.accordion = sportsId;
                 $scope.accordionLv1 = 0;
@@ -1658,8 +1659,8 @@ $('ff').focus(function () {
 		else{
                     $scope.GetTempData = data.matchLst;
 			}
-		
-				
+
+
                  var date = new Date();
     		var d = date.getDate();
 		    if(d<10)
@@ -1683,14 +1684,14 @@ $('ff').focus(function () {
        			 var currentTime = new Date(""+y+"-"+m+"-"+d+" "+hours+":"+min+":"+sec+"");
                                 var date = new Date(""+y+"-"+m+"-"+d+" 00:00:00");
                                 //console.log("newDate : " + newDate);
-                    
+
                         angular.forEach($scope.GetTempData, function(value, key) {
                               console.log(key + ': ' + value);
                               var d = new Date(value.MstDate);
-                                
+
                     //          alert("n : " + n);
                                 console.log("n " + d);
-                                //change By Manish (&& d < currentTime) add in if()  
+                                //change By Manish (&& d < currentTime) add in if()
                                 if(currentTime >= d ){
                                     //$scope.inPlay=(value);
 
@@ -1710,12 +1711,12 @@ $('ff').focus(function () {
 			      {$scope.upComing.push(value);}
 					}
 
-					      
+
                             });
 			calltype=1;
 		$scope.CallgetSeriesMatch(sportsId, seriesId);
                 });
-	
+
 		}
 		else
 		{
@@ -1726,8 +1727,8 @@ $('ff').focus(function () {
             }
 $scope.CallgetSeriesMatch=function(sportsId, seriesId)
 {
-	
-	
+
+
 	if($scope.oldSeriesId != seriesId || $scope.oldSportID != sportsId){
 			$scope.oldSeriesId=seriesId;
 			$scope.oldSportID=sportsId;
@@ -1735,7 +1736,7 @@ $scope.CallgetSeriesMatch=function(sportsId, seriesId)
 			$scope.upComing = [];
 
 			//$timeout.cancel($scope.cancelseries);
-	
+
 		}
 
 		$scope.cancelseries=$timeout(function(){
@@ -1756,8 +1757,8 @@ $scope.CallgetSeriesMatch=function(sportsId, seriesId)
 		else{
                     $scope.GetTempData = data.matchLst;
 			}
-		
-				
+
+
                  var date = new Date();
     		var d = date.getDate();
 		    if(d<10)
@@ -1781,14 +1782,14 @@ $scope.CallgetSeriesMatch=function(sportsId, seriesId)
        			 var currentTime = new Date(""+y+"-"+m+"-"+d+" "+hours+":"+min+":"+sec+"");
                                 var date = new Date(""+y+"-"+m+"-"+d+" 00:00:00");
                                 //console.log("newDate : " + newDate);
-                    
+
                         angular.forEach($scope.GetTempData, function(value, key) {
                               console.log(key + ': ' + value);
                               var d = new Date(value.MstDate);
-                                
+
                     //          alert("n : " + n);
                                 console.log("n " + d);
-                                //change By Manish (&& d < currentTime) add in if()  
+                                //change By Manish (&& d < currentTime) add in if()
                                 if(currentTime >= d ){
                                     //$scope.inPlay=(value);
 
@@ -1808,12 +1809,12 @@ $scope.CallgetSeriesMatch=function(sportsId, seriesId)
 			      {$scope.upComing.push(value);}
 					}
 
-					      
+
                             });
 			$scope.CallgetSeriesMatch(sportsId, seriesId);
                 });
 		calltype=1;
-		
+
 
 		}
 		},10000);
@@ -1832,7 +1833,7 @@ $scope.$on('$destroy', function() {
      });
 
             var UserId = sessionService.get('user_id');
-            $scope.refresh_tree();
+           // $scope.refresh_tree();
             $scope.showCreateFancy = function (ev, type) {
                 $mdDialog.show({
                     controller: 'showCreateFancyCntr',
@@ -1847,7 +1848,7 @@ $scope.$on('$destroy', function() {
               });
             };
             $scope.createAllTypeFancy = function (formData) {
-                 
+
                 var url = BASE_URL + "Createmastercontroller/SaveFancy";
                 $http.post(url, formData).success(function (response) {
                     Dialog.autohide(response.message);
@@ -1856,7 +1857,7 @@ $scope.$on('$destroy', function() {
                 });
             };
             $scope.sdMarketPP = function (sportId,matchId,MarketId,FancyId,IsPlay) {
-                
+
                 var user_id=sessionService.get("user_id");
                 var user_type=sessionService.get("type");
                 var $promise = $http.get(BASE_URL + 'Lstsavemstrcontroller/chaneMarketPPStatus/' +user_id+'/'+matchId+'/'+MarketId+'/'+FancyId+'/'+user_type+'/'+IsPlay);
@@ -1864,12 +1865,13 @@ $scope.$on('$destroy', function() {
                    // //
                      Dialog.autohide(response.data.message);
                      $scope.getMatchMarket(sportId, matchId);
-                   
+
                 });
             };
         }]
     }
 }]);
+})();
 app.controller('showCreateFancyCntr',['$scope', '$mdDialog', 'prntScope', 'matchInfo', 'type', function ($scope, $mdDialog, prntScope, matchInfo, type) {
     $scope.SubmitBtnDis=false;
     $scope.dt = null;

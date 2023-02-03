@@ -255,13 +255,16 @@
 			}
 			function saveSportMatch($data){
 
-
 				$chk=$this->chkSportsMatch($data['matchId']);
 
 				if ($chk==0) {
 
 					$Modeltblconfig = $this->model_load_model('Modeltblconfig');
 					$configData = $Modeltblconfig->find();
+					
+					if(empty($data['scoreboard_id'])){
+                        $data['scoreboard_id'] = 0;
+					}
 
 
 					if(!empty($configData)){
@@ -282,11 +285,11 @@
 
 
 					if($_POST['sportId'] == 7){ 
-						$insertData = array('seriesId'=> '210','MstCode'=> $data['matchId'],'matchName'=> $data['matchName'],'MstDate'=> $data['openDate'],'startDate'=> $data['startDate'],'SportID'=> $data['sportId'],'countryCode'=> $data['countryCode'],'createdOn'=>date('Y-m-d H:i:s',now()),'HelperID'=> $data['HelperID'],'score_board_json'=>$data['score_board_json']);
+						$insertData = array('seriesId'=> '210','MstCode'=> $data['matchId'],'matchName'=> $data['matchName'],'MstDate'=> $data['openDate'],'startDate'=> $data['startDate'],'SportID'=> $data['sportId'],'countryCode'=> $data['countryCode'],'createdOn'=>date('Y-m-d H:i:s',now()),'HelperID'=> $data['HelperID'],'score_board_json'=>$data['score_board_json'],'scoreboard_id'=>$data['scoreboard_id']);
 					}
 					else{
 
-						$insertData = array('seriesId'=>  $data['seriesId'],'MstCode'=> $data['matchId'],'matchName'=> $data['matchName'],'MstDate'=> $data['openDate'],'startDate'=> $data['startDate'],'SportID'=> $data['sportId'],'countryCode'=> '','marketCount'=> '','createdOn'=>date('Y-m-d H:i:s',now()),'HelperID'=> $data['HelperID'],'is_manual'=>$data['is_manual'],'score_board_json'=>json_encode($data['score_board_json']));
+						$insertData = array('seriesId'=>  $data['seriesId'],'MstCode'=> $data['matchId'],'matchName'=> $data['matchName'],'MstDate'=> $data['openDate'],'startDate'=> $data['startDate'],'SportID'=> $data['sportId'],'countryCode'=> '','marketCount'=> '','createdOn'=>date('Y-m-d H:i:s',now()),'HelperID'=> $data['HelperID'],'is_manual'=>$data['is_manual'],'score_board_json'=>json_encode($data['score_board_json']),'scoreboard_id'=>$data['scoreboard_id']);
 					}
 
 					
@@ -302,7 +305,7 @@
 					$this->saveMatchMarket($marketData);
 
 					$selectionData = array();
-					if($data['is_manual'] ){
+					if($data['is_manual']){
                         if(!empty($data['runnerName1'])){
                             $selectionData[] = array('selectionId'=>$data['selectionId1'],'runnerName'=>$data['runnerName1']);
                         }
@@ -347,9 +350,9 @@
 					$GetpId=$this->Get_MatchActive( $data['matchId']);
 					$Active=$GetpId[0]->active;
 					if($Active==0)
-						$dataArray = array('active' => 1,'HelperID'=> $data['HelperID'],'MstDate'=> $data['openDate']);
+						$dataArray = array('active' => 1,'HelperID'=> $data['HelperID'],'MstDate'=> $data['openDate'],'startDate'=> $data['startDate']);
 					else
-						$dataArray = array('active' => 0,'HelperID'=> $data['HelperID'],'MstDate'=> $data['openDate']);
+						$dataArray = array('active' => 0,'HelperID'=> $data['HelperID'],'MstDate'=> $data['openDate'],'startDate'=> $data['startDate']);
 
     				$this->db->where('MstCode', $data['matchId']);
 					$this->db->update('matchmst', $dataArray);
@@ -601,7 +604,7 @@
 					$condition1=$this->db->where('mtchMst.active', 1);
 				}
 
-					$this->db->select("mtchMst.scoreboard_id,mtchMst.volumeLimit,mtchMst.oddsLimit,mtchMst.matchName,mtchMst.countryCode,mtchMst.marketCount,mtchMst.MstDate,spmst.name,mtchMst.active,mtchMst.SportID,mtchMst.MstCode, DATE_FORMAT(mtchMst.MstDate,'%d-%m-%Y') as date");
+					$this->db->select("mtchMst.volumeLimit,mtchMst.oddsLimit,mtchMst.scoreboard_id,mtchMst.matchName,mtchMst.countryCode,mtchMst.marketCount,mtchMst.MstDate,spmst.name,mtchMst.active,mtchMst.SportID,mtchMst.MstCode, DATE_FORMAT(mtchMst.MstDate,'%d-%m-%Y') as date ,mtchMst.minStack,mtchMst.maxStack");
 			$this->db->from('matchmst mtchMst');
 			$this->db->join('sportmst spmst', 'mtchMst.SportID=spmst.id', 'INNER');
 
@@ -822,19 +825,25 @@
 			}
 
 
-			function mbdip_adminFancyList($matchId,$userId){				
+			function mbdip_adminFancyList($matchId,$userId){
 
-				$sql = "select a.*,IFNULL(a.result,'') result,IFNULL(a.upDwnBack,'') upDwnBack,IFNULL(a.upDwnLay,'') upDwnLay,IFNULL(a.upDwnLimit,'') upDwnLimit,IFNULL(a.rateDiff,'') rateDiff,a.MFancyID as FncyId ,case when (select COUNT(*) from tblrights where UserID = $userId and  FancyID =  a.ID )>0 then 1 else 0 end IsPlay
- ,CASE WHEN (SELECT COUNT(*) FROM tblplay WHERE UserID = $userId AND MatchID =a.MatchID AND FancyID = a.ID AND isPlay = 1 )>0 THEN 1 ELSE 0 END IsPlayIcon
-  from
-   matchfancy a  
-where a.active != 2 and fancy_mode = 'M' and MatchID = $matchId and a.result is null ORDER BY a.ind_fancy_selection_id ASC;";
+                try {
 
-				$query =$this->db->query($sql);
-				$res = $query->result_array();
-			//	$query->next_result();
-			//	$query->free_result();
-				return $res;
+                    $redis = new Redis();
+                    $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                    $key = $this->db->database.'ind_' . $matchId . '*';
+                    $data = $redis->mget($redis->keys($key));
+                    $sessionOdds = array_map(function ($a){
+                        return json_decode($a,true);
+                    },$data);
+                    $redis->close();
+
+                } catch (Exception $e) {
+                    $sessionOdds= [];
+                }
+
+
+                return $sessionOdds;
 			}
 
 			 
@@ -909,7 +918,7 @@ where a.active != 2 and fancy_mode = 'M' and MatchID = $matchId and a.result is 
 								'selectionName' => $key['runnerName'],
 								'teamType' => $index
 							);
-					$this->db->insert('tblselection', $file_data);
+					$this->db->insert('tblSelection', $file_data);
 
 					$index++;
 				}
@@ -919,7 +928,7 @@ where a.active != 2 and fancy_mode = 'M' and MatchID = $matchId and a.result is 
 			}
 			function GetSelectionFrmDatabase($marketId){
 				$this->db->select("*");
-				$this->db->from('tblselection');
+				$this->db->from('tblSelection');
 				$this->db->where('marketId', $marketId);
 				$query = $this->db->get();
 				return $query->result_array();
@@ -936,7 +945,7 @@ where a.active != 2 and fancy_mode = 'M' and MatchID = $matchId and a.result is 
 				$MarketName=$_POST['MarketName'];
 				$selectionName=$_POST['selectionName'];		
 				$selectionName = str_replace("'"," ",$selectionName);	
-			//	echo "call SP_SetResult($sportsId,$Match_id,$market_id,'$selectionId',$isFancy,$result,'$sportName','$matchName','$MarketName','$selectionName')";die;	
+					
 				$query = $this->db->query("call SP_SetResult($sportsId,$Match_id,$market_id,'$selectionId',$isFancy,$result,'$sportName','$matchName','$MarketName','$selectionName')");
 				$res = $query->result_array();
 				$query->next_result();
@@ -967,9 +976,8 @@ where a.active != 2 and fancy_mode = 'M' and MatchID = $matchId and a.result is 
 				$query = $this->db->query("DELETE FROM `tblbets` WHERE  MatchId = $Match_id AND MarketId = $market_id;");			
 
 				if($MarketName=='Match Odds'){
-					$query = $this->db->query("UPDATE matchmst SET active = 0 WHERE SportID = $sportsId AND MstCode = $Match_id ;");			
-				}
-				
+					$query = $this->db->query("UPDATE matchmst SET active = 0 WHERE SportID = $sportsId AND MstCode = $Match_id ;");
+				}		
 
 				$query = $this->db->query("UPDATE market SET active = 0 WHERE sportsId = $sportsId AND matchId = $Match_id AND Id = $market_id ;");			
 				
@@ -1018,10 +1026,8 @@ where a.active != 2 and fancy_mode = 'M' and MatchID = $matchId and a.result is 
 				$sportName=$data['sportName'];
 				$matchName= str_replace("'"," ",$data['matchName']);
 				$MarketName= str_replace("'"," ",$data['MarketName']);
-                $selectionName= str_replace("'"," ",$data['selectionName']);
+                $selectionName= str_replace("'"," ",$_POST['selectionName']);
                 $selectionName = str_replace("'"," ",$selectionName);
-
-            //    echo "call SP_SetResult($sportsId,$Match_id,$market_id,'$selectionId',$isFancy,$result,'$sportName','$matchName','$MarketName','$selectionName')";
 
 				$query = $this->db->query("call SP_SetResult($sportsId,$Match_id,$market_id,'$selectionId',$isFancy,$result,'$sportName','$matchName','$MarketName','$selectionName')");
 				$res = $query->result_array();
@@ -1161,7 +1167,7 @@ where a.active != 2 and fancy_mode = 'M' and MatchID = $matchId and a.result is 
 				$soccerSocketUrl = BR_LIVE_SOCCER_SOCKET_URL;
 				$tennisSocketUrl = BR_LIVE_TENNIS_SOCKET_URL;
 
-				$selectQuery = " CASE WHEN `my`.`id` is null THEN 0 else 1 END isfancy , mf.active ,mf.oddsLimit,mf.volumeLimit,mf.matchName,series.Name as series_name,mf.MstCode as matchid,mrkt.market_runner_json runner_json,mrkt.Id as marketid,mrkt.visibility,mrkt.max_bet_liability,mrkt.max_market_liability,mf.MstDate,ROUND(UNIX_TIMESTAMP(mf.MstDate)) as matchdate,DATEDIFF(DATE_ADD(mf.MstDate,INTERVAL 330 MINUTE),DATE_ADD(mf.startDate,INTERVAL 330 MINUTE))+1 as day,sm.name as sportname,(
+				$selectQuery = " CASE WHEN `my`.`id` is null THEN 0 else 1 END isfancy , mf.active ,mf.matchName,series.Name as series_name,mf.MstCode as matchid,mrkt.market_runner_json runner_json,mrkt.Id as marketid,mrkt.visibility,mrkt.max_bet_liability,mrkt.max_market_liability,mf.MstDate,ROUND(UNIX_TIMESTAMP(mf.MstDate)) as matchdate,DATEDIFF(DATE_ADD(mf.MstDate,INTERVAL 330 MINUTE),DATE_ADD(mf.startDate,INTERVAL 330 MINUTE))+1 as day,sm.name as sportname,(
 			        CASE WHEN fav_mrkt.id IS NULL
 			            THEN 'N'
 			            ELSE 'Y'
@@ -1189,6 +1195,7 @@ where a.active != 2 and fancy_mode = 'M' and MatchID = $matchId and a.result is 
 					$this->db->where('ddm.id IS NULL');
 					$this->db->where('mdm.id IS NULL');
                     $this->db->where('sm.active', 1);
+                    $this->db->where('mf.completed', 0);
 				}elseif($usetype==2){
 					$this->db->join('user_deactive_match mdm', "mf.MstCode = mdm.match_id AND mdm.user_id = $masterId", 'LEFT');
 					$this->db->where('mdm.id IS NULL');
@@ -1211,8 +1218,9 @@ where a.active != 2 and fancy_mode = 'M' and MatchID = $matchId and a.result is 
 			//	
 				
 				$query = $this->db->get();
-			//	echo $this->db->last_query();
-			//	die;
+
+				//echo $this->db->last_query();
+				//die;
 				return $query->result_array();
 
 			}
@@ -1283,14 +1291,13 @@ where a.active != 2 and fancy_mode = 'M' and MatchID = $matchId and a.result is 
 				return $query->result_array();
 			}
 
-			function mobileGetFavMrktByMatchId($matchId,$userId){
-
+			function mobileGetFavMrktByMatchId($matchId,$userId,$userType=null){
 				$baseUrl = base_url();
 				$cricketSocketUrl = BR_LIVE_CRICKET_SOCKET_URL;
 				$soccerSocketUrl = BR_LIVE_SOCCER_SOCKET_URL;
 				$tennisSocketUrl = BR_LIVE_TENNIS_SOCKET_URL; 
 
-				$selectQuery = "mrkt.Id as marketid,mrkt.isManualMatchOdds,mrkt.isBetAllowedOnManualMatchOdds,mrkt.visibility,mrkt.Name as market_name,mrkt.max_bet_liability,mrkt.max_market_liability,mf.matchName,series.Name as series_name,mf.MstCode as matchid,mrkt.market_runner_json as runner_json,mf.runner_json as match_runner_json ,mf.MstDate,ROUND(UNIX_TIMESTAMP(mf.MstDate)) as matchdate,DATEDIFF(DATE_ADD(mf.MstDate,INTERVAL 330 MINUTE),DATE_ADD(mf.startDate,INTERVAL 330 MINUTE))+1 as day,sm.name as sportname,(
+				$selectQuery = "mrkt.Id as marketid,mrkt.isManualMatchOdds,mrkt.isBetAllowedOnManualMatchOdds,mrkt.visibility,mrkt.Name as market_name,mrkt.max_bet_liability,mrkt.max_market_liability,mf.matchName,series.Name as series_name,mf.MstCode as matchid,mf.scoreboard_id as scoreboard_id,mrkt.market_runner_json as runner_json,mf.runner_json as match_runner_json ,mf.MstDate,ROUND(UNIX_TIMESTAMP(mf.MstDate)) as matchdate,DATEDIFF(DATE_ADD(mf.MstDate,INTERVAL 330 MINUTE),DATE_ADD(mf.startDate,INTERVAL 330 MINUTE))+1 as day,mrkt.IsRs,sm.name as sportname,(
 			        CASE WHEN fav_mrkt.id IS NULL
 			            THEN 'N'
 			            ELSE 'Y'
@@ -1305,12 +1312,14 @@ where a.active != 2 and fancy_mode = 'M' and MatchID = $matchId and a.result is 
 				$this->db->join('favourite_market fav_mrkt', "mrkt.Id = fav_mrkt.market_id AND fav_mrkt.user_id = $userId", 'LEFT');
 				$this->db->where('mf.MstCode', $matchId);
 				$this->db->where('mrkt.active', 1);
-			//	$this->db->where('mrkt.Name', 'Match Odds');
 				$this->db->where('mf.active', 1);
+				if($userType==3){
+                    $this->db->where('mf.completed', 0);
+                }
 				$this->db->order_by("mf.matchName asc,mf.MstDate asc");
 			//	$this->db->group_by("mrkt.matchId");
 				$query = $this->db->get();
-			//	echo $this->db->last_query();
+				//echo $this->db->last_query();die;
 			//	die;
 
 				return $query->result_array();
@@ -1435,6 +1444,9 @@ where a.active != 2 and fancy_mode = 'M' and MatchID = $matchId and a.result is 
 
 			function getUserMatchResult($useId,$usetype)//sourabh 14-dec-2016
 			{
+				
+			//	echo "call sp_getHomeUserD_matches($useId,$usetype)";
+                //$query =$this->db->query("call sp_getHomeUserPra($useId,$usetype)");
 				$query =$this->db->query("call sp_getHomeUserD_matches($useId,$usetype)");
 				$res = $query->result_array();
 				$query->next_result();
@@ -1571,4 +1583,13 @@ where a.active != 2 and fancy_mode = 'M' and MatchID = $matchId and a.result is 
 
                 return $final_data;
             }
+            
+            function updateScoreBoardId($matchId, $sb_id){
+				$data = array(
+						'scoreboard_id' => $sb_id
+				);
+				$this->db->where('MstCode', $matchId);
+				$this->db->update('matchmst', $data);
+				return true;
+			}
 }

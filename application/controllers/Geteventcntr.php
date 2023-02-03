@@ -17,16 +17,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 			$this->load->model('Modelcreatemaster');
 
-			$this->load->model('Modeltblresult');
-
 			$_POST = json_decode(file_get_contents('php://input'), true);
 		//	$node1=$this->session->userdata('user_id');
 
 			$currentMethod = $this->router->method;
 		    $allowAuth = array('getSeriesLst','getMatchLst','getMarketOfMatch','GetSportFrmDatabase','getBackLaysOfMarket','matchMarketLstPublic','getBackLaysOfMarketSelectionName');
-		    if(!in_array($currentMethod, $allowAuth)){
+		  /*  if(!in_array($currentMethod, $allowAuth)){
 					if ($this->session->userdata('user_id') != '') { } else { redirect(base_url());}
-		    } 
+		    } */
 //			if ($this->session->userdata('user_id') != '') { } else { redirect(base_url());}
 
 		}
@@ -118,12 +116,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 		}
 		function GetScoreApi($eventIds){
-
-		//	$str = file_get_contents('https://www.betfair.com/inplayservice/v1/scores?_ak=nzIFcwyWhrlwYMrh&alt=json&eventIds='.$eventIds.'&locale=en');
-
-			$url = BETFAIR_SCORE_URL . $eventIds;
-		    $str = $this->httpGet($url);
-
+//$str = file_get_contents('https://www.betfair.com/inplayservice/v1/scores?_ak=nzIFcwyWhrlwYMrh&alt=json&eventIds='.$eventIds.'&locale=en');
+$str = file_get_contents('https://ips.betfair.com/inplayservice/v1/scores?_ak=nzIFcwyWhrlwYMrh&alt=json&eventIds='.$eventIds.'&locale=en_GB&productType=EXCHANGE&regionCode=UK');
 			if(!empty(json_decode($str))){
                 echo $json =$str;
             }else{
@@ -417,7 +411,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 		function saveSportMatch(){
 
-			$response = array();
             $this->load->model('ModelUserRights');
             $userRole = $this->ModelUserRights->hasRole('ManageSeriesMatch');
             if($userRole['status']){
@@ -435,128 +428,49 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $_POST['is_manual'] = 1;
                 $_POST['isManualMatchOdds'] = 1;
 
+
                 $_POST['score_board_json'] =[["eventTypeId"=>$_POST['sportId'],"eventId"=>$_POST['matchId'],'toss'=>'','bettingTeam'=>'',"score"=>["home"=>['selection_id'=> $_POST['selectionId1'],"name"=>$_POST['runnerName1'],"halfTimeScore"=>"","fullTimeScore"=>"","penaltiesScore"=>"","penaltiesSequence"=>[],"highlight"=>false],"away"=>['selection_id'=> $_POST['selectionId2'],"name"=>$_POST['runnerName2'],"halfTimeScore"=>"","fullTimeScore"=>"","penaltiesScore"=>"","penaltiesSequence"=>[],"highlight"=>true,"inning1"=>["runs"=>"0","wickets"=>"0","overs"=>"0"]]],"description"=>"3rd Test","currentSet"=>1,"stateOfBall"=>["overNumber"=>"0","overBallNumber"=>"0","bowlerName"=>"Shaheen Afridi","batsmanName"=>"Jeet Raval","batsmanRuns"=>"0","appealId"=>"0","appealTypeName"=>"Not Out","wide"=>"0","bye"=>"0","legBye"=>"0","noBall"=>"0","outcomeId"=>"0","dismissalTypeName"=>"Not Out","referralOutcome"=>"0"],"currentDay"=>"1","matchType"=>"TEST","fullTimeElapsed"=>["hour"=>0,"min"=>0,"sec"=>0],"matchStatus"=>"InPlay"]];
 
-                	$defaultRunners = array();
 
-					if(!empty($_POST['selectionId1'])){
-						$temp = array();
-						$temp['selectionId'] = (int)$_POST['selectionId1'];
-						$temp['handicap'] = 0;
-						$temp['status'] = "ACTIVE";
-						$temp['lastPriceTraded'] = 0;
-						$temp['totalMatched'] = 0;
-						$temp['ex']['availableToBack'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-						$temp['ex']['availableToLay'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-						$temp['ex']['tradedVolume'] = [];
-						$temp['name'] = $_POST['runnerName1'];
-						$defaultRunners[] = $temp;
-					}elseif(!empty($_POST['selectionId2'])){	
-						$temp = array();					
-						$temp['selectionId'] = (int)$_POST['selectionId2'];
-						$temp['handicap'] = 0;
-						$temp['status'] = "ACTIVE";
-						$temp['lastPriceTraded'] = 0;
-						$temp['totalMatched'] = 0;
-						$temp['ex']['availableToBack'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-						$temp['ex']['availableToLay'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-						$temp['ex']['tradedVolume'] = [];
-						$temp['name'] = $_POST['runnerName2'];
-						$defaultRunners[] = $temp;
-					}elseif(!empty($_POST['selectionId3'])){		
-						$temp = array();										
-						$temp['selectionId'] = (int)$_POST['selectionId3'];
-						$temp['handicap'] = 0;
-						$temp['status'] = "ACTIVE";
-						$temp['lastPriceTraded'] = 0;
-						$temp['totalMatched'] = 0;
-						$temp['ex']['availableToBack'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-						$temp['ex']['availableToLay'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-						$temp['ex']['tradedVolume'] = [];
-						$temp['name'] = $_POST['runnerName3'];
-						$defaultRunners[] = $temp;
-					}
-
-					$_POST['market_runner_json'] = json_encode($defaultRunners);
-          
             }else{
                 $_POST['score_board_json']=[];
                 $_POST['isManualMatchOdds'] = 0;
                 $_POST['is_manual'] = 0;
-                $marketUrl = BETFAIR_MARKET_URL.$_POST['matchId'];
-				$marketJson = $this->httpGet($marketUrl);
-				$marketArr = json_decode($marketJson,true);
+            }
+            //echo "<pre>";print_r($_POST);die;
 
-				   //echo "<pre>";print_r($_POST);die;
-            
-				if(!empty($marketArr[0])){
-					$_POST['marketId'] = $marketArr[0]['marketId']; 
-					$_POST['marketName'] = $marketArr[0]['marketName'];
-					$i = 1;
-					$runnerNames = array();
-					foreach($marketArr[0]['runners'] as $runners){
-						$runnerNames[$runners['selectionId']] = $runners['runnerName'];
-						$keyRunnerName = 'runnerName'.$i;
-						$keySelectionId = 'selectionId'.$i;
-						$_POST[$keyRunnerName] = $runners['runnerName']; 
-						$_POST[$keySelectionId] = $runners['selectionId'];
-						$i++;
-					}
+			$condition=$this->Modeleventlst->saveSportMatch($_POST);
 
-					/*	$marketOddsUrl = BETFAIR_ODDS_URL.$_POST['marketId'];
-						$marketOddsJson = $this->httpGet($marketOddsUrl);
-						$marketOddArr = json_decode($marketOddsJson,true);
+			if($condition){
 
-					//	print_r($marketOddArr[0]['runners']);
+				//  Note : Need to disalbe this as we are saveing runners in market table
+			/*	$matchId = $_POST['matchId'];
+				$this->updateMatchRunners($matchId); */
 
-						if(!empty($marketOddArr[0]['runners'])){
-							foreach($marketOddArr[0]['runners'] as $mArr){
+				 $marketid = $_POST['marketId'];
+                if(isset($_POST['is_manual'])){
+                    $this->load->model('Modelmarket');
+                    $this->Modelmarket->updateDefaultRunnerMarket($marketId);
+                }else{
+                    if(empty($_POST['market_runner_json'])){
+                        $this->updateMarketRunners($marketid);
+                    }
 
-								$temp = $mArr;
-								$temp['name'] = $runnerNames[$mArr['selectionId']];
-								$defaultRunners[] = $temp;
-							} 
-							$defaultRunnersJson = json_encode($defaultRunners);
-							$_POST['market_runner_json'] = $defaultRunnersJson;
-						}else{  */
+                }
 
-							$defaultRunners = array();
-							foreach($marketArr[0]['runners'] as $mArr){
-								$temp = array();
-								$temp['selectionId'] = (int)$mArr['selectionId'];
-								$temp['handicap'] = 0;
-								$temp['status'] = "ACTIVE";
-								$temp['lastPriceTraded'] = 0;
-								$temp['totalMatched'] = 0;
-								$temp['ex']['availableToBack'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-								$temp['ex']['availableToLay'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-								$temp['ex']['tradedVolume'] = [];
-								$temp['name'] = $mArr['runnerName'];
-								$defaultRunners[] = $temp;
-							} 
-							$defaultRunnersJson = json_encode($defaultRunners);
-							$_POST['market_runner_json'] = $defaultRunnersJson;
-					//	}
+			}
 
+			$this->output->set_content_type('application/json')->set_output(json_encode($condition));
 
-							$condition=$this->Modeleventlst->saveSportMatch($_POST);
-						
-							$marketid = $_POST['marketId'];
-				            if(isset($_POST['is_manual']) && $condition['error']==0){
-				                $this->load->model('Modelmarket');
-				                $this->Modelmarket->updateDefaultRunnerMarket($marketId);
-				            }
+			/*	if ($condition==0) {
 
-							$this->output->set_content_type('application/json')->set_output(json_encode($condition));
+					echo json_encode(array('error' => 0 ,'message' => 'Record Added Successfully...'));
 
 				}else{
-					$response["code"] = 1;
-					$response["error"] = true;
-	        		$response["message"] = 'Match Odds market not found';
-	        		$this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
-			
-				}
-            }
+
+				echo json_encode(array('error' => 1 ,'message' => 'Record Deactive Successfully...'));
+
+			 	}	*/		 
 
 		}
 
@@ -682,6 +596,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			$this->output->set_content_type('application/json')->set_output(json_encode($data));
 
 		}
+		
+		function updateScoreBoardId($matchId, $scoreboard_id){
+			$data = array();
+			if(strtolower($scoreboard_id)!="undefined"){
+				$this->Modeleventlst->updateScoreBoardId($matchId, $scoreboard_id);
+				$data = array('status'=>'success', 'message'=>'Scoreboard updated successfully!', 'scoreboard_id'=>$scoreboard_id);	
+			}
+			else{
+				$data = array('status'=>'error', 'message'=>'Invalid scoreboard!');
+			}
+			$this->output->set_content_type('application/json')->set_output(json_encode($data));	
+		}
 
         function getMatchLstForMatchSetting($sportId,$seriesId=0,$fromDate=0,$toDate=0){
 
@@ -731,7 +657,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		function getSeriesLst($matchId)//sourabh 9-dec-2016
 		{
 
-		//	$onlineSeries = $this->getAllSeries();
+			$onlineSeries = $this->getAllSeries();
 
 			$seriesLst = $this->Modeleventlst->getSeriesLst($matchId);
 
@@ -739,11 +665,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			foreach($seriesLst as $sLst){
 				$temp = $sLst;
 				$seriesId = $sLst['seriesId'];
-			//	if(in_array($seriesId, $onlineSeries)){
+				if(in_array($seriesId, $onlineSeries)){
 					$temp['is_online'] = 'Y';
-			/*	}else{
+				}else{
 					$temp['is_online'] = 'N';
-				} */
+				}
 				$resultSeries[] = $temp;
 			} 
 
@@ -839,18 +765,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
            $matches =  $this->Modeleventlst->getMatchLstBySportId($sportId,$userId);
            if(!empty($matches)){
                $marketIds =implode(',',array_column($matches, 'marketid'));
-               $matchStatus = $this->httpGet(BETFAIR_ODDS_URL.$marketIds);
+               $matchStatus = $this->httpGet(EXCH_ODDS_BY_MARKETS_URL.'?market_id='.$marketIds);
            }
             if(!empty($matchStatus)){
                 $matchStatusArray = json_decode($matchStatus,true);
-
-           //     print_r($matches);
-            //    print_r($matchStatusArray);die;
                 //echo count($matchStatusArray);die;
                 foreach ($matchStatusArray as $matchRec){
-                    if(!empty($matchRec['inPlay']) && $matchRec['status']=='OPEN'){
+                    if($matchRec['inPlay']==1 && $matchRec['status']=='OPEN'){
 
-                        $inpalyArray[]= $matches[array_search($matchRec['marketId'],array_column($matches,'marketid'))];
+                        $inpalyArray[]= $matches[array_search($matchRec['id'],array_column($matches,'marketid'))];
                     }
 
                 }
@@ -899,39 +822,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			else{
 				
 				$matchApi = $this->getAllUkHorseRacingEvents($this->APP_KEY, $sessionToken, $sportId,$seriesId);//sourabh 170105
-
-				$matchApiFormat = array();
-				foreach($matchApi as $mapi){
-					$temp = array(
-					  "MstCode"=> $mapi['event']['id'],
-				      "MstDate"=> $mapi['event']['openDate'],
-				      "startDate"=> "0000-00-00 00:00:00",
-				      "SportID"=> $sportId,
-				      "active"=> "0",
-				      "matchName"=> $mapi['event']['name'],
-				      "countryCode"=> "",
-				      "marketCount"=> "0",
-				      "createdOn"=> "0000-00-00 00:00:00",
-				      "seriesId"=> $seriesId,
-				      "oddsLimit"=> "0",
-				      "volumeLimit"=> "1.00",
-				      "HelperID"=> "0",
-				      "runner_json"=> "",
-				      "score_board_json"=> "[]",
-				      "bet_deleted"=> "0",
-				      "hard_bet_deleted"=> "0",
-				      "is_manual"=> "0",
-				      "eventName"=> $mapi['event']['name'],
-						"eventId"=> $mapi['event']['id'],
-						"eventDate"=> $mapi['event']['openDate'],
-						"EventTypeId"=> $sportId
-					);
-					$matchApiFormat[] = $temp;
-				} 
-
-
+				
+				
                 $matchManual = $this->Modeleventlst->GetManualMatchFrmDatabase($sportId,$seriesId);
-                $data['matchfrmApi'] = array_merge($matchApiFormat, $matchManual);
+                $data['matchfrmApi'] = array_merge($matchApi, $matchManual);
 			
 			}
 			
@@ -1000,14 +894,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         
 
 		}
-		
 
-		function getMatchBetfairSession($marketId){
-			$url = BETFAIR_FANCY_URL . $marketId;
-		    $matchResult = $this->httpGet($url);
-		    $jsonResponse = json_decode($matchResult,true);
-		    $this->output->set_content_type('application/json')->set_output(json_encode($jsonResponse['session']));
-		}
+        
 
 		function getAllUkHorseRacingEvents($appKey, $sessionToken, $horseRacingEventTypeId,$seriesId){
 
@@ -1016,7 +904,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		    $jsonResponse = $this->sportsApingRequest($appKey, $sessionToken, 'listEvents', $params); */
 
 		//	$url = BR_LIVE_MATCHES_URL."eventType=$horseRacingEventTypeId&seriesId=$seriesId";
-			$url = BETFAIR_MATCH_URL . $horseRacingEventTypeId . '&CompetitionID=' . $seriesId;
+			//$url = BR_SUPER_AMDIN_URL."getMatches/$seriesId";
+			$url =BR_SUPER_AMDIN_URL.$seriesId;
 		    $matchResult = $this->httpGet($url);
 		    $jsonResponse = json_decode($matchResult,true);
 
@@ -1417,7 +1306,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 		}
 
-	
 
 		function SetResult(){
             try {
@@ -1432,7 +1320,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			$selectionId=$_POST['selectionId'];
 
 
-        /*    if(!empty($_POST['market_id'])){
+            if(!empty($_POST['market_id'])){
                 try {
                     $redis = new Redis();
                     $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
@@ -1444,24 +1332,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                 }
 
-            } */
+            }
             $matchId = $_POST['Match_id'];
             $marketId = $_POST['market_id'];
-            $sportId = $_POST['Sport_id'];
-            
 
             if($selectionId==0){
 
                 $uIds = $this->Modeltblbets->getMatchUser($matchId,$marketId);
 
-                $validate = $this->Modeltblresult->validateDeclareResult($sportId,$matchId,$marketId);
+				$condition=$this->Modeleventlst->SetAbandonedResult();
 
-				if($validate['error']==1){
-					$data['status']=array('error' => 1 ,'message' => 'Already Saved ...');
-				}else{
-					$condition=$this->Modeleventlst->SetAbandonedResult();
-					$data['status']=array('error' => 0 ,'message' => 'Saved Successfully ...');
-				}  
+
+
+				$data['status']=array('error' => 0 ,'message' => 'Saved Successfully ...');
+
 
 				$data['MatchOddsResult'] = $this->Modeleventlst->GetMatchOddsResult();
 
@@ -1491,10 +1375,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					$data['MatchOddsResult'] = $this->Modeleventlst->GetMatchOddsResult();
 
                     /* update user balance and liablity */
-                /*    $uIds = $this->Modeltblbets->getMatchUser($matchId,$marketId);
+                    $uIds = $this->Modeltblbets->getMatchUser($matchId,$marketId);
                     foreach($uIds as $uid){
                         $this->Modelcreatemaster->updateUserBalLiablity($uid);
-                    } */
+                    }
 
 					$this->output->set_content_type('application/json')->set_output(json_encode($data));	
 
@@ -1523,6 +1407,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             if($userRole['status']){
                 return $this->output->set_content_type('application/json')->set_output( json_encode(array('error' => 1 ,'message' => $userRole['message'])));
             }
+			 
 			$data['MatchOddsResult'] = $this->Modeleventlst->GetMatchOddsResult();
 
 			$this->output->set_content_type('application/json')->set_output(json_encode($data));	
@@ -1541,7 +1426,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }elseif($matchData['bet_deleted']==1){
                 $data['status']=array('error' => true ,'message' =>"First Of All Undo Bets And Than Roll Back");
             }else{
-
+                $fancyId = $selectionId;
                 if($selectionId==0 && $isFancy==0){                	
 
                     $this->Modeleventlst->DeleteAbandonedMatchResult($resId,$sportId,$matchId,$marketId,$selectionId,$isFancy);
@@ -1559,7 +1444,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                 		$this->Modeleventlst->DeleteAbandonedMatchResult($resId,$sportId,$matchId,$marketId,$selectionId,$isFancy);
                 		
-                		$fancyId = $selectionId;
+
 	                    $this->Modeltblbets->updateUserBalByMatchFancy($matchId,$fancyId);
 	                    $query1 = $this->db->query("call p_l_by_match($matchId)");
 
@@ -1581,6 +1466,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	                    }
 	                    $data['status']=array('error' => $condition[0]['iReturn'] ,'message' => $condition[0]['sMsg']);
                 	}
+                }
+
+                try {
+                    $redis = new Redis();
+                    $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                    $this->load->model('Modelmatchfancy');
+                    $result = $this->Modelmatchfancy->selectFancyById($fancyId);
+                    $redis->set($this->db->database.'ind_' . $matchId . '_' . $fancyId, json_encode($result));
+                    $redis->close();
+                } catch (Exception $e) {
                 }
             }
 
@@ -1632,32 +1527,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				$json = $this->httpGet($url);
 				$data['seriesfrmApi'] = json_decode($json,true); */
 				$dataApi = $this->getSeries($this->APP_KEY, $sessionToken, $sportId);
-
-				$dataApiFormat = array();
-
-				foreach($dataApi as $api){
-					$temp = array(
-					 "seriesId"=> $api['competition']['id'],
-				      "SportID"=> $sportId,
-				      "Name"=> $api['competition']['name'],
-				      "createdOn"=> "0000-00-00 00:00:00",
-				      "active"=> "0",
-				      "region"=> "",
-				      "mCount"=> "0",
-				      "HelperID"=> "0",
-				      "match_json_updated_on"=> null,
-				      "match_json"=> null,
-				      "is_manual"=> "0",
-				      "SeriesName"=> $api['competition']['name']
-				  );
-
-				  $dataApiFormat[] = $temp;
-
-				}
-
                 $dataManual = $this->Modeleventlst->GetManualSeriesFrmDatabase();
 
-                $data['seriesfrmApi']=array_merge($dataApiFormat,$dataManual);
+                $data['seriesfrmApi']=array_merge($dataApi,$dataManual);
 			}	
 			$data['seriesfrmDataBase'] = $this->Modeleventlst->GetSeriesFrmDatabase();
 
@@ -1686,18 +1558,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		//	echo '<pre>';
 			$result = array();
 			$cricket = 4;
-			$url = BR_SUPER_AMDIN_URL.'getSeries/'.$cricket;
+			//$url = BR_SUPER_AMDIN_URL.'getSeries/'.$cricket;
+			$url=BR_SERIES_SPORTS_URL.$cricket;
 			$sportResult = $this->httpGet($url);
 			$result = json_decode($sportResult,true);		
 
 			$tennis = 2;
-			$url = BR_SUPER_AMDIN_URL.'getSeries/'.$tennis;
+			//$url = BR_SUPER_AMDIN_URL.'getSeries/'.$tennis;
+			$url=BR_SERIES_SPORTS_URL.$tennis;
 			$sportResult = $this->httpGet($url);
 			$tennisResult = json_decode($sportResult,true);		
 			$result = array_merge($result,$tennisResult);
 
 			$soccer = 1;
-			$url = BR_SUPER_AMDIN_URL.'getSeries/'.$soccer;
+			//$url = BR_SUPER_AMDIN_URL.'getSeries/'.$soccer;
+			$url=BR_SERIES_SPORTS_URL.$soccer;
 			$sportResult = $this->httpGet($url);
 			$soccerResult = json_decode($sportResult,true);	
 			$result = array_merge($result,$soccerResult);
@@ -1725,7 +1600,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			$this->load->model('Modelsportmst');
 
 		    if($horseRacingEventTypeId == 1){
-		    		$url = BETFAIR_SERIES_URL.$horseRacingEventTypeId;
+		    		//$url = BR_SUPER_AMDIN_URL.'getSeries/'.$horseRacingEventTypeId;
+					$url=BR_SERIES_SPORTS_URL.$horseRacingEventTypeId;
 					$sportResult = $this->httpGet($url);
 					$jsonResponse = json_decode($sportResult,true);		
 
@@ -1747,7 +1623,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				    } */
 			    
 		    }elseif ($horseRacingEventTypeId == 2) {
-		    		$url = BETFAIR_SERIES_URL.$horseRacingEventTypeId;
+		    		//$url = BR_SUPER_AMDIN_URL.'getSeries/'.$horseRacingEventTypeId;
+					$url=BR_SERIES_SPORTS_URL.$horseRacingEventTypeId;
 					$sportResult = $this->httpGet($url);
 					$jsonResponse = json_decode($sportResult,true);		
 
@@ -1770,9 +1647,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 						
 				    } */
 			}elseif ($horseRacingEventTypeId == 4) {
-					$url = BETFAIR_SERIES_URL.$horseRacingEventTypeId;
+					//$url = BR_SUPER_AMDIN_URL.'getSeries/'.$horseRacingEventTypeId;
 					
+ 
+						
+					$url=BR_SERIES_SPORTS_URL.$horseRacingEventTypeId;
 					$sportResult = $this->httpGet($url);
+					
+				 
+					
 					$jsonResponse = json_decode($sportResult,true);		
 
 				/*	$checkSports = $this->Modelsportmst->findBySports($horseRacingEventTypeId);

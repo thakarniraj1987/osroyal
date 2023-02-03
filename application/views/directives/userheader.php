@@ -109,6 +109,8 @@ margin-left:-5px;
             <a class="dropdown-item" href="#" ui-sref="userDashboard.OnePageRprt({typeId:3})">Account Statement</a>
             <a class="dropdown-item" href="#"  ui-sref="userDashboard.Chiphistorycntr">Transfer Statement</a>
             <a class="dropdown-item " href="#" ui-sref="userDashboard.changePasswordUser">Change Password</a>
+              <a class="dropdown-item " ng-if="apkDownloadUrl=='Y'" href="/UtilityController/downloadApk">Download Apk</a>
+
           </div>
         </li>
          <li class="nav-item  ">
@@ -147,6 +149,9 @@ margin-left:-5px;
           <marquee hspace="0" scrollamount="5" BEHAVIOR="SCROLL" style="font-size:14px;color:#000;" onmouseover="this.stop();" onmouseout="this.start();">{{diplayMsg}}</marquee>
         </div>
       </div>
+	  
+	  
+ 
 <aside class="main-sidebar" style="top:95px">
     <section class="sidebar" style="height: auto;">
       <usersidebar></usersidebar>

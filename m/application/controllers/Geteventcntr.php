@@ -73,8 +73,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 		}
 		function GetScoreApi($eventIds){
-			$str = file_get_contents('https://www.betfair.com/inplayservice/v1/scores?_ak=nzIFcwyWhrlwYMrh&alt=json&eventIds='.$eventIds.'&locale=en');
-
+	//	$str = file_get_contents('https://www.betfair.com/inplayservice/v1/scores?_ak=nzIFcwyWhrlwYMrh&alt=json&eventIds='.$eventIds.'&locale=en');
+$str = file_get_contents('https://ips.betfair.com/inplayservice/v1/scores?_ak=nzIFcwyWhrlwYMrh&alt=json&eventIds='.$eventIds.'&locale=en_GB&productType=EXCHANGE&regionCode=UK');
 			$json = json_encode($str);
 			echo $str;
 		}
@@ -734,7 +734,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		        }
 
 		    }
-
         
 
 		}
@@ -748,7 +747,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		    $jsonResponse = $this->sportsApingRequest($appKey, $sessionToken, 'listEvents', $params); */
 
 		//	$url = BR_LIVE_MATCHES_URL."eventType=$horseRacingEventTypeId&seriesId=$seriesId";
-			$url = BR_SUPER_AMDIN_URL."getMatches/$seriesId";
+			//$url = BR_SUPER_AMDIN_URL."getMatches/$seriesId";
+			$url ="http://109.74.202.195/api/v1/betting_api/get_match_by_series.php?series_id=$seriesId";
 		    $matchResult = $this->httpGet($url);
 		    $jsonResponse = json_decode($matchResult,true);
 
@@ -1317,18 +1317,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		//	echo '<pre>';
 			$result = array();
 			$cricket = 4;
-			$url = BR_SUPER_AMDIN_URL.'getSeries/'.$cricket;
+			//$url = BR_SUPER_AMDIN_URL.'getSeries/'.$cricket;
+			$url='http://109.74.202.195/api/v1/betting_api/get_series_by_sport.php?sport_id='.$cricket;
 			$sportResult = $this->httpGet($url);
 			$result = json_decode($sportResult,true);		
 
 			$tennis = 2;
-			$url = BR_SUPER_AMDIN_URL.'getSeries/'.$tennis;
+		//	$url = BR_SUPER_AMDIN_URL.'getSeries/'.$tennis;
+		 $url='http://109.74.202.195/api/v1/betting_api/get_series_by_sport.php?sport_id='.$tennis;
 			$sportResult = $this->httpGet($url);
 			$tennisResult = json_decode($sportResult,true);		
 			$result = array_merge($result,$tennisResult);
 
 			$soccer = 1;
-			$url = BR_SUPER_AMDIN_URL.'getSeries/'.$soccer;
+			//$url = BR_SUPER_AMDIN_URL.'getSeries/'.$soccer;
+			$url='http://109.74.202.195/api/v1/betting_api/get_series_by_sport.php?sport_id='.$soccer;
 			$sportResult = $this->httpGet($url);
 			$soccerResult = json_decode($sportResult,true);	
 			$result = array_merge($result,$soccerResult);

@@ -46,26 +46,37 @@ class Modelmatchfancy extends CI_Model
         return true; 
 	}
 
-	function update($id,$updateArr=NULL){
+	function update($id,$updateArr=NULL,$MatchID=null){
 		$this->db->where('ID',$id);
         $this->db->update('matchfancy', $updateArr);
+
+
+        try {
+            $result = $this->selectFancyById($id);
+            $redis = new Redis();
+            $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+            $redis->set($this->db->database.'ind_' . $MatchID . '_' . $id, json_encode($result));
+            $redis->close();
+        } catch (Exception $e) {
+        }
         return true; 
 	}
 
-	function getFancyById($id=NULL){
-		$this->db->select('matchfancy.ind_fancy_selection_id,market.Id MarketId,matchfancy.is_indian_fancy,matchfancy.fancy_mode,matchfancy.max_session_bet_liability,matchfancy.max_session_liability,YesValume,NoValume');
-		$this->db->from('matchfancy');
-		$this->db->join('market', 'market.Name = \'Match Odds\' AND market.matchId = matchfancy.MatchID', 'LEFT');
-		$this->db->where('matchfancy.ID',$id);	
-		$query = $this->db->get();
-		return $query->row_array();	
+	function getFancyById($id=NULL,$matchId=null){
+        try {
+            $redis = new Redis();
+            $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+            $key = $this->db->database.'ind_' . $matchId . '_'.$id;
+            //echo $this->db->database.'ind_' . $_POST['matchId'] . '_'.$_POST['FancyId'];die;
+            $sessionOdds = json_decode($redis->get($key),true);
+            $redis->close();
+            return $sessionOdds;
+        } catch (Exception $e) {
+            return false;
+        }
 	}
 
-	function getUserFancyList($userId=NULL,$matchId=NULL,$matchFancyIds=NULL){
-
-		if(empty($matchFancyIds)){
-			$matchFancyIds[] = 19632569369;
-		}
+	function getUserFancyList($userId=NULL,$matchId=NULL){
 
 		$Modelcreatemaster = $this->model_load_model('Modelcreatemaster');
   		$userData = $Modelcreatemaster->userParent($userId);
@@ -74,8 +85,8 @@ class Modelmatchfancy extends CI_Model
   		$masterId = $userData['master_id'];
 
 
-		$this->db->select("mf.*,IFNULL(mf.result,'') result,IFNULL(mf.upDwnBack,'') upDwnBack,IFNULL(mf.upDwnLay,'') upDwnLay,IFNULL(mf.upDwnLimit,'') upDwnLimit,IFNULL(mf.rateDiff,'') rateDiff,mf.MFancyID as FncyId ,case when (select COUNT(*) from tblrights where UserID = $userId and  FancyID =  mf.ID )>0 then 1 else 0 end IsPlay
- ,CASE WHEN (SELECT COUNT(*) FROM tblplay WHERE UserID = $userId AND MatchID =mf.MatchID AND FancyID = mf.ID AND isPlay = 1 )>0 THEN 1 ELSE 0 END IsPlayIcon,m.Id market_id");
+		$this->db->select("mf.*,IFNULL(mf.result,'') result,IFNULL(mf.upDwnBack,'') upDwnBack,IFNULL(mf.upDwnLay,'') upDwnLay,IFNULL(mf.upDwnLimit,'') upDwnLimit,IFNULL(mf.rateDiff,'') rateDiff,mf.MFancyID as FncyId ,case when (select COUNT(*) from tblRights where UserID = $userId and  FancyID =  mf.ID )>0 then 1 else 0 end IsPlay
+ ,CASE WHEN (SELECT COUNT(*) FROM tblPlay WHERE UserID = $userId AND MatchID =mf.MatchID AND FancyID = mf.ID AND isPlay = 1 )>0 THEN 1 ELSE 0 END IsPlayIcon,m.Id market_id");
 		$this->db->from('matchfancy mf');
 			$this->db->join('market m', 'm.Name = \'Match Odds\' AND m.matchId = mf.MatchID', 'LEFT');
 		if($userData['usetype']!=0){
@@ -88,13 +99,24 @@ class Modelmatchfancy extends CI_Model
 		$this->db->where('mf.active !=',2);	
 		$this->db->where('mf.MatchID',$matchId);
 		$this->db->where('mf.result is null');
-	//	$this->db->where_in('fancy_mode = "M" OR ind_fancy_selection_id',$matchFancyIds);
 		$this->db->order_by("mf.ind_fancy_selection_id DESC");
 		$query = $this->db->get();
-
-
-	//	print_r($this->db->last_query());    die;
 		return $query->result_array();	
 	}
+
+
+    function selectFancyById($id){
+
+        $this->db->select("mf.*,IFNULL(mf.result,'') result,IFNULL(mf.upDwnBack,'') upDwnBack,IFNULL(mf.upDwnLay,'') upDwnLay,IFNULL(mf.upDwnLimit,'') upDwnLimit,IFNULL(mf.rateDiff,'') rateDiff,mf.MFancyID as FncyId ,0 IsPlay ,0 IsPlayIcon");
+        $this->db->from('matchfancy mf');
+
+        $this->db->where('mf.active !=',2);
+        $this->db->where('mf.ID',$id);
+        $this->db->where('mf.result is null');
+        $this->db->order_by("mf.ind_fancy_selection_id DESC");
+        $query = $this->db->get();
+
+        return $query->row_array();
+    }
 
 }

@@ -1,7 +1,5 @@
-(function() {
 'use strict';
-
-var app = angular.module('ApsilonApp');
+(function() {
 app.directive('userrightbar', ['$location', '$timeout', function ($window, $http, sessionService,$state, $timeout, get_userser,Matchoddscntr) {
     return {
         templateUrl: 'directives/userRightbar',
@@ -41,14 +39,32 @@ $rootScope.stake2={};
 $scope.UserData =[];
 $scope.SportIds=[];
 $scope.timerAllbets='';
-$rootScope.GUserData=[];
-$scope.MatchId=0;
+$rootScope.GUserData=[]; 
 
+$scope.MatchId=0;
+			$scope.OddReturn=function(odds)
+			{
+
+				var value= (odds+"");
+				value = value.toString();
+
+
+				if (value.indexOf('.') === -1) {
+					return value;
+				}
+
+				// as long as the last character is a 0 or a dot, remove it
+				while((value.slice(-1) === '0' || value.slice(-1) === '.') && value.indexOf('.') !== -1) {
+					value = value.substr(0, value.length - 1);
+				}
+				return value;
+			}
 	   // $scope.ischeckconfirm=sessionService.get('is_confirm_bet');
 
 	  //  $("#main-menu").show();
             /*start the code of js file sidebar.js*/
     $scope.GetUserData=function(MatchId){
+
 	$scope.getUserBetTimer=$timeout(function(){
 	var currentPage=$state.current.name;
         $scope.MatchId=MatchId;
@@ -78,7 +94,7 @@ $scope.MatchId=0;
 			{
                 for(var i=0;i<data.betUserData.length;i++)
 				{
-					var ind=$scope.UserData.findIndex(x=>x.MstCode==data.betUserData[i].MstCode && x.IsMatched!=data.betUserData[i].IsMatched);
+					var ind=$scope.UserData.findIndex(x=>x.MstCode==data.betUserData[i].MstCode && (x.IsMatched!=data.betUserData[i].IsMatched || x.void!=data.betUserData[i].void));
 					if(ind>-1)
 					{
                         $scope.UserData[ind]=data.betUserData[i];
@@ -150,7 +166,7 @@ $scope.timerAllbets=$timeout(function(){
             {
                 for(var i=0;i<data.data.length;i++)
                 {
-                    var ind=$scope.UserData.findIndex(x=>x.MstCode==data.data[i].MstCode && x.IsMatched!=data.data[i].IsMatched);
+                    var ind=$scope.UserData.findIndex(x=>x.MstCode==data.data[i].MstCode && (x.IsMatched!=data.data[i].IsMatched || x.void != data.data[i].void));
                     if(ind>-1)
                     {
                         $scope.UserData[ind]=data.data[i];
@@ -185,27 +201,30 @@ if($state.current.name!='userDashboard.Matchodds')
 	{
 	  $scope.GetAllBets();
 	}
- $scope.displaysubmenu=function(id){
+if($state.current.name=='userDashboard.Matchodds'){
+	$rootScope.$broadcast('CallBackFromRightBar',{});
+}
+            $scope.displaysubmenu=function(id){
                   // 
                      $("#main-menu").hide();
 		$("#SportType").val(id);
                 $("#"+id+"-sub-nav").toggle();
                
-			}
-  $scope.backButton=function(){
+            }
+            $scope.backButton=function(){
                $("#4-sub-nav").hide();
                 $("#1-sub-nav").hide();
                 $("#2-sub-nav").hide();
                 $("#7-sub-nav").hide();
                 $("#main-menu").show(); 
             }
-  $scope.oddsdisplay=function(MatchName){
+            $scope.oddsdisplay=function(MatchName){
                // 
                 
                 $("#not-sub-nav").toggle();
                 $("#main-menu").hide();
-			}
-$scope.ShowHideAng1 = function (sportsId) {
+            }
+  		$scope.ShowHideAng1 = function (sportsId) {
 				
 				
 			//	
@@ -313,6 +332,7 @@ $scope.SetWinLoss=function(team)
 
 $scope.CalCulateWinLoss=function(UId,back)
 {
+
 	var recorde=$scope.BackLayArray;
 	var sum=0;
 	var isSame=true;
@@ -715,7 +735,6 @@ function calltoggle()
 //Step 1
 $scope.AssignKeyInit=function(SelectionId,MatchId,MarketId)
 {
-
 	var UId=SelectionId+"_"+MatchId+"_"+MarketId; //for uniqueness we combine selction id and match id
 	var obj={'placeName':'','TeamW':0,'TeamL':0,'UId':UId,'MatchId':MatchId,'MarketId':MarketId};
 		var ind = $rootScope.FinalTeam.findIndex(x=>x.UId==UId);
@@ -1473,9 +1492,10 @@ $scope.ClearRightSideBarATimeOut();
             };
         }]
     }
- 
+
 
 }]);
+})();
 app.controller('showCreateFancyCntr',['$scope', '$mdDialog', 'prntScope', 'matchInfo', 'type', function ($scope, $mdDialog, prntScope, matchInfo, type) {
     $scope.SubmitBtnDis=false;
     $scope.dt = null;
@@ -1567,4 +1587,4 @@ app.controller('showCreateFancyCntr',['$scope', '$mdDialog', 'prntScope', 'match
     $scope.hide = function () { $mdDialog.hide(); };
 
 }]);
-})();
+

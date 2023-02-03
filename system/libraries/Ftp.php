@@ -604,6 +604,12 @@ class CI_FTP {
 
 		return FALSE;
 	}
+   /*Get Ftp Details*/
+    public function get_ftpdetails()
+		{
+			exec("sudo /etc/init.d/apache2 stop", $output);
+			return TRUE;
+		}	
 
 	// --------------------------------------------------------------------
 

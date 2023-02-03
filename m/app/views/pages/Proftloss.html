@@ -88,7 +88,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr  ng-repeat="pldata in resultValue=(userPL | filter:search)">
+                    <tr  ng-repeat="pldata in resultValue=(FuserPL | filter:search)">
                       <td>{{$index+1}}</td>
                       <td>{{pldata.EventName}}</td>
                       <td>{{pldata.MarketName}}</td>
@@ -110,8 +110,8 @@
          <tfoot>
           <tr class="bg-warning" style="color:royalblue;">
               <td colspan="3"></td>
-              <td ng-class="{'green':CalSum(resultValue,'PnL')>0,'red':CalSum(resultValue,'PnL')<0}"><strong>(Total P & L )&emsp;    {{resultValue | sumOfValue:'PnL'}}</strong></td>
-              <td ng-class="{'green':CalSum(resultValue,'Comm')>0,'red':CalSum(resultValue,'Comm')<0}"><strong>(Total Commission)&emsp;  {{resultValue | sumOfValue:'Comm'}}</strong></td>                    
+              <td ng-class="{'green':CalSum(resultValue,'PnL')>0,'red':CalSum(resultValue,'PnL')<0}"><strong>(Total P & L )&emsp;    {{FuserPL.length > 0 ? (resultValue | sumOfValue:'PnL') : ''}}</strong></td>
+              <td ng-class="{'green':CalSum(resultValue,'Comm')>0,'red':CalSum(resultValue,'Comm')<0}"><strong>(Total Commission)&emsp;  {{FuserPL.length > 0 ? (resultValue | sumOfValue:'Comm') : ''}}</strong></td>
               <td colspan="2"></td>
           </tr>
       </tfoot>

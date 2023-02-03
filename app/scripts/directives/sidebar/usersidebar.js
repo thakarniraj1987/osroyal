@@ -1,6 +1,5 @@
 'use strict';
 (function() {
-var app = angular.module('ApsilonApp');
 app.directive('usersidebar', ['$location', '$timeout', function ($window, $http, sessionService, $timeout, get_userser,Matchoddscntr) {
     return {
         templateUrl: 'directives/userSidebar',
@@ -96,44 +95,7 @@ app.directive('usersidebar', ['$location', '$timeout', function ($window, $http,
 		$("#"+id+"-sub-nav").show();
 		
             });
-            /*end of sidebar.js*/
-           /* $scope.refresh_tree = function () {
-                $http.get('Lstsavemstrcontroller/lstSaveMaster/' + sessionService.get('user_id') + '/' + sessionService.get('type') + '/' + sessionService.get('HelperID') + '/' + sessionService.get('Helperype')).success(function (data, status, headers, config) {
-                    $scope.treeNodes = data.tree;
-                });
-            }*/
-            /*$(".myMenu1").click(function () { $(".dropdown123").show(); });
-            $(document).click(function (e) {
-                if (!$(e.target).hasClass("myMenu1") && $(e.target).parents(".dropdown").length === 0) { $(".dropdown123").hide(); }
-                if (!$(e.target).hasClass("myMenu2") && $(e.target).parents(".dropdown").length === 0) { $scope.dropdown124 = false; }
-            });*/
-            /*$scope.showAddSetting = function (node, currentScope1) {
-                $scope.mid = node.id;
-                $scope.fancyType = node.usetype;
-                if (node.usetype == 1) {
-                    $scope.HeadingType = "Create Dealer";
-                    $scope.HeadingName = "Dealer Name";
-                    $scope.HeadingTypeId = 2;
-                }
-                else if (node.usetype == 2) {
-                    $scope.HeadingType = "Create User";
-                    $scope.HeadingName = "User Name";
-                    $scope.HeadingTypeId = 3;
-                }
-                else if (node.usetype == 0) {
-                    $scope.HeadingType = "Create Master";
-                    $scope.HeadingName = "Master Name";
-                    $scope.HeadingTypeId = 1;
-                }
-                $mdDialog.show({
-                    controller: showAddSettingController,
-                    templateUrl: 'app/scripts/directives/popupform/add_account.html?var='+Math.random(),
-                    locals: { prntScope: $scope, node: node, currentScope1: currentScope1 },
-                    clickOutsideToClose: false,
-                    fullscreen: false,
-                });
-            };*/
-           
+
             $scope.getDate = new Date();
             $scope.$watch('sessionService', function (newVal, oldVal) {
                 $scope.FreeChips = sessionService.get('FreeChips');
@@ -151,13 +113,35 @@ app.directive('usersidebar', ['$location', '$timeout', function ($window, $http,
                     case "3": return "dashboard.Userdashboard"; break;
                 }
             }
-            $http.get('Geteventcntr/GetSportFrmDatabase').success(function (data, status, headers, config) {
-                $scope.sprtData = data.sportData;
-            }).error(function (data, status, header, config) {
-                $scope.ResponseDetails = "Data: " + data + "<br />status: " + status + "<br />headers: " + jsonFilter(header) + "<br />config: " + jsonFilter(config);
-            });
-            
-            
+
+
+$scope.GetSoprtName=function()
+{
+    if(sessionService.get('sportData') != angular.isUndefinedOrNull)
+    {
+
+        $scope.FsportData = JSON.parse(sessionService.get('sportData'));
+    }
+    $http.get('Geteventcntr/GetSportFrmDatabase').success(function (data, status, headers, config) {
+        $scope.sprtData = data.sportData;
+    }).error(function (data, status, header, config) {
+        // $scope.ResponseDetails = "Data: " + data + "<br />status: " + status + "<br />headers: " + jsonFilter(header) + "<br />config: " + jsonFilter(config);
+    });
+}
+
+
+
+            $scope.updateSportData = function(){
+                if($scope.sprtData!=angular.isUndefinedOrNull)
+                {
+                    sessionService.set('sportData',JSON.stringify($scope.sprtData));
+                    //alert('cart updated');
+                    $scope.FsportData = JSON.parse(sessionService.get('sportData'));
+
+                }
+
+            };
+            $scope.$watch('sprtData', $scope.updateSportData, true);
             $scope.open = function ($event) {
                 $event.preventDefault();
                 $event.stopPropagation();
@@ -171,8 +155,6 @@ app.directive('usersidebar', ['$location', '$timeout', function ($window, $http,
             $scope.formats = ['dd-MMMM-yyyy', 'yyyy-MM-dd', 'dd.MM.yyyy', 'shortDate'];
             $scope.format = $scope.formats[1];
            $scope.setClickedRow = function(index,series){
-		
-		console.log(series);
 			$state.go('userDashboard.Matchodds',{'MatchId': series.MstCode,'matchName':series.matchName,'date':series.MstDate,'sportId':series.SportID})
 
 		}
@@ -385,7 +367,7 @@ if($scope.cipsData != angular.isUndefinedOrNull ){
         }]
     }
 }]);
-
+})();
 app.controller('showCreateFancyCntr',['$scope', '$mdDialog', 'prntScope', 'matchInfo', 'type', function ($scope, $mdDialog, prntScope, matchInfo, type) {
     $scope.SubmitBtnDis=false;
     $scope.dt = null;
@@ -477,4 +459,4 @@ app.controller('showCreateFancyCntr',['$scope', '$mdDialog', 'prntScope', 'match
     $scope.hide = function () { $mdDialog.hide(); };
 
 }]);
-})();
+

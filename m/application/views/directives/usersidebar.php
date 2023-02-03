@@ -37,6 +37,8 @@
              
 
 <li><a href="javascript:void(0)"> <span><img src="app/assets/newscreen/images/tennis.png"> Tennis</span></a>
+
+
 <ul>
 <li><a href="#/about/address">Our address</a></li>
 </ul>
@@ -64,7 +66,14 @@
      </ul>
 </li>
   </ul>
-  </li>
+  </li> 
+ 
+   <li><a href="javascript:void(0)"> <img src="app/assets/newscreen/images/teenpatti.png">  Live Teen Patti </a><li>
+    <li><a href="javascript:void(0)"> <img src="app/assets/newscreen/images/pro.png">  Pro Kabbadi  </a><li>
+  <li><a href="javascript:void(0)"> <img src="app/assets/newscreen/images/horse.png">  Horse Racing  </a><li>
+  <li><a href="javascript:void(0)"> <img src="app/assets/newscreen/images/grey.png">  Greyhound Racing </a><li>
+  <li><a href="javascript:void(0)"> <img src="app/assets/newscreen/images/poker.png">   Live Poker  </a><li>
+ <li><a href="javascript:void(0)"> <img src="app/assets/newscreen/images/anderbhar.png">    Andar Bahar  </a><li>  
 </ul>
 
 			</nav>
@@ -224,7 +233,9 @@
                     <a class="match-od-link" ui-sref="dashboard.Updown({matchId: series.MstCode,FancyID:fancyArr.ID,TypeID:fancyArr.TypeID,matchName:series.matchName,sportId: displyData.id})">{{fancyArr.HeadName}}</a> -->
                     <a href="">{{fancyArr.HeadName}}</a>
                   </div>
-            </li>                     
+            </li>      
+
+			
           </ul>
         </nav>
       </section>

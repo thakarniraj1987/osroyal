@@ -193,12 +193,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 					$fancyId = $data['FancyID'];
 					$Modelmatchfancy = $this->model_load_model('Modelmatchfancy');
-  					$fancyData = $Modelmatchfancy->getFancyById($fancyId);
+  					$fancyData = $Modelmatchfancy->getFancyById($fancyId,$data['matchId']);
 
   					//print_r($data);die;
   					//print_r($fancyData);die;
 
-  					if($fancyData['fancy_mode']=='M'){
+  					if($fancyData['is_indian_fancy']==0 || $fancyData['fancy_mode']=='M'){
   						$SessSizeYes = !empty($fancyData['YesValume']) ? $fancyData['YesValume']: 100;
 						$SessSizeNo = !empty($fancyData['NoValume']) ? $fancyData['NoValume'] : 100;
   					}else{
@@ -210,7 +210,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
   						$data['betValue'] = ($data['betValue'] * ($SessSizeNo/100));
   					} */
 
-					$parameter="".$data['betValue'].",'".$data['OddValue']."',".$data['OddsNumber'].",".$data['TypeID'].",".$data['matchId'].",".$data['FancyID'].",".$ParantId.",".$userId.",'".date('Y-m-d H:i:s',now())."',".$loginId.",".$data['FancyId'].",'".$data['HeadName']."',".$data['SessInptYes'].",".$data['SessInptNo'].",".$data['sportId'].",'".$_SERVER["REMOTE_ADDR"]."',".$data['pointDiff'].",'".$data['deviceInformation']."',"."null".",".$SessSizeYes.",".$SessSizeNo;
+					$parameter="".$data['betValue'].",'".$data['OddValue']."',".$data['OddsNumber'].",".$data['TypeID'].",".$data['matchId'].",".$data['FancyID'].",".$ParantId.",".$userId.",'".date('Y-m-d H:i:s',now())."',".$loginId.",".$data['FancyId'].",'".$data['HeadName']."',".$SessSizeYes.",".$SessSizeNo.",".$data['sportId'].",'".$_SERVER["REMOTE_ADDR"]."',".$data['pointDiff'].",'".$data['deviceInformation']."',"."null".",".$SessSizeYes.",".$SessSizeNo;
                     //echo "call sp_PlaceBet_Fancy($parameter)";die;
 					$query =$this->db->query("call sp_PlaceBet_Fancy($parameter)");
 
@@ -384,7 +384,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
        
 
 		function getDealerById($userId,$UserType){
-			$this->db->select("SessionComm,OtherComm,InPlayStack,mstruserid,IFNULL(mstrremarks, '') mstrremarks,partner,parentId,set_timeout,lgnUserMaxProfit,lgnUserMaxLoss,lgnUserMaxStake,Commission,stakeLimit,mstrid as usecode,mstrname,mstruserid as usename,active,ipadress,usecrdt,usemodt,case when usetype=0 then 'Admin' else case when usetype=1 then 'Master' else case when usetype=2 then 'Dealer' else case when usetype=3 then 'Client' else case when usetype=4 then 'Helper' end end end end end as usetype1,usetype,liability as Liability,balance as Balance,p_l as P_L,freechips	as FreeChips,mstrlock,Fn_DealerAvailBal(cm.mstrid) as availBal,lgnusrlckbtng");
+			$this->db->select("SessionComm,OtherComm,InPlayStack,mstruserid,IFNULL(mstrremarks, '') mstrremarks,partner,parentId,set_timeout,lgnUserMaxProfit,lgnUserMaxLoss,lgnUserMaxStake,Commission,stakeLimit,mstrid as usecode,mstrname,mstruserid as usename,active,ipadress,usecrdt,usemodt,case when usetype=0 then 'Admin' else case when usetype=1 then 'Master' else case when usetype=2 then 'Dealer' else case when usetype=3 then 'Client' else case when usetype=4 then 'Helper' end end end end end as usetype1,usetype,liability as Liability,balance as Balance,p_l as P_L,freechips	as FreeChips,mstrlock,Fn_DealerAvailBal(cm.mstrid) as availBal,lgnusrlckbtng,create_no_of_child");
 			$this->db->where('usetype',2);
 			$this->db->where('parentId',$userId);
 			$this->db->where('lgnusrCloseAc != 0');
@@ -406,11 +406,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		}
 
 		function ChkFancyOnBet($matchId,$fancyId,$SessInptYes,$SessInptNo){
-			$query =$this->db->query("call sp_ChkFancyOnBet($matchId,$fancyId,$SessInptYes,$SessInptNo)");
+
+            try {
+                $redis = new Redis();
+                $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                $key = $this->db->database.'ind_' . $matchId . '_'.$fancyId;
+                $sessionOdds = json_decode($redis->get($key));
+                if((($sessionOdds->SessInptYes ==$SessInptYes AND $sessionOdds->SessInptNo=$SessInptNo ) or ($sessionOdds->fancy_mode=='A')) and $sessionOdds->active==1){
+                    return array(array('resultV'=>1,'retMess'=>'Pass the next Process...'));
+                }else{
+                    return array(array('resultV'=>0,'retMess'=>'Fancy is not active or Session Value not Match'));
+                }
+                $redis->close();
+
+            } catch (Exception $e) {
+                return array(array('resultV'=>0,'retMess'=>'Some thing is wrong'));
+            }
+
+			/*$query =$this->db->query("call sp_ChkFancyOnBet($matchId,$fancyId,$SessInptYes,$SessInptNo)");
 			$res = $query->result_array();
 			$query->next_result();
 			$query->free_result();
-			return $res;
+			return $res;*/
 			
 
 		}
@@ -486,11 +503,34 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 		function updateFancyHeaderSatatus(){
 
-			$dataArray = array('active' => $_POST['active'],'HelperID' => $_POST['HelperID']);
-    		$this->db->where('ID',$_POST['id']);
+            $dataArray = array('active' => $_POST['active'],'HelperID' => $_POST['HelperID']);
+            $this->db->where('ID',$_POST['id']);
             $this->db->update('matchfancy', $dataArray);
-            //echo $this->db->queries[0];die();		
-            return true; 
+            try {
+                $redis = new Redis();
+                $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                $key = $this->db->database.'ind_' . $_POST['MatchID'] . '_'.$_POST['id'];
+                if($_POST['active']==2){
+                    $redis->delete($key);
+                }else{
+                    if(empty($redis->get($key))){
+                        $this->model_load_model('Modelmatchfancy');
+                        $result = $this->Modelmatchfancy->selectFancyById($_POST['id']);
+                        $result['ID'] = $_POST['id'];
+                        $redis->set($key, json_encode($result));
+                    }else{
+                        $sessionOdds = json_decode($redis->get($key),true);
+                        $sessionOdds['active'] = $_POST['active'];
+                        $sessionOdds['HelperID'] = $_POST['HelperID'];
+                        $redis->set($key, json_encode($sessionOdds));
+                    }
+
+                }
+
+                $redis->close();
+            } catch (Exception $e) {
+            }
+            return true;
 		
 		}
 
@@ -499,8 +539,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $dataArray = array('HeadName' => $_POST['HeadName']);
             $this->db->where('ID',$_POST['id']);
             $this->db->update('matchfancy', $dataArray);
-            //echo $this->db->queries[0];die();
-            return true;
+
+            try {
+                $redis = new Redis();
+                $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                $key = $this->db->database.'ind_' . $_POST['MatchID'] . '_'.$_POST['id'];
+                $sessionOdds = json_decode($redis->get($key),true);
+
+                $sessionOdds['HeadName'] = $_POST['HeadName'];
+                $redis->set($key, json_encode($sessionOdds));
+                $redis->close();
+                return true;
+            } catch (Exception $e) {
+                return false;
+            }
 
         }
 
@@ -516,6 +568,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             //echo $this->db->queries[0];die();
             return true; */
            //echo "call SP_SetResult_Session($sportId,$match_id,$fancy_Id,$result)";die;
+           //file_put_contents('prashant123.txt',"call SP_SetResult_Session($sportId,$match_id,$fancy_Id,$result)");die;
+            //$query =$this->db->query("call SP_SetResult_Session($sportId,$match_id,$fancy_Id,$result)");
             $query =$this->db->query("call SP_SetResult_Session($sportId,$match_id,$fancy_Id,$result)");
 			$res = $query->result_array();
 			$query->next_result();
@@ -570,16 +624,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             //echo $this->db->queries[0];die();	
             return $query; 
 		}
-		function getFancyByEdit($id,$type){
+		function getFancyByEdit($id,$type,$matchID=null){
 
-			$this->db->select('mf.*,market.Id market_id');
-			$this->db->from('matchfancy mf');
-			$this->db->join('market', "mf.MatchID=market.matchId AND market.Name = 'Match Odds'", 'LEFT');
-			$this->db->where('mf.TypeID',$type);
-			$this->db->where('mf.ID',$id);
-			
-			$query1 = $this->db->get();					
-			return $query1->result_array();	
+            try {
+                $redis = new Redis();
+                $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                $key = $this->db->database.'ind_' . $matchID . '_'.$id;
+                //echo $this->db->database.'ind_' . $matchID . '_'.$id;die;
+                $sessionOdds = $redis->get($key);
+
+                $redis->close();
+
+
+                return array(json_decode($sessionOdds));
+            } catch (Exception $e) {
+            }
 		}
 		function scorePosition($userId,$fancyId,$typeId){
 			
@@ -646,7 +705,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     		$this->db->where('TypeID',$_POST['TypeId']);
             $query=$this->db->update('matchfancy', $dataArray);
         //    echo $this->db->queries[0];
-            return $query; 
+
+            try {
+                $redis = new Redis();
+                $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                $key = $this->db->database.'ind_' . $_POST['MatchID'] . '_'.$_POST['FancyID'];
+                $sessionOdds = json_decode($redis->get($key),true);
+
+                $sessionOdds['active'] = 4;
+
+                $sessionOdds['DisplayMsg'] = $_POST['message'];
+                if(!empty($_POST['fancy_mode'])){
+                    $sessionOdds['fancy_mode'] = $_POST['fancy_mode'];
+                }
+                // print_r($sessionOdds);die;
+                $redis->set($key, json_encode($sessionOdds));
+                $redis->close();
+                return true;
+            } catch (Exception $e) {
+                return false;
+            }
+
 		}
 		function chnageRate(){
 			$dataArray = array('RateChange' => $_POST['RateChange']+1,'active' =>4,'DisplayMsg' => 'Rate Change');

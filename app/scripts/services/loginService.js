@@ -22,6 +22,8 @@ app.factory('loginService', function ($http, $location, sessionService, $rootSco
                     sessionService.set('set_timeout', response.data.set_timeout);
                     sessionService.set('last_login_id', response.data.last_login_id);
                     sessionService.set('subAdmin', response.data.subAdmin);
+                    sessionService.set('makeBatUrl', response.data.makeBatUrl);
+
 		    sessionService.set('lgPassword', response.data.mstrpassword);
    sessionService.set('last_login_time', response.data.last_login_time);
 			   $http.defaults.headers.common['UserName'] = sessionService.get('slctUseName');
@@ -92,6 +94,7 @@ app.factory('loginService', function ($http, $location, sessionService, $rootSco
 		    sessionService.set('last_login_time', response.data.last_login_time);
 		    sessionService.set('config_unmatched', response.data.config_unmatched);
 		    sessionService.set('config_max_odd_limit', response.data.config_max_odd_limit);
+                    sessionService.set('apkDownloadUrl', response.data.apkDownloadUrl);
                     sessionService.set('isMultiBet',response.data.isMultiBet);
 
 			    sessionService.set('lgPassword', response.data.mstrpassword);

@@ -7,7 +7,7 @@ error_reporting("ERROR");
 		        parent::__construct();
 				$_POST = json_decode(file_get_contents('php://input'), true);
 		        $this->load->model('Chip_model');
-		        if ($this->session->userdata('user_id') != '') { } else { redirect(base_url());}
+		       // if ($this->session->userdata('user_id') != '') { } else { redirect(base_url());}
 		    }
 		 
 		function SaveChip(){

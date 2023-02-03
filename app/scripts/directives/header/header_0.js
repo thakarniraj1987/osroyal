@@ -190,7 +190,7 @@ app.directive('header', ['$location','$http', 'sessionService', '$timeout','$int
                     //alert("Get");
                 });
             }
-            $scope.FancyListDisplay();
+            //$scope.FancyListDisplay();
             /*Get Fancy Result*/
             $scope.getFancyResult = function (sportId, match_id, fancy_Id) {
                 var result1 = confirm("Are You sure want to set the Result ...");

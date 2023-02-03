@@ -71,15 +71,19 @@ app.directive('header', ['$location','$http', 'sessionService', '$timeout','$int
  $scope.UpdateBalance = function()
 		{
             $scope.upBal = $timeout(function(){
-			      $http.get( BASE_URL+'Chipscntrl/getChipDataById/' + localStorage.user_id).success(function (data, status, headers, config) {
+                if(sessionService.get('user_id')!=null)
+                {
+			      $http.get( BASE_URL+'Chipscntrl/getChipDataById/' + sessionService.get('user_id')).success(function (data, status, headers, config) {
                 $scope.cipsData = data.betLibility;
-                sessionService.set('FreeChips', $scope.cipsData[0].FreeChip);
-                sessionService.set('ChipInOut', $scope.cipsData[0].Chip);
-                sessionService.set('Liability', $scope.cipsData[0].Liability);
-                sessionService.set('Balance', $scope.cipsData[0].Balance);
-                sessionService.set('P_L', $scope.cipsData[0].P_L);
-                      sessionService.set('IsShowTv',$scope.cipsData[0].ShowVideoTv);
-                      sessionService.set('IsSettlementBtn',$scope.cipsData[0].ShowSettlementButton);
+                      if($scope.cipsData !=angular.isUndefinedOrNull) {
+                          sessionService.set('FreeChips', $scope.cipsData[0].FreeChip);
+                          sessionService.set('ChipInOut', $scope.cipsData[0].Chip);
+                          sessionService.set('Liability', $scope.cipsData[0].Liability);
+                          sessionService.set('Balance', $scope.cipsData[0].Balance);
+                          sessionService.set('P_L', $scope.cipsData[0].P_L);
+                          sessionService.set('IsShowTv', $scope.cipsData[0].ShowVideoTv);
+                          sessionService.set('IsSettlementBtn', $scope.cipsData[0].ShowSettlementButton);
+                      }
                 $scope.$watch('sessionService', function (newVal, oldVal) {
                     if($scope.cipsData!=angular.isUndefinedOrNull) {
                         $scope.FreeChips = $scope.cipsData[0].FreeChip;
@@ -104,7 +108,10 @@ app.directive('header', ['$location','$http', 'sessionService', '$timeout','$int
                           $scope.UpdateBalance();
                       }
                   });
-
+                }
+                else {
+                    loginService.logout();
+                }
         },$scope.callbal==1 ? 0 : 5000)
 		}
 	    $scope.UpdateBalance();
@@ -285,7 +292,7 @@ app.directive('header', ['$location','$http', 'sessionService', '$timeout','$int
                     //alert("Get");
                 });
             }
-            $scope.FancyListDisplay();
+           // $scope.FancyListDisplay();
             /*Get Fancy Result*/
             $scope.getFancyResult = function (sportId, match_id, fancy_Id) {
                 var result1 = confirm("Are You sure want to set the Result ...");

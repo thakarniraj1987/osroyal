@@ -43,7 +43,7 @@
          <li ui-sref-active="active" class="active treeview" onclick="mobilefun()"><a ui-sref="dealerDashboard.Home"><i class="fa fa-dashboard"></i><span>Dashboard</span></a></li>
            <li class="userlisting"> <a ng-click="treeAcc=1;IsPopupShow=true;" href="JavaScript:void(0)"> <img src="app/dist/img/dealer_white.png" />              Users</a>  </li>
 <li  ui-sref-active="active" onclick="mobilefun()"><a ui-sref="dealerDashboard.OnePageRprt({typeId:1})"><i style="float: left;position: relative;" class="fa fa-file" aria-hidden="true"></i>  One Page Report</a> </li>
-<li  ui-sref-active="active" onclick="mobilefun()"><a ui-sref="dealerDashboard.CollectionReport"><i style="float: left;position: relative;" class="fa fa-file" aria-hidden="true"></i>  Collection Report</a> </li>
+<li ng-if="false"  ui-sref-active="active" onclick="mobilefun()"><a ui-sref="dealerDashboard.CollectionReport"><i style="float: left;position: relative;" class="fa fa-file" aria-hidden="true"></i>  Collection Report</a> </li>
          <li ui-sref-active="active" onclick="mobilefun()"><a ui-sref="dealerDashboard.ClientList"><i class="fa fa-list" aria-hidden="true"></i><span>Client List</span></a></li>
          <li ui-sref-active="active" onclick="mobilefun()"><a ui-sref="dealerDashboard.Chiphistorycntr"><i class="fa fa-history" aria-hidden="true"></i><span>Chips History</span></a></li>
          <li ui-sref-active="active" onclick="mobilefun()"><a ui-sref="dealerDashboard.ChipSummaryCntr"><i class="fa fa-microchip"></i><span>Chips Summary</span></a></li>

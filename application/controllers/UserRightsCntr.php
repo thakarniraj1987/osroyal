@@ -40,7 +40,7 @@
                 $userRole = $this->ModelUserRights->hasRole('ManageRole');
             }else{
                 $userRole = $this->ModelUserRights->hasRole('AddRole');
-            }  
+            }
 
             if($userRole['status']){
                 return $this->output->set_content_type('application/json')->set_output( json_encode(array('error' => 1 ,'message' => $userRole['message'])));

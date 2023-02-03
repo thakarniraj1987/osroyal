@@ -21,7 +21,7 @@ $scope.Marketdata=JSON.parse(sessionService.get("Marketdata"))};
     /*end of Back Button By Manish*/
     $scope.MarketId=$stateParams.MarketId;
      var columnDefs = [
-        { headerName: "SNo.", width: 30,field: "SrNo",cellClass: function (params) { return (params.data.Type == 'Lay' ? 'lay-head' : 'back-head'); } },       
+        { headerName: "SNo.", width: 30,field: "SrNo",cellClass: function (params) { return (params.data.Type == 'Lay' ? 'lay-head' : 'back-head'); } },
         { headerName: "Description", field: "Description", width: 400, cellClass: function (params) { return (params.data.Type == 'Lay' ? 'lay-head' : 'back-head'); } },
         { headerName: "Selection Name", width: 100, field: "selectionName", cellClass: function (params) { return (params.data.Type == 'Lay' ? 'lay-head' : 'back-head'); } },
         { headerName: "userName", width: 70, field: "userName", cellClass: function (params) { return (params.data.Type == 'Lay' ? 'lay-head' : 'back-head'); } },

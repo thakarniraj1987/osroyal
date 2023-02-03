@@ -30,7 +30,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		 * [checkAuthentication check user authentication by headers]
 		 * @return [type] [description]
 		 */
-	/*	function checkAuthentication(){
+		function checkAuthentication(){
 
 			$this->load->model('Modelcreatemaster');
 
@@ -68,7 +68,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 					$this->output->set_status_header(412)->set_content_type('application/json')->set_output(json_encode($response));
 					exit();
 			}
-		} */
+		}
 
 		function chkLoginUser(){
 

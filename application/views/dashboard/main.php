@@ -1,5 +1,6 @@
 <!-- Navigation -->
 <header></header>
+
 <!-- /.navbar-top-links -->
 <!-- /.navbar-static-side -->
 <div class="content">

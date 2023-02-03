@@ -235,11 +235,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             if($userRole['status']){
                 return $this->output->set_content_type('application/json')->set_output( json_encode(array('error' => 1 ,'message' => $userRole['message'])));
             }
-			$condition=$this->Modelcreatemaster->saveFancy();
-			if ($condition==1) {
-				//echo $condition;
+            $id=$this->Modelcreatemaster->saveFancy();
+
+			if ($id) {
+                try {
+                    $redis = new Redis();
+                    $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                    $this->load->model('Modelmatchfancy');
+                    $result = $this->Modelmatchfancy->selectFancyById($id);
+                    $redis->set($this->db->database.'ind_' . $_POST['mid'] . '_' . $id, json_encode($result));
+                    $redis->close();
+                } catch (Exception $e) {
+                }
 				echo json_encode(array('error' => 0 ,'message' => 'Fancy Inserted Successfully...'));
-			}else if($condition==2){
+			}else if($id==2){
 				echo json_encode(array('error' => 1 ,'message' => 'Fancy Alredy Exits'));
 			}else{
 				echo json_encode(array('error' => 1 ,'message' => 'Fancy Not Inserted'));

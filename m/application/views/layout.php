@@ -31,6 +31,8 @@ if(isset($_GET['login/'])){
       <meta http-equiv="expires" content="0" />
       <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
       <meta http-equiv="pragma" content="no-cache" />
+	  
+	  
       
 	<title>	<?php echo $this->config->item('title'); ?> </title>
       <meta charset="utf-8"/> 
@@ -41,8 +43,14 @@ if(isset($_GET['login/'])){
           <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
       <?php } ?>
        <script> 
-	   var BASE_URL = "<?php echo "https://".$_SERVER['HTTP_HOST']."/"; ?>";
+	   var BASE_URL = "<?php echo $_SERVER['REQUEST_SCHEME']."://".$_SERVER['HTTP_HOST']."/"; ?>";
        </script>  
+	 
+<meta property="al:android:package" content="com.skaigold.ludo">
+<meta property="al:android:app_name" content="SKAI LUDO">
+ 
+<meta property="og:title" content="Skai Gold" />
+<meta property="og:type" content="website" />
        
 
 
@@ -89,11 +97,11 @@ if(isset($_GET['login/'])){
 
  
   <link rel="stylesheet" type="text/css" href="app/assets/newscreen/css/mobile.css">
-<!-- <?php /*if ($type==''){ */?>
-<link rel="stylesheet" type="text/css"  href="app/assets/newscreen/css/login.css">	  
-	  
-	  --><?php /*} */?>
+   
 
+<?php if ($type==''){ ?>
+<link rel="stylesheet" type="text/css"  href="app/assets/newscreen/css/login.css">	
+	  <?php } ?>
 </head>
 	<!--ng-class="{'betslip-active':$root.betslipshow}"-->
     <body class="skin-blue sidebar-mini <?php 	if($type=='0' || $type=='1' || $type=='2'){ ?>  notuser  loginpage<?php }?>" >
@@ -101,10 +109,10 @@ if(isset($_GET['login/'])){
  
       <div ui-view></div>
     </div>
-    <div class="footer_area"  ng-controller="commonCtrl" style="display:none" ng-if="false">
+    <div class="footer_area"  ng-controller="commonCtrl" style="display: none" ng-if="false">
       <div class="footer_nav">
       <ul>
-     <li><a data-toggle="modal"  ng-click="ShowTerAndCondition()">Term and Condition</a> © {{getYear()}} </li>
+     <li><a  ng-click="ShowTerAndCondition()">Terms and Conditions</a> © {{getYear()}} </li>
       <li class="flogo"> | <img src="app/images/f-logo.png" alt="Logo"> </li>
       </ul>
       </div>
@@ -116,7 +124,7 @@ if(isset($_GET['login/'])){
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Term & Condition</h4>
+        <h4 class="modal-title">Terms & Conditions</h4>
         <button type="button" class="close" data-dismiss="modal">&times;</button>
       </div>
       <div class="modal-body">
@@ -133,61 +141,38 @@ if(isset($_GET['login/'])){
 
 
 	   <script type="text/javascript"  src="app/dist/jquery-latest.min.js"></script>
-      <!-- <script type="text/javascript"  src="app/dist/agGrid.js"></script>
-        <script type="text/javascript"  src="app/lib/angular.min.js"></script>-->
+ 
 
     <script type="text/javascript" src="app/dist/agGrid.js" ></script>
     <script type="text/javascript" src="https://code.angularjs.org/1.4.9/angular.min.js"></script>
-        <!-- <?php 	if($type!='3'){ ?>
-        <script src="https://cdn.ckeditor.com/4.6.2/standard/ckeditor.js"></script>
-        	<script src="https://cdnjs.cloudflare.com/ajax/libs/ng-ckeditor/0.2.1/ng-ckeditor.min.js"></script>
-        		  <?php } ?> -->
-    <!--  <script type="text/javascript"  src="app/js/libs/angular-ui-router.min.js"></script>
-      <script type="text/javascript"  src="app/lib/angular-aria.min.js"></script>
-      <script type="text/javascript"  src="app/lib/angular-material.js"></script>
-       <script type="text/javascript"  src="app/lib/angular-animate.min.js"></script>-->
+
+
     <script type="text/javascript" src="../app/dist/AllMixV2.js" ></script>
     <script type="text/javascript" src="../app/dist/AllMix.js" ></script>
          <script type="text/javascript"  src="app/scripts/app_9.js?var=<?php echo $s=(RAND() * (10 - 1) + 1)?>"></script>
-         <!--<script type="text/javascript"  src="app/scripts/directives/sidebar/sidebar_1.js"></script>-->
-     <!-- <script type="text/javascript"  src="app/dist/re-tree.js"></script>
-      <script type="text/javascript"  src="app/dist/ng-device-detector.js"></script>-->
+   
       <script type="text/javascript"  src="app/js/libs/ocLazyLoad.min.js"></script>
 
-     <!-- <script type="text/javascript" src="app/dist/angular-tree-widget.js"></script>-->
-   <!-- <script type="text/javascript"  src="app/js/libs/FileSaver.js"></script>
-      <script type="text/javascript"  src="app/js/libs/jszip.js"></script>
-            <script type="text/javascript"  src="app/js/libs/xlsx.js"></script>-->
-             <!-- <script defer="defer" src="../app/js/manualdatetime.js"></script>-->
-            
-             <?php if($type!=''){ ?> 
-     <!-- <script type="text/javascript"  src="app/assets/js/Roboto.js"></script>
-          <script type="text/javascript" src="app/assets/js/TVLoad.js"></script>
-  	<script defer="defer" src="app/assets/newscreen/vendor/bootstrap/js/popper.js"></script>-->
-
-      
-       <?php } ?>
+ 
       
       <script  type="text/javascript" src="app/assets/js/ui-bootstrap-tpls-0.10.0.min.js"></script>
       <script  type="text/javascript" src="app/scripts/controllers/Form.js"></script>
       <script  type="text/javascript" src="app/scripts/services/sessionService.js"></script>
       <script  type="text/javascript" src="app/scripts/services/loginService.js"></script>
-     <!-- <script  type="text/javascript" src="app/assets/js/app.min.js"></script>
+ 
+
+    <script   src="app/assets/newscreen/vendor/bootstrap/js/bootstrap.min.js"></script>
+  
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsmpeg-player@2.1.6/build/JSMpeg.min.js"></script>
 	
-      <script type="text/javascript" src="app/js/res.js"></script>-->
+	
 
- 		
-<!--===============================================================================================-->
-	<!--<script  src="app/assets/newscreen/vendor/animsition/js/animsition.min.js"></script>-->
-<!--===============================================================================================-->
-
-    <script  src="app/assets/newscreen/vendor/bootstrap/js/bootstrap.min.js"></script>
- <!-- <script  src="app/assets/newscreen/js/main.js"></script>-->
-
-
-  
-  
+		
+		
  	  <script>
+         // var baseUrl=BASE_URL.substring(0, BASE_URL.lastIndexOf("/") );
+         // var socket = io.connect(baseUrl+':4005');
 document.addEventListener('gesturestart', function (e) {
     e.preventDefault();
 });
@@ -321,6 +306,11 @@ $(document).on("keypress", ".numclass", function(evt)
 		{
 			myfunright(); //admin
 		});
+
+  
+
+
+
 
 		$(document).on("click", "#menu2 ul li a", function()
 		{
@@ -484,7 +474,7 @@ function addClass(self)
 
 
          <script defer="defer" src="app/assets/newscreen/slick/slick.min.js"></script>
-   
+ 
     <script>
  
 	
@@ -506,6 +496,7 @@ function initSlider(){
 }
  
     </script>
+
 
 
 

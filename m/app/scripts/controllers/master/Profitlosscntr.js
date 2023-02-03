@@ -60,6 +60,13 @@ app.controller('Profitlosscntr',['$scope', '$http', 'sessionService', '$location
         }); 
     }*/
     //$scope.GetSportName();
+    if(sessionService.get('mbindProfit') != angular.isUndefinedOrNull)
+    {
+
+        $scope.FuserPL = JSON.parse(sessionService.get('mbindProfit'));
+
+        // $scope.bindCricket=[];
+    }
     $scope.onBtExport = function () {
         var params = {
             skipHeader: false,
@@ -79,7 +86,7 @@ app.controller('Profitlosscntr',['$scope', '$http', 'sessionService', '$location
     }
     $scope.Allsport=function(sprtid){
         //
-	$scope.loading=true;
+	//$scope.loading=true;
         $http.get( BASE_URL+'Betentrycntr/profit_lossAll/' + sessionService.get('user_id')+'/'+sprtid).success(function (data, status, headers, config) {
             //
             $scope.userPL = data.userPL;
@@ -90,6 +97,17 @@ app.controller('Profitlosscntr',['$scope', '$http', 'sessionService', '$location
 		$scope.loading=false;
 		});
     }
+
+    $scope.updateProfitLoss = function(){
+        if($scope.userPL!=angular.isUndefinedOrNull)
+        {
+            sessionService.set('mbindProfit',JSON.stringify($scope.userPL));
+            $scope.FuserPL = JSON.parse(sessionService.get('mbindProfit'));
+
+        }
+
+    };
+    $scope.$watch('userPL', $scope.updateProfitLoss, true);
 
     function autoSizeAll() {
         

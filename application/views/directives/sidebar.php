@@ -1,17 +1,17 @@
 <div style="padding-left:0px;">
   <script>
-jQuery(window).scroll(function() {      
+jQuery(window).scroll(function() {
 
   var uheight = jQuery( ".main-sidebar").innerHeight();
   alert(uheight);
 jQuery('.main-sidebar').css("min-height", uheight);
- 
+
 });
 jQuery(window).resize(function() {
-	 
+
 	  var uheight = jQuery( ".main-sidebar").innerHeight();
 jQuery('.main-sidebar').css("min-height", uheight);
- 
+
 });
 </script>
 <style>
@@ -40,7 +40,7 @@ jQuery('.main-sidebar').css("min-height", uheight);
       </label>-->
       <input type="hidden" name='hdnVal' id='hdnVal' value='P'/>
       <input type="hidden" name='hdnVal1' id='hdnVal1' value='P'/>
-      
+
       <section id="content1"  class="tab-content clearfix" style="display:block !important">
       <!--ng-show="treeAcc==0"-->
         <!-- ng-init="ShowHideAng(0)"-->
@@ -53,13 +53,13 @@ jQuery('.main-sidebar').css("min-height", uheight);
        	        </ul>
        	        </li>
 
-      <li class="userlisting" ng-show="IsShowMenu('user')"> <a ng-click="treeAcc=1;IsPopupShow=true;" href="JavaScript:void(0)"> <img src="app/dist/img/dealer_white.png" />              Users</a>  </li>
+      <li class="userlisting" ng-click="refresh_tree();IsShowTreeDiv=true" ng-show="IsShowMenu('user')"> <a ng-click="treeAcc=1;IsPopupShow=true;" href="JavaScript:void(0)"> <img src="app/dist/img/dealer_white.png" />              Users</a>  </li>
       <li ui-sref-active="active" ng-show="IsShowMenu('MasterList')" class="active treeview"> <a  ui-sref="dashboard.MasterList"> <i class="fa fa-list"></i><span>Master List</span> </a> </li>
  	<li ui-sref-active="active" ng-show="IsShowMenu('MarketWatch')" ng-click="ShowHideAng(0)" class="active treeview"> <a  ui-sref="{{getDashboardurl()}}"> <i class="fa fa-dashboard"></i><span>Market Watch</span> </a> </li>
 <li ng-show="IsShowMenu('fancy')"><a ng-show="$root.HelperAllRights==angular.isUndefinedOrNull || $root.HelperAllRights.UpdateUser==1" href="" ui-sref="dashboard.ManageFancy"><i class="fa fa-file" aria-hidden="true"></i>Manage Fancy</a> </li>
 <li ng-show="IsShowMenu('onePageReportSetting')"><a ng-show="$root.HelperAllRights==angular.isUndefinedOrNull || $root.HelperAllRights.UpdateUser==1" href="" ui-sref="dashboard.OnePageRprt"><i class="fa fa-file" aria-hidden="true"></i>  One Page Report</a> </li>
 <li ng-show="IsShowMenu('scheduleMatch')"><a ng-show="$root.HelperAllRights==angular.isUndefinedOrNull || $root.HelperAllRights.UpdateUser==1" href="" ui-sref="dashboard.Matches"><i class="fa fa-file" aria-hidden="true"></i>  Schedule Match</a> </li>
-<li ng-show="IsShowMenu('Collection')"><a ng-show="$root.HelperAllRights==angular.isUndefinedOrNull || $root.HelperAllRights.UpdateUser==1" href="" ui-sref="dashboard.CollectionReport"><i class="fa fa-file" aria-hidden="true"></i>  Collection Report</a> </li>
+<li ng-show="false"><a ng-show="$root.HelperAllRights==angular.isUndefinedOrNull || $root.HelperAllRights.UpdateUser==1" href="" ui-sref="dashboard.CollectionReport"><i class="fa fa-file" aria-hidden="true"></i>  Collection Report</a> </li>
 <li ng-show="IsShowMenu('seriesMatch')"><a ng-show="$root.HelperAllRights==angular.isUndefinedOrNull || $root.HelperAllRights.UpdateUser==1" href="" ui-sref="dashboard.SeriesMatches"><i class="fa fa-list" aria-hidden="true"></i>Manage Series/Matches</a> </li>
             <li ng-click="ShowHideAng(-1)"><a href=""><i class="fa fa-cog" aria-hidden="true"></i> Application Settings <i class="fa fa-angle-left pull-right"></i></a>
             <ul class="treeview-menu">
@@ -72,7 +72,7 @@ jQuery('.main-sidebar').css("min-height", uheight);
               <li ui-sref-active="treeview active"  ng-show="IsShowMenu('seriesSetting')"> <a ui-sref="dashboard.SeriesActDact">Series Setting</a> </li>
               <li ui-sref-active="treeview active"  ng-show="IsShowMenu('matchSetting')"> <a ui-sref="dashboard.Createfancy">Match Setting</a> </li>
               <li ui-sref-active="treeview active"  ng-show="IsShowMenu('marketSetting')" > <a ui-sref="dashboard.ListOfMarket">Market Setting</a> </li>
-              
+
             <!--  <li ui-sref-active="treeview active"> <a ui-sref="dashboard.Listmarkettype">Market Type</a> </li> -->
               <li ui-sref-active="treeview active" ng-show="($root.HelperAllRights==angular.isUndefinedOrNull || $root.HelperAllRights.Result==1) && IsShowMenu('setMatchResult')" > <a ui-sref="dashboard.match_result">Set Match Result</a> </li>
            <!--   <li ui-sref-active="active"> <a ui-sref="dashboard.userRightsCntr">User permissions</a> </li> -->
@@ -98,10 +98,10 @@ jQuery('.main-sidebar').css("min-height", uheight);
                  <h5 ng-show="treeNodes.length==0">No user found.</h5>
         </form>
     </div>
-      
+
      <div class="closebox"> <i ng-click="treeAcc=0" class="fa fa-times"></i></div>
-      
-      
+
+
         <div class="col-sm-12 col-md-12">
           <div slim-scroll="">
             <div data-angular-treeview="true" data-tree-id="tree01" data-tree-model="treeNodes" data-node-id="id" data-node-label="name" data-node-children="children" data-node-image="image" ng-click="printParent($event);" ></div>
@@ -127,9 +127,9 @@ jQuery('.main-sidebar').css("min-height", uheight);
           </ul>
           </span> </div>
       </section>
-      
+
       <div id="" class="tablebox" ng-show="treeAcc==1">
-      <div class="table-responsive" >
+      <div ng-if="IsShowTreeDiv" class="table-responsive" >
 <!--ng-show="tblNodeName || treeAcc==1" -->
         <table class="table chips-table">
           <tr>
@@ -155,7 +155,7 @@ jQuery('.main-sidebar').css("min-height", uheight);
         </table>
       </div>
       </div>
-      
+
     </div>
   </div>
 

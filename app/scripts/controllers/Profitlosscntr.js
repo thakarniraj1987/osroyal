@@ -61,6 +61,13 @@ $scope.UserType=sessionService.get('type');
         }); 
     }*/
     //$scope.GetSportName();
+    if(sessionService.get('abindProfit') != angular.isUndefinedOrNull)
+    {
+
+        $scope.FuserPL = JSON.parse(sessionService.get('abindProfit'));
+
+        // $scope.bindCricket=[];
+    }
     $scope.onBtExport = function () {
         var params = {
             skipHeader: false,
@@ -80,14 +87,24 @@ $scope.UserType=sessionService.get('type');
             
         });
     }
+    $scope.updateProfitLoss = function(){
+        if($scope.userPL!=angular.isUndefinedOrNull)
+        {
+            sessionService.set('abindProfit',JSON.stringify($scope.userPL));
+            //alert('cart updated');
+            $scope.FuserPL = JSON.parse(sessionService.get('abindProfit'));
+
+        }
+
+    };
+    $scope.$watch('userPL', $scope.updateProfitLoss, true);
     $scope.Allsport=function(sprtid){
         //
-	 $scope.loading = true;
+	// $scope.loading = true;
         $http.get('Betentrycntr/profit_lossAll/' + sessionService.get('user_id')+'/'+sprtid).success(function (data, status, headers, config) {
             //
 		 $scope.loading = false;
             $scope.userPL = data.userPL;
-            
             setRowData(data.userPL);
             
         });

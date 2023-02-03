@@ -1,4 +1,4 @@
-﻿app.controller('Fancycontroller', ['$scope', '$http', '$timeout', '$log', '$mdDialog', function ($scope, $http, $timeout, $log, $mdDialog)//sourabh 170103
+app.controller('Fancycontroller', ['$scope', '$http', '$timeout', '$log', '$mdDialog','Dialog', function ($scope, $http, $timeout, $log, $mdDialog,Dialog)//sourabh 170103
 {
     $scope.loading = true;
     $scope.ismeridian = false;
@@ -11,18 +11,10 @@
         d.setMinutes(0);
         $scope.mytime = d;
     };
-    $scope.changed = function () { $log.log('Time changed to: ' + $scope.mytime); };
-    $scope.clear = function () { $scope.mytime = null; };
-    $scope.open = function ($event) {
-        $event.preventDefault();
-        $event.stopPropagation();
-        $scope.opened = true;
-    };
-
     $scope.addScorekey = function(matchid,key){
         debugger
             if(key != undefined && key !=''){
-                $http.get('Lstsavemstrcontroller/updatescorekey/'+key+'/'+matchid).success(function (data, status, headers, config) {
+                $http.get('Geteventcntr/updateScoreBoardId/'+matchid+'/'+key).success(function (data, status, headers, config) {
                     debugger
                    // $scope.scoredata = data;
                     Dialog.autohide(data.message);
@@ -33,19 +25,25 @@
             }
 
     }
-    $scope.fetchscoredata = function () {
-		$http.get('Apiadmincontroller/matchlist').success(function (data, status, headers, config) {
+	$scope.fetchscoredata = function () {
+		$http.get('https://score.crakex.in:3290/matchlist').success(function (data, status, headers, config) {
 			debugger
-			$scope.scoredata = data.data;
+			$scope.scoredata = data;
 		});
 	}
-
-    $scope.fetchscoredata();
-
+	$scope.fetchscoredata();
+    $scope.changed = function () { $log.log('Time changed to: ' + $scope.mytime); };
+    $scope.clear = function () { $scope.mytime = null; };
+    $scope.open = function ($event) {
+        $event.preventDefault();
+        $event.stopPropagation();
+        $scope.opened = true;
+    };
     $scope.dateOptions = {
         formatYear: 'yy',
         startingDay: 1
     };
+
     $scope.formats = ['dd-MMMM-yyyy', 'yyyy-MM-dd', 'dd.MM.yyyy', 'shortDate'];
     $scope.format = $scope.formats[1];
     $scope.selectedItemvalue = "1";
@@ -341,6 +339,52 @@
                     $scope.totalItems = $scope.match_data.length;
                 });
                 alert('Limit Updated Successfully');
+                $scope.loading = false;
+            }
+            else {
+                alert(data.message);
+                $scope.loading = false;
+            }
+
+        }).error(function (data, status, header, config) {
+            $scope.ResponseDetails = "Data: " + data +
+                "<br />status: " + status +
+                "<br />headers: " + jsonFilter(header) +
+                "<br />config: " + jsonFilter(config);
+        });
+    };
+    $scope.changeStake = function (stake, matchid,type) {
+
+        $scope.loading = true;
+
+        if(type=="min")
+        {
+            var data={
+                "value":stake,
+                "key":'minStack',
+                "match_id":matchid
+            };
+        }
+        else {
+            var data={
+                "value":stake,
+                "key":'maxStack',
+                "match_id":matchid
+            };
+        }
+        $http.post(BASE_URL+'Lstsavemstrcontroller/updateMinAndMaxStackLimit/',data).success(function (data, status, headers, config) {
+
+            if(data.error==0)
+            {
+                var s = 0;
+                $http.get(BASE_URL+'Geteventcntr/getMatchLst/' + s).success(function (data, status, headers, config) {
+                    $scope.match_data = data.matchLst;
+                    $scope.currentPage = 1;
+                    $scope.entryLimit = 20;
+                    $scope.filteredItems = $scope.match_data.length;
+                    $scope.totalItems = $scope.match_data.length;
+                });
+                alert('Updated Successfully');
                 $scope.loading = false;
             }
             else {

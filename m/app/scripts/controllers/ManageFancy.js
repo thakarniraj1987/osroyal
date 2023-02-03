@@ -16,8 +16,8 @@ $timeout(function(){
     },500);
 		
 	
-         $scope.getFancyStatus = function (fancyId, active) {
-                var formData = { id: fancyId, active: active, HelperID: sessionService.get('HelperID') }
+         $scope.getFancyStatus = function (fancyId, active,MatchID) {
+                var formData = { id: fancyId, active: active, HelperID: sessionService.get('HelperID'),'MatchID':MatchID }
                 $http({
                     method: 'POST',
                     url: BASE_URL+'Lstsavemstrcontroller/updateFancyHeaderSatatus/',

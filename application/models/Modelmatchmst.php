@@ -125,6 +125,7 @@ class Modelmatchmst extends CI_Model
     }
 
     function getActiveSeriesIds(){
+
         $this->db->select('GROUP_CONCAT(seriesId) as seriesId');
         $this->db->from('seriesmst');
         $this->db->where('active',1);
@@ -138,21 +139,8 @@ class Modelmatchmst extends CI_Model
         } catch (Exception $e) {
             return [];
         }
+
     }
-
-
-	function findActiveSeriesBySport($sportId=NULL){
-		$this->db->select('seriesId,Name,SportID');
-		$this->db->from('seriesmst');				
-		$this->db->where('active',1);
-		if(!empty($sportId)){
-			$this->db->where('SportID',$sportId);		
-		}	
-		$query = $this->db->get();
-		$result = $query->result_array();	
-		return $result;
-	}
-
 
 	function findActiveMatches($matchId=NULL){
 	//	$matchId = 28888445;

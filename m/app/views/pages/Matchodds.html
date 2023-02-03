@@ -137,52 +137,52 @@
                                         <input type="hidden" id="NewLiability_{{$index}}" name="NewLiability_" value="{{testValue1}}">
 
                                     </strong>
-                                    <div class="size" style='{{getValColor(getSumValPnL((MarketWinLossByMId(marketitem.id)|filter:{"selectionId":marketInfo.selectionId})[0].winValue,(MarketWinLossByMId(marketitem.id)|filter:{"selectionId":marketInfo.selectionId})[0].lossValue))}}'>
+                                    <div class="size" style='{{getValColor(getSumValPnL((MarketWinLossByMId(marketitem.id)|filter:{"selectionId":marketInfo.id})[0].winValue,(MarketWinLossByMId(marketitem.id)|filter:{"selectionId":marketInfo.id})[0].lossValue))}}'>
 
-                                        {{(getSumValPnL((MarketWinLossByMId(marketitem.id)|filter:{"selectionId":marketInfo.selectionId})[0].winValue,(MarketWinLossByMId(marketitem.id)|filter:{"selectionId":marketInfo.selectionId})[0].lossValue))|number:2}}
-                                        
-                                        
-                                        
-                                                                                 </div>
-                                </td>
-                                <td class="back unhighlighted hidden-xs" ng-class="{'callYlCss':marketInfo.ex.availableToBack[2].selected}">
-                                    <strong class="odds">{{getOddCalcVal(marketInfo.ex.availableToBack[2].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
-                                    <div class="size">
-                                        <span>{{getOddCalcVal(marketInfo.ex.availableToBack[2].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
-                                    </div>
-                                </td>
-                                <td class="back unhighlighted hidden-xs" ng-class="{'callYlCss':marketInfo.ex.availableToBack[1].selected}">
-                                    <strong class="odds">{{getOddCalcVal(marketInfo.ex.availableToBack[1].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
-                                    <div class="size">
-                                        <span>{{getOddCalcVal(marketInfo.ex.availableToBack[1].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
-                                    </div>
-                                </td>
-                                <td class="back" ng-class="{'callYlCss':marketInfo.ex.availableToBack[0].selected}" ng-click="getOddValue($event,marketInfo.ex.availableToBack[0].price+oddsLimit,FinalArray[0].event.id,0,marketInfo.name,marketInfo.id)">
-                                    <strong ng-if="marketitem.is_manual==1" class="odds">{{marketInfo.ex.availableToBack[0].price}}</strong>
-                                    <strong ng-if="marketitem.is_manual==0" class="odds">{{getOddCalcVal(marketInfo.ex.availableToBack[0].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
-                                    <div class="size">
-                                        <span>{{getOddCalcVal(marketInfo.ex.availableToBack[0].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
-                                    </div>
-                                </td>
-                                <td class="lay" ng-class="{'callCYanCss':marketInfo.ex.availableToLay[0].selected}" ng-click="getOddValue($event,marketInfo.ex.availableToLay[0].price+oddsLimit,FinalArray[0].event.id,1,marketInfo.name,marketInfo.id)">
+                                        {{(getSumValPnL((MarketWinLossByMId(marketitem.id)|filter:{"selectionId":marketInfo.id})[0].winValue,(MarketWinLossByMId(marketitem.id)|filter:{"selectionId":marketInfo.id})[0].lossValue))|number:2}}
 
-                                    <strong ng-if="marketitem.is_manual==1" class="odds" ng-model="testModel">{{marketInfo.ex.availableToLay[0].price}}</strong>
-                                    <strong ng-if="marketitem.is_manual==0" class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.ex.availableToLay[0].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
-                                    <div class="size">
-                                        <span>{{getOddCalcVal(marketInfo.ex.availableToLay[0].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
-                                    </div>
-                                </td>
-                                <td class="lay unhighlighted hidden-xs" ng-class="{'callCYanCss':marketInfo.ex.availableToLay[1].selected}" >
-                                    <strong class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.ex.availableToLay[1].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
-                                    <div class="size">
-                                        <span>{{getOddCalcVal(marketInfo.ex.availableToLay[1].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
-                                    </div>
-                                </td>
-                                <td class="lay unhighlighted hidden-xs" ng-class="{'callCYanCss':marketInfo.ex.availableToLay[2].selected}" >
 
-                                    <strong class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.ex.availableToLay[2].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
+
+                                    </div>
+                                </td>
+                                <td class="back unhighlighted hidden-xs" ng-class="{'callYlCss':marketInfo.back[2].selected}">
+                                    <strong class="odds">{{getOddCalcVal(marketInfo.back[2].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
                                     <div class="size">
-                                        <span>{{getOddCalcVal(marketInfo.ex.availableToLay[2].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
+                                        <span>{{getOddCalcVal(marketInfo.back[2].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
+                                    </div>
+                                </td>
+                                <td class="back unhighlighted hidden-xs" ng-class="{'callYlCss':marketInfo.back[1].selected}">
+                                    <strong class="odds">{{getOddCalcVal(marketInfo.back[1].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
+                                    <div class="size">
+                                        <span>{{getOddCalcVal(marketInfo.back[1].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
+                                    </div>
+                                </td>
+                                <td class="back" ng-class="{'callYlCss':marketInfo.back[0].selected}" ng-click="getOddValue($event,marketInfo.back[0].price+oddsLimit,FinalArray[0].event.id,0,marketInfo.name,marketInfo.id)">
+                                    <strong ng-if="marketitem.is_manual==1" class="odds">{{marketInfo.back[0].price}}</strong>
+                                    <strong ng-if="marketitem.is_manual==0" class="odds">{{getOddCalcVal(marketInfo.back[0].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
+                                    <div class="size">
+                                        <span>{{getOddCalcVal(marketInfo.back[0].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
+                                    </div>
+                                </td>
+                                <td class="lay" ng-class="{'callCYanCss':marketInfo.lay[0].selected}" ng-click="getOddValue($event,marketInfo.lay[0].price+oddsLimit,FinalArray[0].event.id,1,marketInfo.name,marketInfo.id)">
+
+                                    <strong ng-if="marketitem.is_manual==1" class="odds" ng-model="testModel">{{marketInfo.lay[0].price}}</strong>
+                                    <strong ng-if="marketitem.is_manual==0" class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.lay[0].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
+                                    <div class="size">
+                                        <span>{{getOddCalcVal(marketInfo.lay[0].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
+                                    </div>
+                                </td>
+                                <td class="lay unhighlighted hidden-xs" ng-class="{'callCYanCss':marketInfo.lay[1].selected}" >
+                                    <strong class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.lay[1].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
+                                    <div class="size">
+                                        <span>{{getOddCalcVal(marketInfo.lay[1].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
+                                    </div>
+                                </td>
+                                <td class="lay unhighlighted hidden-xs" ng-class="{'callCYanCss':marketInfo.lay[2].selected}" >
+
+                                    <strong class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.lay[2].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
+                                    <div class="size">
+                                        <span>{{getOddCalcVal(marketInfo.lay[2].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
                                     </div>
                                 </td>
 
@@ -205,15 +205,18 @@
                     </div>
                     <form name="manualmatchodds">
 
-                        <div class="table-responsive">
+                        <div class="table-overflow">
                             <table class="table market-listing-table" ng-show="marketitem.isManualMatchOdds == 1 || marketitem.is_manual == '1'">
                                 <thead>
                                 <tr>
                                     <td>Point Diff</td>
                                     <td colspan="3" ng-init="marketitem.IsPointDiff=false;marketitem.pointDiff=0">
-                                        <input type="number" step="1" oninput="this.value=(parseInt(this.value)||0)" ng-model="marketitem.pointDiff"   class="numclass" ng-change="CalCulatePointDiff($index,marketitem.pointDiff)">
+                                        <input ng-if="!marketitem.IsRs" type="number"  step="0.01" oninput="this.value=(parseInt(this.value)||0)"  ng-model="marketitem.pointDiff"   class="numclass" ng-change="CalCulatePointDiff($index,marketitem.pointDiff)">
+                                        <input ng-if="marketitem.IsRs" type="number"  step="1"  ng-model="marketitem.pointDiff"   class="numclass" ng-change="CalCulatePointDiff($index,marketitem.pointDiff)">
                                         <input  type="checkbox" ng-model="marketitem.IsPointDiff" ng-click="SetPointDiff(marketitem.IsPointDiff,marketitem.id)"><span>{{marketitem.IsPointDiff==true ? 'Same' : 'Different'}}</span>
+                                        <input  type="checkbox" ng-model="marketitem.IsRs" ng-click="SetPointAuto(marketitem.IsRs,marketitem.id)"><span>{{marketitem.IsRs ? 'Rs' : 'Paisa'}}</span>
                                     </td>
+
                                 </tr>
                                 <tr>
                                     <th class="title"> Match </th>
@@ -233,9 +236,12 @@
 
 
                                     <td class="back">
-                                        <strong class="odds">
+                                        <strong ng-if="!marketitem.IsRs" class="odds">
                                             <span>0.</span>
-                                            <input ng-disabled="(IsPointDiff && $index!=0) || team1Suspend[$index+marketitem.id]" ng-keyup="UpdateManualOdds(marketitem.pointDiff,marketitem.runners.length,$index,marketitem)" type="number"  step="1" oninput="this.value=(parseInt(this.value)||0)" ng-enter="callEnter(marketitem.pointDiff,marketitem.runners.length,$index,marketitem)" ng-model="team1backodd[$index+marketitem.id]" ng-change="CalCulatePointDiff($index+marketitem.id,marketitem.pointDiff)" ng-focus="SetIndex($index,$index+marketitem.id,marketitem.pointDiff)" class="numclass"></strong>
+                                            <input ng-disabled="(IsPointDiff && $index!=0) || team1Suspend[$index+marketitem.id]" ng-blur="UpdateManualOdds(marketitem.pointDiff,marketitem.runners.length,$index,marketitem)" type="number"  step="1"  oninput="this.value=(parseInt(this.value)||0)" ng-enter="callEnter(marketitem.pointDiff,marketitem.runners.length,$index,marketitem)" ng-model="team1backodd[$index+marketitem.id]" ng-change="CalCulatePointDiff($index+marketitem.id,marketitem.pointDiff)" ng-focus="SetIndex($index,$index+marketitem.id,marketitem.pointDiff)" class="numclass"></strong>
+
+                                        <strong ng-if="marketitem.IsRs" class="odds">
+                                            <input ng-disabled="(IsPointDiff && $index!=0) || team1Suspend[$index+marketitem.id]" ng-blur="UpdateManualOdds(marketitem.pointDiff,marketitem.runners.length,$index,marketitem)" type="number"  step="1"   ng-enter="callEnter(marketitem.pointDiff,marketitem.runners.length,$index,marketitem)" ng-model="team1backodd[$index+marketitem.id]" ng-change="CalCulatePointDiff($index+marketitem.id,marketitem.pointDiff)" ng-focus="SetIndex($index,$index+marketitem.id,marketitem.pointDiff)" class="numclass"></strong>
 
                                     </td>
                                     <td class="lay">
@@ -255,10 +261,24 @@
                             </table>
                         </div>
                         <div ng-show="marketitem.isManualMatchOdds == 1 || marketitem.is_manual == '1'" ng-init="marketitem.state=false">
+                            <div class="row">
+                                <div class="col-sm-4 form-group">
+                                    <label>Max Stack</label>
+                                    <input type="number" name="maxstack" ng-model="marketitem.MaxStack" placeholder="Max stack">
+                                </div>
+                                <div class="col-sm-4 form-group">
+                                    <label>Min Stack</label>
+                                    <input type="number" name="minstack" ng-model="marketitem.MinStack" placeholder="Min stack">
+                                </div>
+                                <div class="col-sm-4 form-group">
+                                    <label></label>
+                                    <button style="margin-right: 5px" class="btn btn-warning btn-sm" ng-click="updateStack(marketitem)">Save </button>
+                                </div>
+                            </div>
                             <div><button class="btn btn-warning btn-sm" ng-click="UpdateManualOdds(marketitem.pointDiff,marketitem.runners.length,$index,marketitem)">Submit </button></div>
                             <button type="button" class="act-btn" ng-click="updateManualbetAllow(0,marketitem)" ng-if="marketitem.isBetAllowedOnManualMatchOdds == 1"  style="background-color:GREEN;"><img src="app/images/active-1.png">Active</button>
                             <button type="button" class="inact-btn" ng-click="updateManualbetAllow(1,marketitem)" ng-if="marketitem.isBetAllowedOnManualMatchOdds == 0"  style="background-color:RED;"><img src="app/images/deactive-1.png" />Deactive</button>
-                            <button ng-click="toggle(marketitem)"
+                            <button ng-if="false" ng-click="toggle(marketitem)"
                                     style="float:right;position:relative;top:-23px;"><i class="fa fa-calculator"></i> {{marketitem.state==false ? 'Show' : 'Hide'}}</button>
                         </div>
 
@@ -354,7 +374,7 @@
                             <div><button class="btn btn-warning btn-sm" ng-click="UpdateManualOdds(Manuald.pointDiff,marketitem.runners.length,$index,marketitem)">Submit </button></div>
                             <button type="button" class="act-btn" ng-click="updateManualbetAllow(0)" ng-if="isBetAllowedOnManualMatchOdds == 1"  style="background-color:GREEN;"><img src="app/images/active-1.png">Active</button>
                             <button type="button" class="inact-btn" ng-click="updateManualbetAllow(1)" ng-if="isBetAllowedOnManualMatchOdds == 0"  style="background-color:RED;"><img src="app/images/deactive-1.png" />Deactive</button>
-                            <button ng-click="toggle()"
+                            <button ng-if="false" ng-click="toggle()"
                                     style="float:right;position:relative;top:-23px;"><i class="fa fa-calculator"></i> {{state==false ? 'Show' : 'Hide'}}</button>
                             <div ng-show="state" >
                                 <div class="row">
@@ -443,6 +463,7 @@
                         <h3 class="panel-title">Matched Bets ({{(UserData | filter : {"IsMatched":"1"}).length}})</h3>
                     </div>
                     <div class="panel-body login_table unmatchedScrollTable" ng-if='(UserData | filter : {"IsMatched":"1"}).length>0'>
+					
                         <table class="table table-striped  betslip-table">
                             <thead>
                                <tr>
@@ -459,13 +480,63 @@
                                 </tr>
                             </thead>
                              <tbody>
-                                <tr ng-repeat='unMatchedData in (UserData | filter : {"IsMatched":"1"})' ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}">
-                                    <td><span class="glyphicon glyphicon-trash" ng-click="deleteUser1(unMatchedData.MstCode,unMatchedData.UserId,unMatchedData.MarketId)"></span>{{$index+1}}</td>
-                                    <td title="{{unMatchedData.selectionName}}">{{unMatchedData.selectionName |limitTo: 8}}</td>
+                               <!-- <tr ng-repeat='unMatchedData in (UserData | filter : {"IsMatched":"1"})' ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}">-->
+							  <tr ng-repeat='unMatchedData in (UserData | filter : {"IsMatched":"1"})' ng-if='unMatchedData.selectionName.length<22' ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}">
+								
+                                    <td><span class="glyphicon glyphicon-trash" ng-click="deleteUser1(unMatchedData.MstCode,unMatchedData.UserId,unMatchedData.MarketId,unMatchedData.void)"></span>
+                                        <span ng-if="unMatchedData.void==0" class="glyphicon glyphicon-remove" ng-click="deleteVoidBet(unMatchedData.MstCode,unMatchedData.UserId,unMatchedData.MarketId)" title="void bet"></span>
+                                        {{$index+1}}</td>
+                                    <td title="{{unMatchedData.selectionName}}">{{unMatchedData.selectionName |limitTo: 8}} <input type="hidden" value="{{teamValue_0}}"> <span class="red" ng-if="unMatchedData.void==1"><br> -> Void</span></td>
                                     <td>{{unMatchedData.MasterName}}</td>
                                     <td >{{unMatchedData.ParantName}}</td>
                                     <td >{{unMatchedData.userName}}</td>
-                                    <td>{{unMatchedData.Odds}}</td>
+                                    <td>{{OddReturn(unMatchedData.Odds)}}</td>
+                                    <td>{{unMatchedData.Stack}}</td>
+                                    <td>{{unMatchedData.P_L}}</td>
+                                    <td title="{{unMatchedData.MstDate}}">{{unMatchedData.MstDate }}</td>
+                                    <td>{{unMatchedData.ip}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    </div>
+	<div class="col-sm-12 padding">
+            <div class="fancy-collapse-panel">
+                <div class="panel panel-default match">
+                    <div class="panel-heading" role="tab" id="headingthree">
+                       <!--- <h3 class="panel-title">Fancy Bets ({{(UserData | filter : {"IsMatched":"1"}).length}})</h3>-->
+						 <h3 class="panel-title">Fancy Bets </h3>
+                    </div>
+                    <div class="panel-body login_table unmatchedScrollTable">
+                        <table class="table table-striped  betslip-table">
+                            <thead>
+                               <tr>
+                                    <th></th>
+                                   <th >Runner</th>
+                                   <th >Master</th>
+                                   <th >Dealer</th>
+                                   <th >Client</th>
+                                   <th>odds </th>
+                                   <th>stack</th>
+                                   <th>P&l</th>
+                                   <th>date</th>
+                                    <th>ip</th>
+                                </tr>
+                            </thead>
+                             <tbody>
+                             <!-- ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}"-->
+                                <tr ng-repeat='unMatchedData in (UserData | filter : {"IsMatched":"1"})' ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}" ng-if='unMatchedData.selectionName.length > 22'>
+                                    <td><span class="glyphicon glyphicon-trash" ng-click="deleteUser1(unMatchedData.MstCode,unMatchedData.UserId,unMatchedData.MarketId,unMatchedData.void)"></span>
+                                        <span ng-if="unMatchedData.void==0" class="glyphicon glyphicon-remove" ng-click="deleteVoidBet(unMatchedData.MstCode,unMatchedData.UserId,unMatchedData.MarketId)" title="void bet"></span>
+                                        {{$index+1}}</td>
+                                    <td title="{{unMatchedData.selectionName}}">{{unMatchedData.selectionName |limitTo: 8}}  
+<span class="red" ng-if="unMatchedData.void==1"><br> -> Void</span></td>
+                                    <td>{{unMatchedData.MasterName}}</td>
+                                    <td >{{unMatchedData.ParantName}}</td>
+                                    <td >{{unMatchedData.userName}}</td>
+                                    <td>{{OddReturn(unMatchedData.Odds)}}</td>
                                     <td>{{unMatchedData.Stack}}</td>
                                     <td>{{unMatchedData.P_L}}</td>
                                     <td title="{{unMatchedData.MstDate}}">{{unMatchedData.MstDate }}</td>
@@ -508,7 +579,7 @@
                             <td>{{unMatchedData.MasterName}}</td>
                             <td >{{unMatchedData.ParantName}}</td>
                             <td>{{unMatchedData.userName}}</td>
-                            <td>{{unMatchedData.Odds}}</td>
+                            <td>{{OddReturn(unMatchedData.Odds)}}</td>
                             <td>{{unMatchedData.Stack}}</td>
                             <td>{{unMatchedData.P_L}}</td>
                             <td title="{{unMatchedData.MstDate}}">{{unMatchedData.MstDate}}</td>
@@ -520,7 +591,44 @@
                     </div>
                 </div>
             </div> 
-    </div>           
+    </div>  
+
+
+ <div class="col-sm-12 padding">
+            <div class="fancy-collapse-panel">
+                <div class="panel panel-default match">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h3 class="panel-title">Indian Fancy ({{GetindianfancyData.length}})</h3>
+                    </div>
+                    <div class="panel-body login_table unmatchedScrollTable" ng-if='(UserData | filter : {"IsMatched":"1"}).length>0'>
+                        <table class="table table-striped  betslip-table">
+               
+                             <tbody id="tblData">
+                <tr ng-repeat="indianfancy in GetindianfancyData">
+
+                    <td data-label="Serial No">{{$index+1}}</td>
+                    <td data-label="Series ID" style="color:white">{{indianfancy.RunnerName}}</td>
+                    
+
+                    <td data-label="Action" >
+<button class="btn-info" ng-click="saveIndianSeries(indianfancy)"  ng-show="indianfancy.is_exists == 0">Add</button>
+<button class="btn-success" ng-click=""  ng-show="indianfancy.is_exists == 1">Added</button>
+                       </td>
+                </tr>
+                <tr ng-if="GetindianfancyData.length==0">
+                    <td colspan="3">
+                        <h4>{{Message}}</h4>
+                    </td>
+                </tr>
+            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+
+	
     </div>
 </div>
 
@@ -565,8 +673,8 @@
 
         <div class="fancy-collapse-panel" >
             <div class="panel panel-default match">
-                <div class="panel-heading" role="tab" id="headingOne">
-                    <h3 class="panel-title">Fancy Bet Lists
+                <div class="panel-heading" role="tab" id="headingOne1">
+                    <h3 class="panel-title">Fancy bet list
                         <select name="Fancydrp1" ng-model="FancyVal1" ng-change="Clean();GetSeesionBetData(FancyVal1)" style="color: RED;">
                             <option ng-repeat="FancyDrp in FancyData" value="{{FancyDrp.ID}}" style="color: RED;">{{FancyDrp.HeadName}}</option>
                         </select>
@@ -592,7 +700,7 @@
                             <td >{{unMatchedData.selectionName}}</td>
 
                             <td>{{unMatchedData.userName}}</td>
-                            <td>{{unMatchedData.Odds}}</td>
+                            <td>{{OddReturn(unMatchedData.Odds)}}</td>
                             <td>{{unMatchedData.Stack}}</td>
                             <td>{{unMatchedData.P_L}}</td>
                             <td>{{unMatchedData.MstDate}}</td>

@@ -234,8 +234,25 @@ cellStyle:function (params) { return (params.data.Credit>=0 ? {color: 'green !im
         else var d = l;
         if (a == angular.isUndefinedOrNull || r == angular.isUndefinedOrNull) var o = "",
             h = "";
-        else if (a != angular.isUndefinedOrNull && r != angular.isUndefinedOrNull) var o = i("date")(a, "yyyy-MM-dd"),
-            h = i("date")(r, "yyyy-MM-dd");
+        else if (a != angular.isUndefinedOrNull && r != angular.isUndefinedOrNull) {
+
+            if(a==0)
+            {
+                var o = "";
+            }
+            else {
+                var o = i("date")(a, "yyyy-MM-dd");
+            }
+
+            if(r==0)
+            {
+                var h = "";
+            }
+            else {
+                var h = i("date")(r, "yyyy-MM-dd");
+            }
+        }
+
         t.get("Betentrycntr/Chip_leger/" + e.user_id + "/" + e.type + "/" + d + "/" + o + "/" + h).success(function(t, i, a, r) {
             e.loading=false;
             e.chips_lgr = t.chips_lgr,  e.gridOptionslgr.api.setRowData(e.chips_lgr) ,s(t.chips_lgr, "lgr"), e.SumOfCreadit = e.sum(e.chips_lgr, "Credit"), e.SumOfDebit = e.sum(e.chips_lgr, "Debit")

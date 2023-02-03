@@ -1,9 +1,9 @@
 ﻿'use strict';
-angular.module('ApsilonApp').controller('dealerdashboard',['$scope', '$http', 'sessionService', '$timeout', 'deviceDetector','$filter','$location', function ($scope, $http, sessionService, $timeout, deviceDetector,$filter,$location) {
+angular.module('ApsilonApp').controller('dealerdashboard',['$scope', '$http', 'sessionService', '$timeout', 'deviceDetector','$filter','$location','$state', function ($scope, $http, sessionService, $timeout, deviceDetector,$filter,$location,$state) {
    $scope.getMatchResult = function () {
-	$scope.loading=true;
+	//$scope.loading=true;
         $http.get('Geteventcntr/getUserMatchResult/' + sessionService.get('slctUseID') + '/' + sessionService.get('slctUseTypeID')).success(function (data, status, headers, config) {
-            $scope.matchResult = data.matchRslt;
+            $scope.TmatchResult = data.matchRslt;
 		$scope.loading=false;
             getDynamicOdds();
         }).error(function (data, status, header, config) {
@@ -12,7 +12,16 @@ angular.module('ApsilonApp').controller('dealerdashboard',['$scope', '$http', 's
         
     }
 if(localStorage.length >1)
+{
     $scope.getMatchResult();
+    if(sessionService.get('TmatchResult')!=angular.isUndefinedOrNull)
+    {
+
+        $scope.TempArray = JSON.parse(sessionService.get('TmatchResult'));
+        $scope.matchResult = $scope.TempArray;
+    }
+}
+
 else
    $location.path('/login');
 
@@ -21,12 +30,16 @@ else
     function getDynamicOdds() 
     {
         $scope.marketTimer = $timeout(function () {
-            $http.get('Geteventcntr/getUserMatchResult/' + sessionService.get('slctUseID') + '/' + sessionService.get('slctUseTypeID')).success(function (data, status, headers, config) {
-                $scope.matchResult = data.matchRslt;           
-            }).error(function (data, status, header, config) {
-                $scope.ResponseDetails = "Data: " + data + "<br />status: " + status + "<br />headers: " + jsonFilter(header) + "<br />config: " + jsonFilter(config);
-            });
-            getDynamicOdds();
+            if($state.current.name=='masterDashboard.Home')
+            {
+                $http.get('Geteventcntr/getUserMatchResult/' + sessionService.get('slctUseID') + '/' + sessionService.get('slctUseTypeID')).success(function (data, status, headers, config) {
+                    $scope.TmatchResult = data.matchRslt;
+                }).error(function (data, status, header, config) {
+                    $scope.ResponseDetails = "Data: " + data + "<br />status: " + status + "<br />headers: " + jsonFilter(header) + "<br />config: " + jsonFilter(config);
+                });
+                getDynamicOdds();
+            }
+
         }, 5000);
     }
     $scope.$on("$destroy", function (event) {
@@ -34,8 +47,19 @@ else
         $timeout.cancel($scope.marketTimer);
               
     });
-    
-   
+
+    $scope.updateMatchResult = function(){
+
+        if($scope.TmatchResult!=angular.isUndefinedOrNull)
+        {
+            sessionService.set('TmatchResult',JSON.stringify($scope.TmatchResult));
+            //alert('cart updated');
+            $scope.matchResult = JSON.parse(sessionService.get('TmatchResult'));
+
+        }
+
+    };
+    $scope.$watch('TmatchResult', $scope.updateMatchResult, true);
     $scope.getUrl = function (type, matchid, marketid, matchname, matchdate,SportId)//sourabh 161231
     {
         switch (type) {

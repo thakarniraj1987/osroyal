@@ -72,6 +72,7 @@ angular.module('ApsilonApp').controller('SeriesMatchCntr',['$scope', '$http', 's
         });
     }
     $scope.saveMatch = function (paramsd) {
+
         $scope.loading = true;
         var NewOpenDate = $filter('date')(paramsd.eventDate , 'yyyy-MM-dd HH:mm:ss');
 
@@ -92,7 +93,8 @@ angular.module('ApsilonApp').controller('SeriesMatchCntr',['$scope', '$http', 's
             selectionId3:  paramsd.selectionId3,
             runnerName3:  paramsd.runnerName3,
             startDate:paramsd.startDate,
-            market_runner_json:paramsd.market_runner_json
+            market_runner_json:paramsd.market_runner_json,
+            scoreboard_id:paramsd.scoreboard_id,
          }
         var url = BASE_URL + "Geteventcntr/saveSportMatch";
         $http.post(url, formData).success(function (response) {

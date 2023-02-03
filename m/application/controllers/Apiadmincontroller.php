@@ -432,6 +432,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				$toDateTime = 0;
 			}	
 
+			
 			$page_no = 1;
 			$pageLimit = 9000;
 			$this->load->model('Betentrymodel');
@@ -454,7 +455,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 	    function get_all_matches(){
              $this->load->model('Modelmatchmst');
-			$url = BR_SUPER_AMDIN_URL."getAllMatches";
+			//$url = BR_SUPER_AMDIN_URL."getAllMatches";
+			$url = "http://109.74.202.195/api/v1/betting_api/getAllMatches.php";
 		    $matchResult = $this->httpGet($url);
 		    $data = json_decode($matchResult,true);
 

@@ -54,7 +54,7 @@
                             <th><a ng-click="sort_by('MstDate');"><i class="glyphicon glyphicon-sort"></i></a>Date</th>
                             
                             <th>Action</th>
-                            <th>Session</th>
+                            <th ng-if="false">Session</th>
                         </tr>
                     </thead>
                     <tr ng-repeat="matche in filtered = (match_data | exact:search | orderBy : predicate :reverse) | startFrom:(currentPage-1)*entryLimit | limitTo:entryLimit">
@@ -67,7 +67,7 @@
                             <md-switch ng-model="switch" aria-label="Switch 1" ng-click='changeMatchStatus(matche.MstCode,switch)'><!--{{ switch }}--></md-switch>
                            
                         </td>
-                        <td style="cursor: pointer;" ><a ui-sref="masterDashboard.sessionSetting({MatchId:matche.MstCode})" ng-show="matche.SportID == 4"><img src="app/images/sportsicon/Cricket.png"></a></td>
+                        <td ng-if="false" style="cursor: pointer;" ><a ui-sref="masterDashboard.sessionSetting({MatchId:matche.MstCode})" ng-show="matche.SportID == 4"><img src="app/images/sportsicon/Cricket.png"></a></td>
                     </tr>
                 </table>
             </div>

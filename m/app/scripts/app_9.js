@@ -148,9 +148,10 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                         name: 'ApsilonApp',
                         files: [
                             'app/scripts/services/get_userser.js',
+                            'app/scripts/directives/sidebar/sidebar_1.js?ver='+Math.random(),
                             'app/scripts/directives/header/header_0.js?ver='+Math.random(),
                             'app/scripts/directives/header/header-notification/header-notification_1.js?ver='+Math.random(),
-                            'app/scripts/directives/sidebar/sidebar_1.js?ver='+Math.random(),
+
                             'app/scripts/directives/sidebar/sidebar-search/sidebar-search.js?ver='+Math.random()
 
                         ]
@@ -226,6 +227,8 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                     return $ocLazyLoad.load({
                         name: 'ApsilonApp',
                         files: [
+                            'app/scripts/directives/sidebar/usersidebar.js?ver='+Math.random(),
+                            'app/scripts/directives/sidebar/userrightbar.js?ver='+Math.random(),
                             'app/scripts/directives/dashboard/homedashboard.js?ver=1.5',
                             'app/scripts/controllers/Lstcontroller.js?ver='+Math.random(),
                             "app/assets/js/TVLoad.js"
@@ -311,8 +314,8 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                         files: [
                             'app/scripts/controllers/OnePageRprtCntr.js?ver='+Math.random(),
                             "app/js/libs/FileSaver.js",
-                            "app/js/libs/jszip.js",
                             "app/js/libs/xlsx.js",
+                            "app/js/libs/jszip.js",
                         ]
                     })
                 }
@@ -426,7 +429,6 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
             }
         })
        .state('dashboard.manualSeries', {
-           
             templateUrl: 'app/views/pages/manualSeries.html?ver=' + Math.random(),
             controller: 'manualSeriesCntr',
             url: '/manualSeriesCntr',
@@ -436,6 +438,7 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                         name: 'ApsilonApp',
                         files: [
                             'app/scripts/controllers/manualSeriesCntr.js?ver=' + Math.random(),
+                            "app/js/manualdatetime.js"
                         ]
                     })
                 }
@@ -468,8 +471,8 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                         files: [
                             'app/scripts/controllers/OnePageRprtCntr.js?ver='+Math.random(),
                             "app/js/libs/FileSaver.js",
-                            "app/js/libs/jszip.js",
                             "app/js/libs/xlsx.js",
+                            "app/js/libs/jszip.js",
                         ]
                     })
                 }
@@ -486,8 +489,8 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                         files: [
                             'app/scripts/controllers/OnePageRprtCntr.js?ver='+Math.random(),
                             "app/js/libs/FileSaver.js",
-                            "app/js/libs/jszip.js",
                             "app/js/libs/xlsx.js",
+                            "app/js/libs/jszip.js",
                         ]
                     })
                 }
@@ -504,8 +507,8 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                         files: [
                             'app/scripts/controllers/OnePageRprtCntr.js?ver='+Math.random(),
                             "app/js/libs/FileSaver.js",
-                            "app/js/libs/jszip.js",
                             "app/js/libs/xlsx.js",
+                            "app/js/libs/jszip.js",
                         ]
                     })
                 }
@@ -1431,6 +1434,21 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                 }
             }
         })
+        .state('dashboard.makebet', {
+            templateUrl: '../app/views/pages/makebet.html?ver='+Math.random(),
+            controller: 'makebetCntr',
+            url: '/makebet',
+            resolve: {
+                loadMyFiles: function ($ocLazyLoad) {
+                    return $ocLazyLoad.load({
+                        name: 'ApsilonApp',
+                        files: [
+                            '../app/scripts/controllers/makebet.js?ver='+Math.random(),
+                        ]
+                    })
+                }
+            }
+        })
         .state('dashboard.Matchtypemaster', {
             templateUrl: 'app/views/pages/Matchtypemaster.html?ver='+Math.random(),
             controller: 'Sportstypecontroller',
@@ -1856,8 +1874,9 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                     return $ocLazyLoad.load({
                         name: 'ApsilonApp',
                         files: [
-                            'app/scripts/controllers/Matchoddscntr_3.js?ver='+Math.random(),
                             "app/scripts/directives/sidebar/sidebar_1.js?ver="+Math.random(),
+                            'app/scripts/controllers/Matchoddscntr_3.js?ver='+Math.random(),
+
                             'app/dist/ng-device-detector.js',
                             'app/js/moment.min.js'
                         ]
@@ -2743,6 +2762,7 @@ app.factory('Dialog', ['$mdDialog', '$timeout', function ($mdDialog, $timeout) {
                     .ok('Got it!')
                     .targetEvent(event)
             );
+			
         }
     }
 }]);
@@ -2750,11 +2770,18 @@ app.run(function ($rootScope, sessionService,$location,$state,$templateCache,$ht
 
     $rootScope.$on("$stateChangeStart", function (evt, toState, toParams, fromState, fromParams) {
 
-        if (window.location.protocol == 'http:') {              
-            $rootScope.GApiPath=BASE_URL+"Apicontroller/";            
+        if (window.location.protocol == 'http:') {
+        //$rootScope.GApiPath="https://crakex.in:9998/"; //BR//
+		//$rootScope.GApiPath="http://213.219.39.230/betfair_api/v1/"; //PC//
+		// $rootScope.GApiPath="http://45.79.122.19/apis/"; //MS//
+		 // $rootScope.GApiPath="https://my.betdip.com/ExchangeController/";
+		$rootScope.GApiPath="http://13.127.18.45/"
+		  
         }
         else {
-            $rootScope.GApiPath=BASE_URL+"Apicontroller/";
+           // $rootScope.GApiPath="https://crakex.in:9998/"; //BR//
+		//$rootScope.GApiPath="http://213.219.39.230/betfair_api/v1/"; //PC//
+		   $rootScope.GApiPath="http://45.79.122.19/apis/"; //MS//
         }
         $rootScope.userType=sessionService.get('type');
         $rootScope.$broadcast('MatchOddsTimeOut',{});
@@ -2774,6 +2801,36 @@ app.run(function ($rootScope, sessionService,$location,$state,$templateCache,$ht
             }
 
         }
+       /* socket.emit('chat', {
+            message: 'hello'
+
+        });
+        var receiveTime=0;
+        var sendTime=0;
+        socket.on('chat', function (data) {
+            receiveTime=new Date().getSeconds();
+        });
+        socket.on('connection', function() {
+
+        });
+        socket.on('disconnect', function () {
+            // window.location.reload();
+        });
+        var SenderTimeId= setInterval(function(){
+            sendTime=new Date().getSeconds();
+            socket.emit('chat', {
+                message: 'hello'
+
+            });
+        },1000);
+
+        var TimeId= setInterval(function(){
+            if(Math.abs(sendTime-receiveTime)>9)
+            {
+                // internet disconnect;
+                //window.location.reload();
+            }
+        },4000);*/
         var canceler = $q.defer();
         canceler.resolve();
     });
@@ -2786,6 +2843,7 @@ app.run(function ($rootScope, sessionService,$location,$state,$templateCache,$ht
     $rootScope.Liability = sessionService.get('Liability');
     $rootScope.gurlIp="ws://18.130.213.12";
     $rootScope.gIndurlIp="ws://35.178.148.162";
+    $rootScope.MatchScoreApi="https://score.crakex.in:3290/matchid/";
     //$rootScope.GApiPath="https://crakex.in:8383/";
    // $rootScope.GApiPath="http://139.162.242.237:8383/";
     $rootScope.gUrlArray=[{'SportId':4,'url':'ws://139.162.242.237:8090'},

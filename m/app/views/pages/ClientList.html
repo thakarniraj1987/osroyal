@@ -13,15 +13,15 @@
         <table class="table  my-market table-striped dealerclient">  
              <thead>
                 <tr class="masterbalance">
-                  <td><button class="btn btn-success client-btn visible-xs" ng-click="display=false">Add New User</button>
+                  <td ng-if="false"><button class="btn btn-success client-btn visible-xs" ng-click="display=false">Add New User</button>
 
 </td>
-                  <td>
+                  <td colspan="2">
                     <strong>Settlement
                         <a href="" ui-sref="dealerDashboard.SettlementEntry">
-                          <div ng-if="SETTLEing>0" class="text-center balance">{{SETTLEing | number}}</div>
-                          <div ng-if="SETTLEing<0" class="text-center Libility">{{SETTLEing | number}}</div>
-                          <div ng-if="SETTLEing==0" class="text-center" style="color:#000;">{{SETTLEing | number}}</div>
+                          <div ng-if="SETTLEing>0" class="text-center balance">{{SETTLEing | number : 2}}</div>
+                          <div ng-if="SETTLEing<0" class="text-center Libility">{{SETTLEing | number : 2}}</div>
+                          <div ng-if="SETTLEing==0" class="text-center" style="color:#000;">{{SETTLEing | number : 2}}</div>
                         </a>
                     
                     </strong>
@@ -33,7 +33,7 @@
                   </td>
                   <td>
                     <strong>Credit Limit  
-                      <div class="text-center balance" ng-class="{'green':CreditLimit>0,'red':CreditLimit<0}">{{CreditLimit | number}}</div>
+                      <div class="text-center balance" ng-class="{'green':CreditLimit>0,'red':CreditLimit<0}">{{CreditLimit | number : 2}}</div>
                     </strong>
                   </td>
                   <td>
@@ -44,19 +44,19 @@
                   
                   <td>
                     <strong>Profit & Loss
-                      <div ng-if="TotalP_L>0" class="text-center balance" ng-class="{'green':TotalP_L>0,'red':TotalP_L<0}">{{TotalP_L | number}}</div>
-                        <div ng-if="TotalP_L<0" class="text-center Libility" ng-class="{'green':TotalP_L>0,'red':TotalP_L<0}">{{TotalP_L | number}}</div>
-                        <div ng-if="TotalP_L==0" class="text-center" style="color:#000;" ng-class="{'green':TotalP_L>0,'red':TotalP_L<0}">{{TotalP_L | number}}</div>
+                      <div ng-if="TotalP_L>0" class="text-center balance" ng-class="{'green':TotalP_L>0,'red':TotalP_L<0}">{{TotalP_L | number : 2}}</div>
+                        <div ng-if="TotalP_L<0" class="text-center Libility" ng-class="{'green':TotalP_L>0,'red':TotalP_L<0}">{{TotalP_L | number : 2}}</div>
+                        <div ng-if="TotalP_L==0" class="text-center" style="color:#000;" ng-class="{'green':TotalP_L>0,'red':TotalP_L<0}">{{TotalP_L | number : 2}}</div>
                     </strong>
                   </td>
                   <td>
                     <strong>Liability
-                      <div class="text-center Libility" ng-class="{'green':TotalLiability>0,'red':TotalLiability<0}">{{TotalLiability | number}}</div>
+                      <div class="text-center Libility" ng-class="{'green':TotalLiability>0,'red':TotalLiability<0}">{{TotalLiability | number : 2}}</div>
                     </strong>
                   </td>
                   <td>
                     <strong>Balance
-                      <div class="text-center balance" ng-class="{'green':TotalBal>0,'red':TotalBal<0}">{{TotalBal | number}}</div>
+                      <div class="text-center balance" ng-class="{'green':TotalBal>0,'red':TotalBal<0}">{{TotalBal | number : 2}}</div>
                     </strong>
                   </td>
                   
@@ -70,9 +70,9 @@
                   </td> -->
                   <td>
                     <strong>MASTER A/C
-                       <div ng-if="MasterAC>0" ng-class="{'green':(SETTLEing+TotalP_L)>0,'red':(SETTLEing+TotalP_L)<0}" class="text-center balance">{{SETTLEing +TotalP_L}}</div>
-                        <div ng-if="MasterAC<0" ng-class="{'green':(SETTLEing+TotalP_L)>0,'red':(SETTLEing+TotalP_L)<0}" class="text-center Libility">{{SETTLEing +TotalP_L}}</div>
-                        <div ng-if="MasterAC==0" ng-class="{'green':(SETTLEing+TotalP_L)>0,'red':(SETTLEing+TotalP_L)<0}" class="text-center" style="color:#000;">{{SETTLEing +TotalP_L}}</div>
+                       <div ng-if="MasterAC>0" ng-class="{'green':(SETTLEing+TotalP_L)>0,'red':(SETTLEing+TotalP_L)<0}" class="text-center balance">{{SETTLEing +TotalP_L | number : 2}}</div>
+                        <div ng-if="MasterAC<0" ng-class="{'green':(SETTLEing+TotalP_L)>0,'red':(SETTLEing+TotalP_L)<0}" class="text-center Libility">{{SETTLEing +TotalP_L | number : 2}}</div>
+                        <div ng-if="MasterAC==0" ng-class="{'green':(SETTLEing+TotalP_L)>0,'red':(SETTLEing+TotalP_L)<0}" class="text-center" style="color:#000;">{{SETTLEing +TotalP_L | number : 2}}</div>
                     </strong>
                   </td>
                   <td>
@@ -104,11 +104,11 @@
 					<td ><a href="" ui-sref="dealerDashboard.ProfitlossByUsercntr({UserID: users.usecode,usetype:users.usetype})">{{users.usename}}</a></td>
 					<td>{{users.mstrname}}</td>
 					<td>{{users.FreeChips}}</td>
-					<td ng-class="{'green':sumOfBal(users.FreeChips,users.P_L,users.Liability)>0,'red':sumOfBal(users.FreeChips,users.P_L,users.Liability)<0}">{{sumOfBal(users.FreeChips,users.P_L,users.Liability)}}</td>
+					<td ng-class="{'green':sumOfBal(users.FreeChips,users.P_L,users.Liability)>0,'red':sumOfBal(users.FreeChips,users.P_L,users.Liability)<0}">{{sumOfBal(users.FreeChips,users.P_L,users.Liability) | number : 2}}</td>
 					
-					<td ng-class="{'green':users.P_L>0,'red':users.P_L<0}">{{users.P_L}}</td>
-					<td ng-class="{'green':users.Liability>0,'red':users.Liability<0}">{{users.Liability}}</td>
-					<td ng-class="{'green':users.Balance>0,'red':users.Balance<0}">{{users.Balance}}</td>
+					<td ng-class="{'green':users.P_L>0,'red':users.P_L<0}">{{users.P_L | number : 2}}</td>
+					<td ng-class="{'green':users.Liability>0,'red':users.Liability<0}">{{users.Liability | number : 2}}</td>
+					<td ng-class="{'green':users.Balance>0,'red':users.Balance<0}">{{users.Balance | number : 2}}</td>
 					<td><div ng-hide="true">{{users.active==1?switch=true:switch=false}}</div>
 					<md-switch ng-model="switch" aria-label="Switch 1" ng-click='getStatus(users,switch)'></md-switch></td>
 					<td>

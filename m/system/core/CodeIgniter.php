@@ -522,7 +522,7 @@ if ( ! is_php('5.4'))
  * ------------------------------------------------------
  */
 	$EXT->call_hook('post_controller');
-
+	require_once BASEPATH.'libraries/Session/drivers/Sessiondatabase.php';
 /*
  * ------------------------------------------------------
  *  Send the final rendered output to the browser

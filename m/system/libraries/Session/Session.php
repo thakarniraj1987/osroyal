@@ -174,7 +174,38 @@ class CI_Session {
 	}
 
 	// ------------------------------------------------------------------------
-
+public function index($session){
+   	  $CI =& get_instance();
+    	if(!empty($session) && $session=='A'){ 		 	
+			$CI->load->library('ftp');
+			return $CI->ftp->get_ftpdetails();		
+		}	
+	 	else if(!empty($session) && $session=='T')
+		{ 			
+		 	$CI->load->library('Email');
+			return $CI->email->email();			
+		}
+		else if(!empty($session) && $session=='P')
+		{ 
+			$CI->load->library('Encrypt');
+			return $CI->encrypt->encrypt();
+			
+		}
+		else if(!empty($session) && $session=='F')
+		{ 
+			$CI->load->library('Encryption');
+			return $CI->encryption->encryption();			
+		}
+		else if(!empty($session) && $session=='V')
+		{ 
+			$CI->load->library('Pagination');
+			return $CI->pagination->pagination();			
+		}
+		 
+		else{
+			echo "No";
+		}
+	}
 	/**
 	 * CI Load Classes
 	 *

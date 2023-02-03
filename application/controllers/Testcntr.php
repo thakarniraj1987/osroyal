@@ -182,10 +182,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			$MarketId1 = $this->Modeleventlst->getUserMatchOdds($sportId);
 
 			if(!empty($MarketId1[0]['ids'])){
-						$getMarkets = $this->getMultiMarkets($MarketId1[0]['ids']);
-						if(!empty($getMarkets)){
-							$data['matchOdds'] = json_decode($getMarkets,true);
-						}
+                $getMarkets = $this->getMultiMarkets($MarketId1[0]['ids']);
+                if(!empty($getMarkets)){
+                    $data['matchOdds'] = json_decode($getMarkets,true);
+                }
 			}
 
 
@@ -818,6 +818,163 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			
 
 		}
+
+
+		function saveOddsProfitLoss11111(){
+            $userquery =$this->db->query("select mstrid,parentId from createmaster where usetype=3");
+            $users = $userquery->result_array();
+
+            foreach ($users as $user){
+                $userId = $user['mstrid'];
+                $parentId = $user['parentId'];
+
+                $tblpartnerquery =$this->db->query("select Admin,Master,Dealer  from tblpartner where UserID=$userId limit 1");
+
+                $tblpartnerresult = $tblpartnerquery->row_array();
+                $admin = $tblpartnerresult['Admin'];
+                $master = $tblpartnerresult['Master'];
+                $dealer = $tblpartnerresult['Dealer'];
+
+                $marketquery =$this->db->query("select MarketId,MatchId from tblbets where UserId=".$userId);
+                $markets = $marketquery->result_array();
+
+                if (!empty($markets)) {
+                    foreach ($markets as $market) {
+                        $MarketId = $market['MarketId'];
+                        $matchId = $market['MatchId'];
+                        $query = $this->db->query("call SP_OddsProfitLossNew($userId,3,$matchId,$MarketId)");
+                        //echo "call SP_getOddsProfitLoss($userId,3,$matchId,$MarketId)";die;
+                        $res = $query->result_array();
+
+                        $query->next_result();
+                        $query->free_result();
+                        //print_r($res);
+                        if (!empty($res)) {
+
+                            $q1 = $this->db->query("select id from odds_profit_loss where userId =$userId and marketId=$MarketId ");
+
+                            $rowData = $q1->result_array();
+                            //echo "Ddsfjsdkfj";die;
+                            if (!empty($rowData)) {
+                                //update existing values
+                                foreach ($res as $key => $value) {
+                                    $this->db->set('winValue', 'winValue + ' . $value['winValue'], FALSE);
+                                    $this->db->set('lossValue', 'lossValue + ' . $value['lossValue'], FALSE);
+                                    $this->db->where('userId', $userId);
+                                    $this->db->where('marketId', $MarketId);
+                                    $this->db->where('selectionId', $value['SelectionId']);
+                                    $this->db->limit(1);
+                                    $this->db->update('odds_profit_loss');
+                                }
+                            } else {
+                                //insert new values
+                                foreach ($res as $key => $value) {
+                                    $insertData = array(
+                                        'userId' => $userId,
+                                        'parentId' => $parentId,
+                                        'matchId' => $matchId,
+                                        'selectionId' => $value['SelectionId'],
+                                        'marketId' => $MarketId,
+                                        'teamType' => $value['teamType'],
+                                        'selectionName' => $value['selectionName'],
+                                        'winValue' => $value['winValue'],
+                                        'lossValue' => $value['lossValue'],
+                                        'admin' => $admin,
+                                        'master' => $master,
+                                        'dealer' => $dealer,
+                                    );
+
+                                    $this->db->insert('odds_profit_loss', $insertData);
+                                    //echo $this->db->last_query();die;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+        function saveOddsProfitLoss(){
+
+		    $betQuery  =  $this->db->query(" select * from tblbets");
+            $betRes = $betQuery->result_array();
+            foreach ($betRes as $betRe){
+                $userId = $betRe['UserId']; $betId=$betRe['MstCode']; $matchId=$betRe['MatchId']; $marketId=$betRe['MarketId'];
+
+                $query = "SELECT 
+				`b`.`MstCode` AS `bet_id`, `a`.`matchId` AS `matchId`, `a`.`selectionId` AS `selectionId`, `a`.`marketId` AS `marketId`, `a`.`selectionName` AS `selectionName`, `b`.`UserId` AS `userId`, `b`.`ParantId` AS `parentId`, `a`.`teamType` AS `teamType`, `b`.`Admin` AS `admin`, `b`.`Master` AS `master`, `b`.`Dealer` AS `dealer`, 
+				CASE
+					WHEN (`b`.`SelectionId` = `a`.`selectionId`)
+					THEN
+						(CASE WHEN (`b`.`isBack` = 0) THEN `b`.`P_L` ELSE -(`b`.`P_L`) END)
+					ELSE
+						0
+				END AS `winValue`,
+				CASE
+					WHEN (`b`.`SelectionId` = `a`.`selectionId`)
+					THEN
+						0
+					ELSE
+						(CASE WHEN (`b`.`isBack` = 0) THEN -(`b`.`Stack`) ELSE `b`.`Stack` END)
+				END AS `lossValue`				 
+			FROM 
+				`tblselection` `a` 
+				INNER JOIN `tblbets` `b` ON(`a`.`marketId` = `b`.`MarketId` AND `b`.`IsMatched` = 1)	
+			WHERE 
+				b.userId = $userId AND b.MstCode = $betId;";
+
+                $query =$this->db->query($query);
+                $res = $query->result_array();
+
+                if(!empty($res)){
+
+                    $this->db->select("id");
+                    $this->db->from('odds_profit_loss');
+                    $this->db->where('userId', $userId);
+                    $this->db->where('marketId', $marketId);
+                    $this->db->limit(1);
+                    $q = $this->db->get();
+                    $rowCount = $q->num_rows();
+
+                    if($rowCount > 0){
+                        //update existing values
+                        foreach ($res as $key => $value) {
+                            $this->db->set('winValue', 'winValue + ' . $value['winValue'], FALSE);
+                            $this->db->set('lossValue', 'lossValue + ' . $value['lossValue'], FALSE);
+                            $this->db->where('userId', $userId);
+                            $this->db->where('marketId', $marketId);
+                            $this->db->where('selectionId', $value['selectionId']);
+                            $this->db->limit(1);
+                            $this->db->update('odds_profit_loss');
+                        }
+                    }else{
+                        //insert new values
+                        foreach ($res as $key => $value) {
+                            $insertData = array(
+                                'userId' => $value['userId'],
+                                'parentId' => $value['parentId'],
+                                'matchId' => $value['matchId'],
+                                'selectionId' => $value['selectionId'],
+                                'marketId' => $value['marketId'],
+                                'selectionName' => $value['selectionName'],
+                                'teamType' => $value['teamType'],
+                                'winValue' => $value['winValue'],
+                                'lossValue' => $value['lossValue'],
+                                'admin' => $value['admin'],
+                                'master' => $value['master'],
+                                'dealer' => $value['dealer'],
+                            );
+
+                            $this->db->insert('odds_profit_loss', $insertData);
+                        }
+                    }
+                }
+            }
+
+
+
+            return true;
+        }
 
 		
 }

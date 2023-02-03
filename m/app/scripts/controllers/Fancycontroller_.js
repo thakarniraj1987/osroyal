@@ -1,4 +1,4 @@
-﻿app.controller('Fancycontroller', ['$scope', '$http', '$timeout', '$log', '$mdDialog', function ($scope, $http, $timeout, $log, $mdDialog)//sourabh 170103
+app.controller('Fancycontroller', ['$scope', '$http', '$timeout', '$log', '$mdDialog','Dialog', function ($scope, $http, $timeout, $log, $mdDialog,Dialog)//sourabh 170103
 {
     $scope.loading = true;
     $scope.ismeridian = false;
@@ -11,6 +11,28 @@
         d.setMinutes(0);
         $scope.mytime = d;
     };
+
+    $scope.addScorekey = function(matchid,key){
+        debugger
+        if(key != undefined && key !=''){
+            $http.get(BASE_URL+'Geteventcntr/updateScoreBoardId/'+matchid+'/'+key).success(function (data, status, headers, config) {
+                debugger
+              //  $scope.scoredata = data;
+                Dialog.autohide(data.message);
+
+            });
+        }else {
+            Dialog.autohide('Please enter key');
+        }
+
+    }
+    $scope.fetchscoredata = function () {
+        $http.get('https://score.crakex.in:3290/matchlist').success(function (data, status, headers, config) {
+            debugger
+            $scope.scoredata = data;
+        });
+    }
+    $scope.fetchscoredata();
     $scope.changed = function () { $log.log('Time changed to: ' + $scope.mytime); };
     $scope.clear = function () { $scope.mytime = null; };
     $scope.open = function ($event) {
@@ -300,6 +322,52 @@
         else{
             $scope.loading = false;
         }
+    };
+    $scope.changeStake = function (stake, matchid,type) {
+
+        $scope.loading = true;
+
+        if(type=="min")
+        {
+            var data={
+                "value":stake,
+                "key":'minStack',
+                "match_id":matchid
+            };
+        }
+        else {
+            var data={
+                "value":stake,
+                "key":'maxStack',
+                "match_id":matchid
+            };
+        }
+        $http.post(BASE_URL+'Lstsavemstrcontroller/updateMinAndMaxStackLimit/',data).success(function (data, status, headers, config) {
+
+            if(data.error==0)
+            {
+                var s = 0;
+                $http.get(BASE_URL+'Geteventcntr/getMatchLst/' + s).success(function (data, status, headers, config) {
+                    $scope.match_data = data.matchLst;
+                    $scope.currentPage = 1;
+                    $scope.entryLimit = 20;
+                    $scope.filteredItems = $scope.match_data.length;
+                    $scope.totalItems = $scope.match_data.length;
+                });
+                alert('Updated Successfully');
+                $scope.loading = false;
+            }
+            else {
+                alert(data.message);
+                $scope.loading = false;
+            }
+
+        }).error(function (data, status, header, config) {
+            $scope.ResponseDetails = "Data: " + data +
+                "<br />status: " + status +
+                "<br />headers: " + jsonFilter(header) +
+                "<br />config: " + jsonFilter(config);
+        });
     };
     $scope.changeVolumeLimit = function (limit, matchid) {
         $scope.loading = true;

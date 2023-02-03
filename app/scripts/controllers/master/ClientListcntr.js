@@ -1,5 +1,5 @@
 'use strict';
-angular.module('ApsilonApp').controller('ClientListcntr',['$scope','$mdDialog', '$http', 'sessionService','get_userser', '$timeout', 'deviceDetector','$filter','$window','$rootScope', function ($scope, $mdDialog,$http, sessionService,get_userser, $timeout, deviceDetector,$filter,$window,$rootScope) {
+angular.module('ApsilonApp').controller('ClientListcntr',['$scope','$mdDialog', '$http', 'sessionService','get_userser', '$timeout', 'deviceDetector','$filter','$window','$rootScope','Dialog', function ($scope, $mdDialog,$http, sessionService,get_userser, $timeout, deviceDetector,$filter,$window,$rootScope,Dialog) {
     $scope.UserName = sessionService.get('user');
     $scope.PID = sessionService.get('user_id');
     $scope.userType=sessionService.get('type');
@@ -262,13 +262,16 @@ else{$scope.loading = false; }
         });
     }
     $scope.showViewSetting = function (node) {  //currentScope1
-       
+        if(node.create_no_of_child!=angular.isUndefinedOrNull)
+        {
+            node.create_no_of_child=parseInt(node.create_no_of_child);
+        }
         $scope.vcNode = node;
         //$scope.vcCurrentScope1 = currentScope1;
         $scope.showViewAccountForm();
     };
     $scope.UpdateViewAccount = function (useinfo, node) {
-                
+
                 var userId = useinfo.userId;
                 var Name = useinfo.Name;
                 var partnership = 0;
@@ -278,6 +281,7 @@ else{$scope.loading = false; }
                 var maxLoss = useinfo.maxLoss;
                 var remarks =useinfo.remarks;
                 var maxStake = useinfo.maxStake;
+                useinfo.create_no_of_child=node.create_no_of_child;
                 var accountUserData = {
                         userId: userId,
                         name: Name,
@@ -287,7 +291,8 @@ else{$scope.loading = false; }
                         remarks:remarks,
                         maxStake: maxStake,
                         InPlayStack: useinfo.InPlayStack,
-                        set_timeout: useinfo.set_timeout
+                        set_timeout: useinfo.set_timeout,
+                        create_no_of_child:node.create_no_of_child
                     }
                 $http({
                     method: 'POST', url: 'Createmastercontroller/updateUserAccountData/', data: useinfo, headers: { 'Content-Type': 'application/x-www-form-urlencoded' }

@@ -98,7 +98,7 @@ class Betentrymodel extends CI_Model
 	}	
 
 	function validateSessionSaveBet($data,$redisArr){
-		
+		//print_r($data['OddsNumber']);die;
 	//	print_r($data);die;
 		$result = array();
 	
@@ -125,7 +125,7 @@ class Betentrymodel extends CI_Model
 				}else{
 					$sLayKey = $data['MarketId'].'_s'.$data['ind_fancy_selection_id'].'_lay';
 					$layStr = $redisArr[$sLayKey];
-					$layArr = explode(',', $layStr);		
+					$layArr = explode(',', $layStr);
 					if($layArr[0] == $data['OddsNumber']){
 
 					}else{
@@ -176,6 +176,9 @@ class Betentrymodel extends CI_Model
         } elseif (isset($userData[0]['lgnusrCloseAc']) && $userData[0]['lgnusrCloseAc'] == 0) {
         	$result = array('code' => 9 ,'error'=>true,'message' => 'Your Account is Closed...');
         	return $result;	
+        }elseif ($data['OddsNumber']<=0 ) {
+            $result = array('code' => 9 ,'error'=>true,'message' => 'run must be greater than 0');
+            return $result;
         } elseif (isset($userData[0]['mstrlock']) && $userData[0]['mstrlock'] == 0) {
         	$result = array('code' => 9 ,'error'=>true,'message' => 'Your Account is InActive...');
         	return $result;	
@@ -230,7 +233,10 @@ class Betentrymodel extends CI_Model
 		$MarketId = $data['MarketId'];
 		$priceVal = $data['priceVal'];
 		$selectionId = $data['selectionId'];
-		
+		$betfair_status = $data['betfair_status'];
+
+		//print_r($betfair_status);die;
+
 
 		$config_matched = CONFIG_UNMATCHED;
 
@@ -244,11 +250,22 @@ class Betentrymodel extends CI_Model
 			return $result;	
 		}
 
+       //var_dump($betfair_status!='OPEN' and $data['isManual']==0 );die;
+        if($betfair_status!='OPEN' and $data['isManual']==0){
+            $result = array('code' => 4 ,'error'=>true,'message' => 'Market Is Suspended');
+            return $result;
+        }
+       
+
+
+
+
 		if(!empty($marketData['max_bet_liability']) && ($stake > $marketData['max_bet_liability'])){
 			$result = array('code' => 4 ,'error'=>true,'message' => 'Max Market bet liablity is '.$marketData['max_bet_liability']);
 			return $result;	
 		}
-		
+
+
 	//	echo "$MarketId,$loginId,$UserTypeId,$matchId";
 		$runners = $this->sumOfOdds($MarketId,$loginId,$UserTypeId,$matchId);
 
@@ -338,10 +355,29 @@ class Betentrymodel extends CI_Model
 
         $errorMinStake = MIN_STAKE;
 
-        if($stake < $errorMinStake){
-            $minStakeMsg = 'Minimum stake is '.$errorMinStake;
-            $result = array('code' => ERROR_MIN_STAKE ,'error'=>true,'message' => $minStakeMsg);
-            return $result;
+        if($marketData['minStack']<=0){
+            if($stake < $errorMinStake){
+                $minStakeMsg = 'Minimum stake is '.$errorMinStake;
+                $result = array('code' => ERROR_MIN_STAKE ,'error'=>true,'message' => $minStakeMsg);
+                return $result;
+            }
+        }else{
+            if($stake < $marketData['minStack']){
+                $result = array('code' => 4 ,'error'=>true,'message' => 'Min Match Stack is '.$marketData['minStack']);
+                return $result;
+            }
+        }
+        if($marketData['maxStack']<=0){
+            if($stake > MAX_STAKE){
+                $maxStakeMsg = 'Maximum stake is '.MAX_STAKE;
+                $result = array('code' => ERROR_MIN_STAKE ,'error'=>true,'message' => $maxStakeMsg);
+                return $result;
+            }
+        }else{
+            if( $stake > $marketData['maxStack']){
+                $result = array('code' => 4 ,'error'=>true,'message' => 'Max Match Stack is '.$marketData['maxStack']);
+                return $result;
+            }
         }
 
 		if(!empty($marketData['max_market_liability'])){
@@ -371,16 +407,6 @@ class Betentrymodel extends CI_Model
             	return $result;
 			}
 		}
-
-		$config_min_odd_limit = CONFIG_MIN_ODD_LIMIT;
-
-	//	if($config_max_odd_limit <= 0){
-			if($priceVal <= $config_min_odd_limit){
-				$result = array('code' => 9 ,'error'=>true,'message' => 'Min odd limit reached');
-            	return $result;
-			}
-	//	}
-
         if($data['type']=='auto'){
             $Model_general_setting = $this->model_load_model('Model_general_setting');
             $bet_start_time_before = $Model_general_setting->get('BET_START_TIME_BEFORE');
@@ -438,7 +464,7 @@ class Betentrymodel extends CI_Model
                 $team = 'draw';
             }
 
-            if($manualMatchOddsDetails['active_'.$team]==0){
+            if($manualMatchOddsDetails['active_'.$team]==1){
                 $result = array('code' => 9 ,'error'=>true,'message' => 'Market not active');
                 return $result;
             }
@@ -505,10 +531,6 @@ class Betentrymodel extends CI_Model
 			$ParantId=$GetpId[0]->parentId;
 			$UserId= $data['loginId'];
 		}
-	/*	else{
-			$ParantId=$this->input->post('ParantId');
-			$UserId=$this->input->post('userId');
-		} */
 
 		if($data['isback'] == 1){
 			$isBack = 0;
@@ -544,17 +566,14 @@ class Betentrymodel extends CI_Model
 		$stateMent='Chips Deducted From Betting >>'.$_POST['MatchName'];
            //echo "<pre>"; print_r($data);die;
 		 $parameter=$data['loginId'].','.$UserId.','.$ParantId.','.$data['matchId'].','.$data['selectionId'].','.$data['stake'].',"'.$data['MarketId'].'","'.$data['placeName'].'","'.date('Y-m-d H:i:s',now()).'",'.$data['priceVal'].','.$data['p_l'].','.$isBack.','.$data['isMatched'].',"'.$stateMent.'","'.$data['deviceInfo'].'","'.$_SERVER['REMOTE_ADDR'].'",'.$InplayVal.','.$data['ApiVal'].',"'.$data['type'].'"';
-		//echo "call sp_PlaceBet($parameter)";die;
-		/*START pROCEDURE CALL*/
+           // echo "call sp_PlaceBet($parameter)";die;
 			$query =$this->db->query("call sp_PlaceBet($parameter)");
 			$res = $query->result_array();
+
+
 			$query->next_result();
 			$query->free_result();
-			//print_r($query);
-			//echo $this->db->queries[0];
 			return $res;
-			/*END OF PROCEDURE CALL*/
-			//	return true;
 	}
     function deleteUnMatchBetData(){
 
@@ -594,24 +613,22 @@ class Betentrymodel extends CI_Model
         try {
             $redis = new Redis();
             $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
-            $this->db->select('group_concat(b.MstCode) as MstCode,b.Stack,b.isBack,b.SelectionId,b.MarketId,b.Odds,b.MatchId,m.SportID');
-            $this->db->from('tblbets b');
-            $this->db->join('matchmst m','b.MatchId=m.MstCode');
-            $this->db->where('IsMatched',0);
-            $this->db->where('type','auto');
-            $this->db->group_by('isBack');
-            $this->db->group_by('Stack');
-            $this->db->group_by('MarketId');
-            $this->db->group_by('SelectionId');
-            $query = $this->db->get();
+            $query =  $this->db->query("SELECT group_concat(distinct c.MstCode) as MstCode, `b`.`Stack`, `b`.`isBack`, `b`.`SelectionId`, `b`.`MarketId`, `b`.`Odds`, `b`.`MatchId`, `m`.`SportID`
+FROM `tblbets` `b`
+JOIN `matchmst` `m` ON `b`.`MatchId`=`m`.`MstCode`
+join tblbets c on (((b.Odds >= c.Odds and b.`isBack`=0) or (b.Odds <= c.Odds and b.`isBack`=1) ) and b.`MarketId`=c.`MarketId` and b.`SelectionId`=c.`SelectionId` and b.`isBack`=c.`isBack`  and c.`IsMatched` =0)
+WHERE b.`IsMatched` =0
+AND b.`type` = 'auto'
+GROUP BY b.`isBack`, b.`Odds`, b.`MarketId`, b.`SelectionId`");
+
             $results = $query->result_array();
 
             if(!empty($results)){
                 $database = $this->db->database;
 
                 foreach ($results as $result){
-                   $key =$database.'_'.$result['MarketId'].'_'.$result['SelectionId'].'_'.$result['isBack'].'_'.$result['SportID'].'_'.$result['Odds'];
-                   $value= json_encode(explode(',',$result['MstCode']));
+                   $key =$database.'_'.$result['MarketId'].'_'.$result['SelectionId'].'_'.$result['isBack'].'_'.$result['SportID'].'_'.$result['Odds'].'_'.$_SERVER['HTTP_HOST'];
+                   $value= $result['MstCode'];
                     $redis->set($key,$value);
                 }
 
@@ -697,9 +714,10 @@ class Betentrymodel extends CI_Model
 	function sumOfOdds($MarketId,$userId,$userType,$matchId)//170201_1
 	{
 		if($userId==null)$userId1=0;else $userId1=$userId;
-		
-			//$query =$this->db->query("call SP_OddsProfitLoss($userId1,$MarketId)");//sourabh 11-dec-2016
-			$query =$this->db->query("call SP_OddsProfitLossNew($userId1,$userType,$matchId,$MarketId)");//sourabh 170201_1
+
+			//$query =$this->db->query("call SP_OddsProfitLossNew($userId1,$userType,$matchId,$MarketId)");//sourabh 170201_1
+			//$query =$this->db->query("call getOddsProfitLoss($MarketId,$userId1,$userType,$matchId)");//sourabh 170201_1
+        $query =$this->db->query("call SP_getOddsProfitLoss($userId,$userType,$matchId,$MarketId)");
 			$res = $query->result_array();
 			$query->next_result();
 			$query->free_result();
@@ -795,10 +813,14 @@ class Betentrymodel extends CI_Model
 	}
 
     function moveUnMatchToMatchBetByAdmin($betId){
+
+        $this->updateOddsProfitLossOnBetMoveUnmatchToMatch($betId);
         $dataArray = array('IsMatched' => 1,'MatchedDate'=>date('Y-m-d H:i:s',now()));
         $this->db->where('MstCode',$betId);
         $this->db->update('tblbets', $dataArray);
-        //echo $this->db->queries[0];die();
+       // echo $this->db->last_query();die();
+
+
         return true;
     }
 
@@ -1018,6 +1040,26 @@ class Betentrymodel extends CI_Model
         return $res;
     }
 
+    function sessionBetDetailsGroupByMatch(){
+        $this->db->select("mtchmst.matchName name,mtchmst.startDate date,count(b.MstCode) noOfRecord,sum(b.Stack) totalAmount");
+        $this->db->from('tblbets b');
+        $this->db->join('matchmst mtchmst', 'mtchmst.MstCode=b.MatchId', 'INNER');
+        $this->db->group_by('mtchmst.MstCode');
+        $query = $this->db->get();
+        //echo $this->db->last_query();die;
+        return $query->result_array();
+    }
+
+    function oddBetDetailsGroupByMatch(){
+        $this->db->select("mtchmst.matchName name,mtchmst.startDate date,count(b.matchId) noOfRecord,sum(b.bet_value) totalAmount");
+        $this->db->from('bet_entry b');
+        $this->db->join('matchmst mtchmst', 'mtchmst.MstCode=b.matchId', 'INNER');
+        $this->db->group_by('mtchmst.MstCode');
+        $query = $this->db->get();
+        //echo $this->db->last_query();die;
+        return $query->result_array();
+    }
+
     /**
      * [myBetsFilters description]
      * @param  [bet_type -> M=>Matched,U=>Unmatched,P=>Past]
@@ -1033,9 +1075,7 @@ class Betentrymodel extends CI_Model
 			$pageno = $data['page_no'];
 			$page_max = $page_limit;
         	$start = ($pageno - 1) * $page_max; 
-        	
-        /*	print_r($data); 
-        	die; */ 
+
 			$query =$this->db->query("CALL `GetBetHistoryFilterPaging`($userId, '$from_date', '$to_date' , $start , $page_limit, '$betType')");
 			
 			$res = $query->result_array();
@@ -1059,6 +1099,37 @@ class Betentrymodel extends CI_Model
 			return $res;
 	}
 
+    function deleteBetsFilters($data){
+        $betType = $data['bet_type'];
+        $userId = $data['user_id'];
+        $from_date = $data['from_date'];
+        $to_date = $data['to_date'];
+
+        $page_limit = $data['page_limit'];
+        $pageno = $data['page_no'];
+        $page_max = $page_limit;
+        $start = ($pageno - 1) * $page_max;
+
+        $query =$this->db->query("CALL `GetDeleteBetHistoryFilterPaging`($userId, '$from_date', '$to_date' , $start , $page_limit, '$betType')");
+
+        $res = $query->result_array();
+        $query->next_result();
+        $query->free_result();
+        //print_r($res);
+        //die();
+        return $res;
+    }
+    function myDeleteBetsFiltersCount($data){
+        $betType = $data['bet_type'];
+        $userId = $data['user_id'];
+        $from_date = $data['from_date'];
+        $to_date = $data['to_date'];
+        $query =$this->db->query("CALL `GetDeleteBetHistoryFilterPagingCount`($userId, '$from_date', '$to_date','$betType')");
+        $res = $query->result_array();
+        $query->next_result();
+        $query->free_result();
+        return $res;
+    }
 
 	function mb_myBetsFilters($data){
 			$userId = $data['user_id'];
@@ -1416,15 +1487,37 @@ FROM bet_entry_bak where matchId=$matchId");
     }
 
 	function deleteGetbettingmat($betId,$userId,$marketId){
-	
 		$query =$this->db->query("call SP_DelMatch($userId,$betId,$marketId)");
 		$res = $query->result_array();
 		$query->next_result();
 		$query->free_result();
 
+		if($marketId == 2){
+			$this->updateUserFancyLiabilityOnBetDelete($betId, 'bet_entry_bak');
+		}else{
+			$this->updateOddsProfitLossOnBetDelete($betId, $marketId, 'tblbets_bak');
+		}
 
+		$cmModel = $this->model_load_model('Modelcreatemaster');
+		$cmModel->updateUserBalLiablity($userId);
 		return $query;
 	}
+
+    function moveToAvoidBet($betId,$userId,$marketId){
+
+        $query =$this->db->query("call SP_MoveToVoidBats($userId,$betId,$marketId)");
+
+        $res = $query->result_array();
+        $query->next_result();
+        $query->free_result();
+
+        if($marketId == 2){
+            $this->updateUserFancyLiabilityOnBetVoid($betId, 'void_bet_entry');
+        }else{
+            $this->updateOddsProfitLossOnBetVoid($betId, $marketId, 'void_tblbets');
+        }
+        echo $query;
+    }
 	
 	function NewChip_historyP($userId,$type){
 
@@ -1471,12 +1564,69 @@ FROM bet_entry_bak where matchId=$matchId");
                 $query =$this->db->query("call GetLedger($userType,$userId,$selectType,0,$fromDate2,$ToDate2)");//170201
             }
 
-			//$query =$this->db->query("call GetLedger($userType,$userId,$selectType,0,$fromDate2,$ToDate2)");//170201
 			$res = $query->result_array();
 			$query->next_result();
 			$query->free_result();
 			return $res;
 	}
+
+	function Chip_leger_filter($userId,$userType,$selectType,$fromDate1,$ToDate1,$transaction_type){
+	   // echo $fromDate1;
+       // echo $ToDate1;
+	        if($fromDate1==null ||$ToDate1==null){
+                //$fromDate2="''";
+                //$ToDate2="''";
+                //echo "true";
+            //  echo "call GetLedgerFilters($userType,$userId,$selectType,0,'$transaction_type',null,null)";
+                $query =$this->db->query("call GetLedgerFilters($userType,$userId,$selectType,0,'$transaction_type',null,null)");//170201
+            }else{
+                $fromDate2="'".$fromDate1."'";
+               // echo"||";
+                $ToDate2="'".$ToDate1."'";
+
+                //echo $userType,$userId,$selectType,0,$fromDate2,$ToDate2;die;
+                //echo "False";
+            // echo "call GetLedgerFilters($userType,$userId,$selectType,0,'$transaction_type',null,null)";die;
+                $query =$this->db->query("call GetLedgerFilters($userType,$userId,$selectType,0,'$transaction_type',$fromDate2,$ToDate2)");//170201
+            }
+
+			$res = $query->result_array();
+			$query->next_result();
+			$query->free_result();
+			return $res;
+	}
+
+	
+
+	function Chip_leger_filter_count($userId,$userType,$selectType,$fromDate1,$ToDate1,$transaction_type){
+	   // echo $fromDate1;
+       // echo $ToDate1;
+	        if($fromDate1==null ||$ToDate1==null){
+                //$fromDate2="''";
+                //$ToDate2="''";
+                //echo "true";
+              //echo "call GetLedger($userType,$userId,$selectType,0,null,null)";
+                $query =$this->db->query("call GetLedgerFiltersCount($userType,$userId,$selectType,0,'$transaction_type',null,null)");//170201
+            }else{
+                $fromDate2="'".$fromDate1."'";
+               // echo"||";
+                $ToDate2="'".$ToDate1."'";
+
+                //echo $userType,$userId,$selectType,0,$fromDate2,$ToDate2;die;
+                //echo "False";
+            //    echo "call GetLedgerFiltersCount($userType,$userId,$selectType,0,'$transaction_type',$fromDate2,$ToDate2)"; die;
+                $query =$this->db->query("call GetLedgerFiltersCount($userType,$userId,$selectType,0,'$transaction_type',$fromDate2,$ToDate2)");//170201
+            }
+
+			$res = $query->result_array();
+			$query->next_result();
+			$query->free_result();
+			return $res;
+	}
+
+
+
+
 	function GetPlusA_c($userId,$matchId,$MarketId,$fancyId){
 	
 			$query =$this->db->query("call sp_PL_ChipSumm_P($userId,$matchId,'$MarketId',$fancyId)");
@@ -1522,20 +1672,19 @@ FROM bet_entry_bak where matchId=$matchId");
     }
 
 	function setHeaderMsg(){
-			$message=$_POST['setMessage'];
-			//echo "call SetMarquee('$message')";
-			$query =$this->db->query("call SetMarquee('$message')");
-			$res = $query->result_array();
-			$query->next_result();
-			$query->free_result();
-			return $res;
+
+        $message=$_POST['setMessage'];
+        $myfile = fopen("marquee.txt", "w");
+        $txt = $message;
+        fwrite($myfile, $txt);
+        fclose($myfile);
+		return true;
 	}
-	function DisplayMsgOnHeader(){			
-			$query =$this->db->query("call GetMarquee()");
-			$res = $query->result_array();
-			$query->next_result();
-			$query->free_result();
-			return $res;
+	function DisplayMsgOnHeader(){
+        $myfile = fopen("marquee.txt", "r") ;
+        $res =  fread($myfile,filesize("marquee.txt"));
+        fclose($myfile);
+        return $res;
 	}
 
 	function updateBalByMatchSession($matchId,$fancyId){
@@ -1597,4 +1746,331 @@ FROM bet_entry_bak where matchId=$matchId");
 			return $sumsessions;
 
 	}
+
+    function saveOddsProfitLoss($userId, $betId, $matchId, $marketId){
+
+        $query = "SELECT 
+				`b`.`MstCode` AS `bet_id`, `a`.`matchId` AS `matchId`, `a`.`selectionId` AS `selectionId`, `a`.`marketId` AS `marketId`, `a`.`selectionName` AS `selectionName`, `b`.`UserId` AS `userId`, `b`.`ParantId` AS `parentId`, `a`.`teamType` AS `teamType`, `b`.`Admin` AS `admin`, `b`.`Master` AS `master`, `b`.`Dealer` AS `dealer`, 
+				CASE
+					WHEN (`b`.`SelectionId` = `a`.`selectionId`)
+					THEN
+						(CASE WHEN (`b`.`isBack` = 0) THEN `b`.`P_L` ELSE -(`b`.`P_L`) END)
+					ELSE
+						0
+				END AS `winValue`,
+				CASE
+					WHEN (`b`.`SelectionId` = `a`.`selectionId`)
+					THEN
+						0
+					ELSE
+						(CASE WHEN (`b`.`isBack` = 0) THEN -(`b`.`Stack`) ELSE `b`.`Stack` END)
+				END AS `lossValue`				 
+			FROM 
+				`tblselection` `a` 
+				INNER JOIN `tblbets` `b` ON(`a`.`marketId` = `b`.`MarketId` AND `b`.`IsMatched` = 1)	
+			WHERE 
+				b.userId = $userId AND b.MstCode = $betId;";
+
+        $query =$this->db->query($query);
+        $res = $query->result_array();
+
+        if(!empty($res)){
+
+            $this->db->select("id");
+            $this->db->from('odds_profit_loss');
+            $this->db->where('userId', $userId);
+            $this->db->where('marketId', $marketId);
+            $this->db->limit(1);
+            $q = $this->db->get();
+            $rowCount = $q->num_rows();
+
+            if($rowCount > 0){
+                //update existing values
+                foreach ($res as $key => $value) {
+                    $this->db->set('winValue', 'winValue + ' . $value['winValue'], FALSE);
+                    $this->db->set('lossValue', 'lossValue + ' . $value['lossValue'], FALSE);
+                    $this->db->where('userId', $userId);
+                    $this->db->where('marketId', $marketId);
+                    $this->db->where('selectionId', $value['selectionId']);
+                    $this->db->limit(1);
+                    $this->db->update('odds_profit_loss');
+                }
+            }else{
+                //insert new values
+                foreach ($res as $key => $value) {
+                    $insertData = array(
+                        'userId' => $value['userId'],
+                        'parentId' => $value['parentId'],
+                        'matchId' => $value['matchId'],
+                        'selectionId' => $value['selectionId'],
+                        'marketId' => $value['marketId'],
+                        'selectionName' => $value['selectionName'],
+                        'teamType' => $value['teamType'],
+                        'winValue' => $value['winValue'],
+                        'lossValue' => $value['lossValue'],
+                        'admin' => $value['admin'],
+                        'master' => $value['master'],
+                        'dealer' => $value['dealer'],
+                    );
+
+                    $this->db->insert('odds_profit_loss', $insertData);
+                }
+            }
+        }
+        return true;
+    }
+
+    function getOddsProfitLoss($MarketId,$userId,$userType,$matchId)
+    {
+
+        $query =$this->db->query("call SP_getOddsProfitLoss($userId,$userType,$matchId,$MarketId)");
+        $res = $query->result_array();
+        $query->next_result();
+        $query->free_result();
+        return $res;
+
+    }
+
+    function updateOddsProfitLossOnBetDelete($betId, $marketId, $tableName = 'tblbets_bak'){
+        //Here we fetch deleted bet data from tblbets_cancelled table
+        $query = "SELECT 
+					`b`.`MstCode` AS `bet_id`, `a`.`matchId` AS `matchId`, `a`.`selectionId` AS `selectionId`, `a`.`marketId` AS `marketId`, `b`.`UserId` AS `userId`, 
+					CASE
+						WHEN (`b`.`SelectionId` = `a`.`selectionId`)
+						THEN
+							(CASE WHEN (`b`.`isBack` = 0) THEN `b`.`P_L` ELSE -(`b`.`P_L`) END)
+						ELSE
+							0
+					END AS `winValue`,
+					CASE
+						WHEN (`b`.`SelectionId` = `a`.`selectionId`)
+						THEN
+							0
+						ELSE
+							(CASE WHEN (`b`.`isBack` = 0) THEN -(`b`.`Stack`) ELSE `b`.`Stack` END)
+					END AS `lossValue`				 
+				FROM 
+					`tblselection` `a` 
+					INNER JOIN $tableName `b` ON(`a`.`marketId` = `b`.`MarketId` AND `b`.`IsMatched` = 1)	
+				WHERE 
+					b.MstCode = $betId AND b.MarketId = $marketId;";
+
+        $query =$this->db->query($query);
+        $res = $query->result_array();
+       // echo $this->db->last_query();die;
+        if(!empty($res)){
+            //update existing values with subtract values which deleted
+            foreach ($res as $key => $value) {
+                $this->db->set('winValue', 'winValue - ' . $value['winValue'], FALSE);
+                $this->db->set('lossValue', 'lossValue - ' . $value['lossValue'], FALSE);
+                $this->db->where('userId', $value['userId']);
+                $this->db->where('marketId', $marketId);
+                $this->db->where('selectionId', $value['selectionId']);
+                $this->db->limit(1);
+                $this->db->update('odds_profit_loss');
+            }
+        }
+        return true;
+    }
+
+    function updateUserFancyLiabilityOnBetDelete($deletedBetId = 0, $tableName = 'bet_entry_bak'){
+
+        //first get bet data from deleted bet
+        //then find latest bet of this user for this fancy
+        //if bet found then update calculation with latest bet id else update with 0 liabilities by passing bet id 0
+
+        $this->db->select("*");
+        $this->db->from($tableName);
+        $this->db->where('bet_id', $deletedBetId);
+        $this->db->limit(1);
+        $query = $this->db->get();
+        $res = $query->result_array();
+        if(!empty($res)){
+
+            $userId = $res[0]['userId'];
+            $matchId = $res[0]['matchId'];
+            $sessionId = $res[0]['fancyId'];
+            $betId = 0;
+
+            $this->db->select("bet_id");
+            $this->db->from('bet_entry');
+            $this->db->where('userId', $userId);
+            $this->db->where('matchId', $matchId);
+            $this->db->where('fancyId', $sessionId);
+
+            if($tableName == 'bet_entry'){
+                $this->db->where('bet_id !=', $deletedBetId);
+            }
+
+            $this->db->order_by("bet_id",'DESC');
+            $this->db->limit(1);
+            $query1 = $this->db->get();
+            $res1 = $query1->result_array();
+
+            if(!empty($res1)){
+                $betId = $res1[0]['bet_id'];
+            }
+            $Sessionmodel = $this->model_load_model('Sessionmodel');
+            $retData = $Sessionmodel->calculateUserScorePosition($userId, $matchId, $sessionId, $betId);
+
+        }
+
+        return true;
+    }
+
+    function updateOddsProfitLossOnBetVoid($betId, $marketId,$tableName = 'void_tblbets'){
+        //Here we fetch deleted bet data from tblbets_cancelled table
+        $query = "SELECT 
+					`b`.`MstCode` AS `bet_id`, `a`.`matchId` AS `matchId`, `a`.`selectionId` AS `selectionId`, `a`.`marketId` AS `marketId`, `b`.`UserId` AS `userId`, 
+					CASE
+						WHEN (`b`.`SelectionId` = `a`.`selectionId`)
+						THEN
+							(CASE WHEN (`b`.`isBack` = 0) THEN `b`.`P_L` ELSE -(`b`.`P_L`) END)
+						ELSE
+							0
+					END AS `winValue`,
+					CASE
+						WHEN (`b`.`SelectionId` = `a`.`selectionId`)
+						THEN
+							0
+						ELSE
+							(CASE WHEN (`b`.`isBack` = 0) THEN -(`b`.`Stack`) ELSE `b`.`Stack` END)
+					END AS `lossValue`				 
+				FROM 
+					`tblselection` `a` 
+					INNER JOIN $tableName `b` ON(`a`.`marketId` = `b`.`MarketId` AND `b`.`IsMatched` = 1)	
+				WHERE 
+					b.MstCode = $betId AND b.MarketId = $marketId;";
+
+
+        $query =$this->db->query($query);
+        $res = $query->result_array();
+        if(!empty($res)){
+            //update existing values with subtract values which deleted
+            foreach ($res as $key => $value) {
+                $this->db->set('winValue', 'winValue - ' . $value['winValue'], FALSE);
+                $this->db->set('lossValue', 'lossValue - ' . $value['lossValue'], FALSE);
+                $this->db->where('userId', $value['userId']);
+                $this->db->where('marketId', $marketId);
+                $this->db->where('selectionId', $value['selectionId']);
+                $this->db->limit(1);
+                $this->db->update('odds_profit_loss');
+            }
+        }
+        return true;
+    }
+
+    function updateUserFancyLiabilityOnBetVoid($betId, $marketId,$tableName = 'void_bet_entry'){
+        //Here we fetch deleted bet data from tblbets_cancelled table
+        $query = "SELECT 
+					`b`.`MstCode` AS `bet_id`, `a`.`matchId` AS `matchId`, `a`.`selectionId` AS `selectionId`, `a`.`marketId` AS `marketId`, `b`.`UserId` AS `userId`, 
+					CASE
+						WHEN (`b`.`SelectionId` = `a`.`selectionId`)
+						THEN
+							(CASE WHEN (`b`.`isBack` = 0) THEN `b`.`P_L` ELSE -(`b`.`P_L`) END)
+						ELSE
+							0
+					END AS `winValue`,
+					CASE
+						WHEN (`b`.`SelectionId` = `a`.`selectionId`)
+						THEN
+							0
+						ELSE
+							(CASE WHEN (`b`.`isBack` = 0) THEN -(`b`.`Stack`) ELSE `b`.`Stack` END)
+					END AS `lossValue`				 
+				FROM 
+					`tblselection` `a` 
+					INNER JOIN $tableName `b` ON(`a`.`marketId` = `b`.`MarketId` AND `b`.`IsMatched` = 1)	
+				WHERE 
+					b.MstCode = $betId AND b.MarketId = $marketId;";
+
+
+        $query =$this->db->query($query);
+        $res = $query->result_array();
+        if(!empty($res)){
+            //update existing values with subtract values which deleted
+            foreach ($res as $key => $value) {
+                $this->db->set('winValue', 'winValue - ' . $value['winValue'], FALSE);
+                $this->db->set('lossValue', 'lossValue - ' . $value['lossValue'], FALSE);
+                $this->db->where('userId', $value['userId']);
+                $this->db->where('marketId', $marketId);
+                $this->db->where('selectionId', $value['selectionId']);
+                $this->db->limit(1);
+                $this->db->update('odds_profit_loss');
+            }
+        }
+        return true;
+    }
+
+    function updateOddsProfitLossOnBetMoveUnmatchToMatch( $betId){
+
+        $query = "SELECT 
+				`b`.`MstCode` AS `bet_id`, `a`.`matchId` AS `matchId`, `a`.`selectionId` AS `selectionId`, `a`.`marketId` AS `marketId`, `a`.`selectionName` AS `selectionName`, `b`.`UserId` AS `userId`, `b`.`ParantId` AS `parentId`, `a`.`teamType` AS `teamType`, `b`.`Admin` AS `admin`, `b`.`Master` AS `master`, `b`.`Dealer` AS `dealer`, 
+				CASE
+					WHEN (`b`.`SelectionId` = `a`.`selectionId`)
+					THEN
+						(CASE WHEN (`b`.`isBack` = 0) THEN `b`.`P_L` ELSE -(`b`.`P_L`) END)
+					ELSE
+						0
+				END AS `winValue`,
+				CASE
+					WHEN (`b`.`SelectionId` = `a`.`selectionId`)
+					THEN
+						0
+					ELSE
+						(CASE WHEN (`b`.`isBack` = 0) THEN -(`b`.`Stack`) ELSE `b`.`Stack` END)
+				END AS `lossValue`				 
+			FROM 
+				`tblselection` `a` 
+				INNER JOIN `tblbets` `b` ON(`a`.`marketId` = `b`.`MarketId`  and `b`.`MatchedDate` is null)	
+			WHERE  b.MstCode = $betId;";
+
+        $query =$this->db->query($query);
+        $res = $query->result_array();
+
+        if(!empty($res)){
+
+            $this->db->select("id");
+            $this->db->from('odds_profit_loss');
+            $this->db->where('userId', $res[0]['userId']);
+            $this->db->where('marketId', $res[0]['marketId']);
+            $this->db->limit(1);
+            $q = $this->db->get();
+            $rowCount = $q->num_rows();
+
+            if($rowCount > 0){
+                //update existing values
+                foreach ($res as $key => $value) {
+                    $this->db->set('winValue', 'winValue + ' . $value['winValue'], FALSE);
+                    $this->db->set('lossValue', 'lossValue + ' . $value['lossValue'], FALSE);
+                    $this->db->where('userId', $res[0]['userId']);
+                    $this->db->where('marketId', $res[0]['marketId']);
+                    $this->db->where('selectionId', $value['selectionId']);
+                    $this->db->limit(1);
+                    $this->db->update('odds_profit_loss');
+                }
+            }else{
+                //insert new values
+                foreach ($res as $key => $value) {
+                    $insertData = array(
+                        'userId' => $value['userId'],
+                        'parentId' => $value['parentId'],
+                        'matchId' => $value['matchId'],
+                        'selectionId' => $value['selectionId'],
+                        'marketId' => $value['marketId'],
+                        'selectionName' => $value['selectionName'],
+                        'teamType' => $value['teamType'],
+                        'winValue' => $value['winValue'],
+                        'lossValue' => $value['lossValue'],
+                        'admin' => $value['admin'],
+                        'master' => $value['master'],
+                        'dealer' => $value['dealer'],
+                    );
+
+                    $this->db->insert('odds_profit_loss', $insertData);
+                }
+            }
+        }
+        return true;
+    }
 }

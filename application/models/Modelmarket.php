@@ -19,7 +19,7 @@ class Modelmarket extends CI_Model
 	}
 
 	function findByMarketId($marketId=0){
-		$this->db->select('sportsId Sport_id,matchId Match_id,sportmst.name sportName,matchmst.matchName matchName,market.Name MarketName,market.max_bet_liability,market.max_market_liability,market.max_market_profit,isManualMatchOdds,isBetAllowedOnManualMatchOdds');
+		$this->db->select('sportsId Sport_id,matchId Match_id,sportmst.name sportName,matchmst.matchName matchName,market.Name MarketName,market.max_bet_liability,market.max_market_liability,market.max_market_profit,isManualMatchOdds,isBetAllowedOnManualMatchOdds,maxStack,minStack');
 		$this->db->from('market');
 		$this->db->join('sportmst','market.sportsId=sportmst.id');
 		$this->db->join('matchmst','market.matchId=matchmst.MstCode');
@@ -70,10 +70,9 @@ class Modelmarket extends CI_Model
 		$this->db->join('tblresult','market.Id=tblresult.marketId','left');
 		$this->db->where('tblresult.resId IS NULL');	
 		$this->db->where('matchmst.MstDate < NOW()');
-		$this->db->where('market.Name !=','Bookmaker');
-	//	$this->db->where('market.Id','1.179958225');
 		$this->db->order_by("RAND()");
 		$this->db->limit(5);
+
 		$query = $this->db->get();
 		return $query->result_array();	
 	}
@@ -102,40 +101,7 @@ class Modelmarket extends CI_Model
 		$menuoption1 = array('menCode'=> $data['marketId'],'menName'=> $GetMarket,'menDesc'=> $GetMarket,'mstType'=> '8');
 		$query1=$this->db->insert('menuoption', $menuoption1);
 
-		$selectionData = array();
-		if($data['is_manual'] ){
-            if(!empty($data['runnerName1'])){
-                $selectionData[] = array('selectionId'=>$data['selectionId1'],'runnerName'=>$data['runnerName1']);
-            }
-        }else{
-            if(!empty($data['selectionId1'])){
-                $selectionData[] = array('selectionId'=>$data['selectionId1'],'runnerName'=>$data['runnerName1']);
-            }
-        }
-
-        if($data['is_manual']){
-            if(!empty($data['runnerName2'])){
-                $selectionData[] = array('selectionId'=>$data['selectionId2'],'runnerName'=>$data['runnerName2']);
-            }
-        }else{
-            if(!empty($data['selectionId2'])){
-                $selectionData[] = array('selectionId'=>$data['selectionId2'],'runnerName'=>$data['runnerName2']);
-            }
-        }
-
-        if($data['is_manual']){
-            if(!empty($data['runnerName3'])){
-                $selectionData[] = array('selectionId'=>$data['selectionId3'],'runnerName'=>$data['runnerName3']);
-            }
-        }else{
-            if(!empty($data['selectionId3'])){
-                $selectionData[] = array('selectionId'=>$data['selectionId3'],'runnerName'=>$data['runnerName3']);
-            }
-        }
-
-		$selectionJson = json_encode($selectionData);
-
-	//	$selectionJson = json_encode($data['selection_json']);
+		$selectionJson = json_encode($data['selection_json']);
 						
 		$Modeleventlst->SaveSelection($selectionJson,$insertData['matchId'],$insertData['sportsId'],$insertData['Id']);
 
@@ -174,17 +140,6 @@ class Modelmarket extends CI_Model
 		$defaultRunners = array();
 		foreach($matchArr as $mArr){
 			$temp = array();
-			$temp['selectionId'] = (int)$mArr['selectionId'];
-			$temp['handicap'] = 0;
-			$temp['status'] = "ACTIVE";
-			$temp['lastPriceTraded'] = 0;
-			$temp['totalMatched'] = 0;
-			$temp['ex']['availableToBack'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-			$temp['ex']['availableToLay'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-			$temp['ex']['tradedVolume'] = [];
-			$temp['name'] = $mArr['selectionName'];
-			$defaultRunners[] = $temp;
-		/*	$temp = array();
 			$temp['id'] = (int)$mArr['selectionId'];
 			$temp['selectionId'] = (int)$mArr['selectionId'];
 			$temp['name'] = $mArr['selectionName'];
@@ -192,25 +147,8 @@ class Modelmarket extends CI_Model
 			$temp['sort'] = 2;
 			$temp['back'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
 			$temp['lay'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-			$defaultRunners[] = $temp; */
+			$defaultRunners[] = $temp;
 		}
-
-	  /*		$defaultRunners = array();
-				foreach($marketArr[0]['runners'] as $mArr){
-					$temp = array();
-					$temp['selectionId'] = (int)$mArr['selectionId'];
-					$temp['handicap'] = 0;
-					$temp['status'] = "ACTIVE";
-					$temp['lastPriceTraded'] = 0;
-					$temp['totalMatched'] = 0;
-					$temp['ex']['availableToBack'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-					$temp['ex']['availableToLay'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-					$temp['name'] = $mArr['runnerName'];
-					$temp['tradedVolume'] = [];
-					$defaultRunners[] = $temp;
-				} */
-
-
 
 
 

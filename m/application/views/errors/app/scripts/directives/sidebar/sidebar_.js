@@ -106,7 +106,7 @@ app.directive('sidebar', ['$location', '$timeout', function ($window, $http, ses
             //View Account        
 
             $scope.showViewAccountForm = function () {
-                //
+                //debugger;
                 $mdDialog.show({
                     controller: showViewSettingController,
                     templateUrl: 'app/scripts/directives/popupform/view_account.html',
@@ -160,7 +160,7 @@ app.directive('sidebar', ['$location', '$timeout', function ($window, $http, ses
                         $http.get( BASE_URL+'Createmastercontroller/updatePartnerShip/' + Admin + '/' + Master + '/' + Dealer + '/' + ID)
                             .success(function (data1, status, headers, config) {
                                 Dialog.autohide(data1.message, 1000);
-                                //
+                                //debugger;
                                 prntScope.showViewAccountForm();
                                 prntScope.refresh_tree();
                             });
@@ -189,7 +189,7 @@ app.directive('sidebar', ['$location', '$timeout', function ($window, $http, ses
                     var maxProfit = document.getElementById('maxProfit1').value;
                     var maxLoss = document.getElementById('maxLoss1').value;
                     var maxStake = document.getElementById('maxStake1').value;
-                    //
+                    //debugger;
                     var userInfo = {
                         id: node.id,
                         userId: userId,
@@ -1436,12 +1436,12 @@ app.controller('showCreateFancyCntr', function ($scope, $mdDialog, prntScope, ma
     $scope.LastDigitFancy = function (formData) {
         var setFancyTime = document.getElementById('setFancyTimeL').value;
         var liabilityLstDigit = document.getElementById('liabilityLstDigit').value;
-        //
+        //debugger;
         var formData1 = { HeadName: formData.HeadName, remarks: formData.remarks, mid: $scope.mid, fancyType: $scope.fancyType, date: $scope.dt, time: setFancyTime, liability: liabilityLstDigit }
         prntScope.createAllTypeFancy(formData1);
     };
     $scope.UpDownFancy = function (formData) {
-        //
+        //debugger;
         var liability = document.getElementById('liability').value;
         var upDownHead = document.getElementById('upDownHead').value;
         var ratediffUpdwn = document.getElementById('ratediffUpdwn').value;

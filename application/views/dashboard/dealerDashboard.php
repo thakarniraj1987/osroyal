@@ -14,6 +14,7 @@
                 <th class="text-right">Team A</th>
                 <th class="text-right">Team B</th>
                 <th class="text-right">Draw</th>
+                  <th class="text-right">Date</th>
               </tr>
             </thead>
             <tbody>
@@ -46,6 +47,7 @@
                       <span ng-if="mtchRs.theDraw==0" style="color:Black;">{{mtchRs.theDraw|number:2}}</span>
                     </strong>
                 </td>
+                 <td class="text-center">{{mtchRs.date | date : 'dd MMM,yyyy HH:mm'}}</td>
               </tr>
               </tbody>
             </table>

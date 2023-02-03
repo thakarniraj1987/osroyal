@@ -20,24 +20,20 @@ app.controller('Matchoddscntr', ['$scope', '$http', '$stateParams', 'sessionServ
     $scope.logInTypeId = sessionService.get('slctUseTypeID');
     $scope.logInId = sessionService.get('slctUseID');
     $scope.FinalArray = [];
+    $scope.Manuald={};
+    $scope.Manuald.pointDiff=0;
     var MarketId = $stateParams.MarketId;
     $scope.ajaxTimer="";
     $scope.PLAYPAUSE=0;
-    $scope.Manuald={};
-    $scope.Manuald.pointDiff=0;
     var urlIp=$rootScope.gurlIp;
     var urlArray=$rootScope.gUrlArray;
-    var matchStatus = "OPEN";
     $scope.IsManual='';
-    $scope.UserData=[];
     $scope.team1backodd=[];
     $scope.team1layodd=[];
     $scope.team1Suspend=[];
-    var tempval="";
     $scope.counter = 0;
     var totalMatch = 0;
     var selectedRunner = null;
-    var callType1="1";
     var scorePosition;
     $scope.scorePosition1=[];
     $scope.result=[];
@@ -48,12 +44,154 @@ app.controller('Matchoddscntr', ['$scope', '$http', '$stateParams', 'sessionServ
     var scoreOddPosition;
     var callscoreOddpostype=0;
     $scope.Fdata={};
+    $scope.saleName2='';
+    var callType1="1";
+    $scope.FancyData=[];
+    $scope.FancyDataTemp=[];
+    var tempval="";
     $scope.SelectedTextBox=0;
     $scope.state=false;
     $scope.ManualMsg="";
     $scope.IsError=false;
     $scope.tempIndex=0;
-    $scope.IsPointDiff=false;
+    $scope.PointAuto=false;
+
+    $scope.gotoCharts = function(){
+        $state.go('dashboard.chartGraph');
+
+    }
+
+	
+		$scope.GetIndianFancy=function()
+{
+//debugger
+    if($state.current.name=="dashboard.Matchodds")
+    {
+       $scope.callFancy= $timeout(function(){
+           $http.get('Apicontroller/get_indian_session/'+$stateParams.MatchId).success(function (data, status, headers, config) {
+
+               if(data.error)
+               {
+                   $scope.Message = data.message;
+                   $scope.GetindianfancyData=[];
+               }
+               else
+               {
+                   $scope.GetindianfancyData = data.data;
+               }
+               $scope.GetIndianFancy();
+
+
+           });
+       },10000);
+    }
+
+}
+    $scope.GetIndianFancy();
+ $scope.saveIndianSeries = function (indianseries) {
+	
+        var formData = { SelectionId: indianseries.SelectionId, RunnerName: indianseries.RunnerName, LayPrice1: indianseries.LayPrice1, LaySize1: indianseries.LaySize1,BackSize1:indianseries.BackSize1, BackPrice1: indianseries.BackPrice1, GameStatus: indianseries.GameStatus,FinalStatus:indianseries.FinalStatus,is_exists:indianseries.is_exists ,match_id:indianseries.match_id,super_admin_fancy_id:indianseries.id}
+        var url = BASE_URL + "Apicontroller/save_indian_session";
+        $http.post(url, formData).success(function (response) {
+		if(!response.error){
+    indianseries.is_exists=1;
+
+}
+ var toast = $mdToast.simple().content(response.message).position('top right').hideDelay(1000);
+            $mdToast.show(toast);
+       
+        });
+    }
+	
+	
+    $scope.updateStack=function(mitem)
+    {
+
+        var formData={
+            market_id:mitem.id,
+            min_stack:mitem.MinStack,
+            max_stack:mitem.MaxStack
+        }
+        if(mitem.MinStack!=angular.isUndefinedOrNull || mitem.MaxStack!=angular.isUndefinedOrNull) {
+            $http.post(BASE_URL+'Lstsavemstrcontroller/saveManualMarketStack',formData).success(function(data, status, headers, config){
+                Dialog.autohide(data.message);
+                $scope.loading=false;
+
+            }).error(function(data, status, headers, config){
+                $scope.loading=false;
+            });
+        }
+        else {
+            Dialog.autohide('Please enter min or max stack.');
+            $scope.loading=false;
+        }
+
+    }
+    $scope.OddReturn=function(odds)
+    {
+
+        var value= (odds+"");
+        value = value.toString();
+
+
+        if (value.indexOf('.') === -1) {
+            return value;
+        }
+
+        // as long as the last character is a 0 or a dot, remove it
+        while((value.slice(-1) === '0' || value.slice(-1) === '.') && value.indexOf('.') !== -1) {
+            value = value.substr(0, value.length - 1);
+        }
+        return value;
+    }
+    document.addEventListener('keydown', function(evt) {
+
+
+        var gind=$scope.KeyValue.findIndex(x=>x.key==evt.keyCode);
+        if(gind>-1)
+        {
+            var vindx=$scope.KeyValue[gind].value;
+            $scope.FinalArray[vindx].IsRs=!$scope.FinalArray[vindx].IsRs;
+            $scope.FinalArray[vindx].pointDiff="";
+            for(var j=0;j<$scope.FinalArray[vindx].runners.length;j++)
+            {
+                $scope.team1backodd[j+$scope.FinalArray[vindx].id]="";
+                $scope.team1layodd[j+$scope.FinalArray[vindx].id]="";
+
+            }
+            $scope.updateIsRupees($scope.FinalArray[vindx].IsRs,$scope.FinalArray[vindx].id);
+
+        }
+    });
+
+    $scope.updateIsRupees=function(status,mid)
+    {
+        var vstatus=status==true ? 1 : 0;
+        $http.get(BASE_URL+'Lstsavemstrcontroller/updateIsRs/' + mid + '/' + vstatus).success(function (data, status, headers, config) {
+
+        })
+    }
+    //$scope.KeyValue=[];
+    //a to z (65 to 90)
+    $scope.firstKey=65;
+    $scope.SetManualMarketKey=function()
+    {
+
+        var len=$scope.FinalArray.length;
+        if(len>0)
+        {
+            for(var i=0;i<len;i++)
+            {
+                var kind=$scope.KeyValue.findIndex(x=>x.value==i);
+                if(kind==-1)
+                {
+                    $scope.KeyValue.push({'key':$scope.firstKey,'value':i});
+                    $scope.firstKey+=1;
+                }
+
+            }
+        }
+    }
     var authdata = Base64.encode(sessionService.get('user') + ':' +    sessionService.get('lgPassword'));
     var Bauthdata='Basic ' + authdata;
     $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata;
@@ -70,7 +208,7 @@ app.controller('Matchoddscntr', ['$scope', '$http', '$stateParams', 'sessionServ
 
                         $scope.UserData = data.betUserData;
                         if($scope.UserData.length==1)
-                            $scope.MarketWinLoss($stateParams.MarketId);
+                            $scope.MarketWinLoss($scope.MarketLst);
 
                     }
                     else
@@ -81,7 +219,7 @@ app.controller('Matchoddscntr', ['$scope', '$http', '$stateParams', 'sessionServ
                             $scope.UserData = data.betUserData;
                             if($state.current.name=='dashboard.Matchodds')
                             {
-                                $scope.MarketWinLoss($stateParams.MarketId);
+                                $scope.MarketWinLoss($scope.MarketLst);
 
                             }
                         }
@@ -89,14 +227,14 @@ app.controller('Matchoddscntr', ['$scope', '$http', '$stateParams', 'sessionServ
                         {
                             for(var i=0;i<data.betUserData.length;i++)
                             {
-                                var ind=$scope.UserData.findIndex(x=>x.MstCode==data.betUserData[i].MstCode && x.IsMatched!=data.betUserData[i].IsMatched);
+                                var ind=$scope.UserData.findIndex(x=>x.MstCode==data.betUserData[i].MstCode && (x.IsMatched!=data.betUserData[i].IsMatched || x.void!=data.betUserData[i].void));
                                 if(ind>-1)
                                 {
                                     $scope.UserData[ind]=data.betUserData[i];
                                     if($state.current.name=='dashboard.Matchodds')
 
                                     {
-                                        $scope.MarketWinLoss($stateParams.MarketId);
+                                        $scope.MarketWinLoss($scope.MarketLst);
                                     }
 
                                 }
@@ -141,6 +279,22 @@ app.controller('Matchoddscntr', ['$scope', '$http', '$stateParams', 'sessionServ
                 }
 
             }
+
+    $scope.deleteVoidBet = function (betId, userId,MarketId) {
+
+        var result = confirm("Are you sure want to delete void bet?");
+        if (result) {
+            $scope.loading = true;
+            $http.get(BASE_URL+'Betentrycntr/moveToAvoidBet/' + betId + '/' + userId+'/'+MarketId).success(function (data, status, headers, config) {
+
+                Dialog.autohide("Record Deleted Successfully...");
+                $scope.loading = false;
+                //$scope.MarketWinLoss(MarketId);
+            });
+
+        }
+
+    }
 
     $scope.movetoMatchedBet = function (betId, userId) {
 
@@ -189,11 +343,11 @@ app.controller('Matchoddscntr', ['$scope', '$http', '$stateParams', 'sessionServ
         // tempval=$scope.team1backodd[indx];
     }
     ///////////////////////////
-    $scope.deleteUser1 = function (betId, userId,MarketId) {
+    $scope.deleteUser1 = function (betId, userId,MarketId,voids) {
         var result = confirm("Are you sure want to delete Matched Records?");
         if (result) {
 		  $scope.loading = true;
-            $http.get(BASE_URL+'Betentrycntr/deleteGetbettingmat/' + betId + '/' + userId+'/'+MarketId).success(function (data, status, headers, config) {
+            $http.get(BASE_URL+'Betentrycntr/deleteGetbettingmat/' + betId + '/' + userId+'/'+MarketId+'/'+voids).success(function (data, status, headers, config) {
                 
                  Dialog.autohide("Record Deleted Successfully...");
                  $scope.loading = false;
@@ -302,7 +456,19 @@ app.controller('Matchoddscntr', ['$scope', '$http', '$stateParams', 'sessionServ
     {
         $scope.ManualMatchOddsData=marketitem.manual_market_data;
         if($scope.ManualMatchOddsData != null){
-            $scope.team1backodd[0+$scope.ManualMatchOddsData.market_id]= parseInt(($scope.ManualMatchOddsData.team1_back+"").split(".")[1]);
+            $scope.team1backodd[0+$scope.ManualMatchOddsData.market_id]= parseFloat($scope.ManualMatchOddsData.team1_back);
+            $scope.team1backodd[1+$scope.ManualMatchOddsData.market_id]= parseFloat(($scope.ManualMatchOddsData.team2_back));
+            $scope.team1backodd[2+$scope.ManualMatchOddsData.market_id]= parseFloat(($scope.ManualMatchOddsData.draw_back));
+            $scope.team1layodd[0+$scope.ManualMatchOddsData.market_id]=parseFloat(($scope.ManualMatchOddsData.team1_lay));
+            $scope.team1layodd[1+$scope.ManualMatchOddsData.market_id]=parseFloat(($scope.ManualMatchOddsData.team2_lay));
+            $scope.team1layodd[2+$scope.ManualMatchOddsData.market_id]=parseFloat(($scope.ManualMatchOddsData.draw_lay));
+            $scope.team1Suspend[0+$scope.ManualMatchOddsData.market_id]=$scope.ManualMatchOddsData.active_team1==0 ? false : true;
+            $scope.team1Suspend[1+$scope.ManualMatchOddsData.market_id]=$scope.ManualMatchOddsData.active_team2==0 ? false : true;
+            $scope.team1Suspend[2+$scope.ManualMatchOddsData.market_id]=$scope.ManualMatchOddsData.active_draw==0 ? false : true;
+            marketitem.pointDiff=parseFloat($scope.ManualMatchOddsData.dlay_time);
+            marketitem.MaxStack=$scope.ManualMatchOddsData.max_stack;
+            marketitem.MinStack=$scope.ManualMatchOddsData.min_stack;
+            /*$scope.team1backodd[0+$scope.ManualMatchOddsData.market_id]= parseInt(($scope.ManualMatchOddsData.team1_back+"").split(".")[1]);
             $scope.team1backodd[1+$scope.ManualMatchOddsData.market_id]= parseInt(($scope.ManualMatchOddsData.team2_back+"").split(".")[1]);
             $scope.team1backodd[2+$scope.ManualMatchOddsData.market_id]= parseInt(($scope.ManualMatchOddsData.draw_back+"").split(".")[1]);
             $scope.team1layodd[0+$scope.ManualMatchOddsData.market_id]=parseInt(($scope.ManualMatchOddsData.team1_lay+"").split(".")[1]);
@@ -311,7 +477,7 @@ app.controller('Matchoddscntr', ['$scope', '$http', '$stateParams', 'sessionServ
             $scope.team1Suspend[0+$scope.ManualMatchOddsData.market_id]=$scope.ManualMatchOddsData.active_team1==0 ? false : true;
             $scope.team1Suspend[1+$scope.ManualMatchOddsData.market_id]=$scope.ManualMatchOddsData.active_team2==0 ? false : true;
             $scope.team1Suspend[2+$scope.ManualMatchOddsData.market_id]=$scope.ManualMatchOddsData.active_draw==0 ? false : true;
-            marketitem.pointDiff=parseFloat($scope.ManualMatchOddsData.dlay_time);
+            marketitem.pointDiff=parseFloat($scope.ManualMatchOddsData.dlay_time);*/
         }
     }
    /* $scope.callOddsFunc = function() {
@@ -768,6 +934,7 @@ else{$scope.loading = false;}
 			 callType1=2;
 			}).error(function(err){
 			 $scope.loading = false;
+             $scope.GetMarketListId();
         });	
 }
         },1000);
@@ -840,177 +1007,190 @@ $scope.GetScoreTimer=$timeout(function(){
         });
 		},1000);
     }
-$scope.BindSoketMarket=function(result)
+    $scope.BindSoketMarket=function(result)
     {
-	
-	$scope.marketIdLst=[];
+
+        $scope.marketIdLst=[];
+        $scope.KeyValue=[];
         if(result.data != angular.isUndefinedOrNull)
-            {
+        {
 
-		  for(var i=0;i<result.data.length;i++){
-			 $scope.marketIdLst.push(result.data[i].marketid);
-           		
-			if(callType1==1)
-			{
-	 	   	  $scope.FinalArray.push(result.data[i]);
-                if(result.data[i].market_name=="Match Odds")
+            for(var i=0;i<result.data.length;i++){
+                $scope.marketIdLst.push(result.data[i].marketid);
+
+                var kind=$scope.KeyValue.findIndex(x=>x.value==i);
+                if(kind==-1)
                 {
-                    $scope.GetMarketBackLayDataSelectionName=$scope.FinalArray[0].runners;
+                    $scope.KeyValue.push({'key':$scope.firstKey,'value':i});
+                    $scope.firstKey+=1;
                 }
-			}
-              if($scope.sportId == 4){
-                  $scope.getFancyList(result.data[i].marketid);
-                  $scope.UpdateAdminFancyList(result.data[i].marketid);
-              }
-
-		    }
-		
-            //var callbackResult=$scope.SetResult($scope.marketIdLst);
-         
-            $scope.MarketLst=$scope.marketIdLst.join(',');
-            $scope.MarketWinLoss($scope.MarketLst);
-	    $scope.MarketId= $scope.MarketLst;
-            $scope.AllMarket =  $scope.MarketLst;
-		 $scope.GetScore();
-		if(true){
-}
-                get_userser.getSocketDataApiDetail($scope.MarketLst,function(data) {
-                    $scope.market_sel_id=[];
-                    //console.log(data);
-                    var dataResult = data;
-                    var tempResult =[];
-
-                    if(dataResult !=angular.isUndefinedOrNull && dataResult.length>0 && dataResult[0]!=angular.isUndefinedOrNull)
+                if(callType1==1)
+                {
+                    $scope.FinalArray.push(result.data[i]);
+                    if(result.data[i].market_name=="Match Odds")
                     {
-                        for(var j=0;j<$scope.FinalArray.length;j++)
-                        {
-                            var ind = dataResult.findIndex(x=>x.marketId==$scope.FinalArray[j].id);
-                            if(ind>-1)
-                            {
-                                tempResult.data=dataResult[ind];
-                                var tempArray=$scope.FinalArray[j];
-                                $scope.FinalArray[j].volumeLimit=tempArray.volumeLimit;
-                                $scope.FinalArray[j].IsMatchDisable=tempArray.IsMatchDisable;
-                                $scope.FinalArray[j].is_favourite=tempArray.is_favourite;
-                                $scope.FinalArray[j].id=tempResult.data.id;
-                                $scope.FinalArray[j].mtype=tempResult.data.mtype;
-                                $scope.FinalArray[j].btype=tempResult.data.btype;
-                                $scope.FinalArray[j].name=tempArray.market_name;
-                                $scope.FinalArray[j].status=tempResult.data.status;
-                                $scope.FinalArray[j].inplay=tempResult.data.inPlay;
-                                $scope.FinalArray[j].groupById=tempResult.data.matchid;
-                                $scope.FinalArray[j].isBetAllowedOnManualMatchOdds=tempArray.isBetAllowedOnManualMatchOdds;
-                                if($scope.FinalArray[j].name=="Match Odds") {
-                                    $scope.GetMarketBackLayDataSelectionName = $scope.FinalArray[j].runners;
-                                }
-                                //data base runners exist
-                                if($scope.FinalArray[j].runners.length>0)
-                                {
-
-                                    for(var r=0;r<$scope.FinalArray[j].runners.length;r++)
-                                    {
-                                        if($scope.FinalArray[j].runners[r].selectionId != angular.isUndefinedOrNull){
-                                            $scope.FinalArray[j].runners[r].id=$scope.FinalArray[j].runners[r].selectionId;
-                                        }
-
-                                        if($scope.FinalArray[j].runners[r].name=="" || tempArray.runners[r].name==angular.isUndefinedOrNull){
-                                            var sId=$scope.FinalArray[j].id +"-"+ $scope.FinalArray[j].runners[r].id;
-                                            $scope.FinalArray[j].runners[r].selection_id=sId;
-
-                                            $scope.market_sel_id.push(sId);
-                                        }
-                                        else
-                                        {
-                                            var rindx=  $scope.FinalArray[j].runners.findIndex(x=>x.id==tempArray.runners[r].id);
-                                            if(rindx>-1)
-                                            {
-                                                $scope.FinalArray[j].runners[rindx].name=tempArray.runners[r].name;
-                                            }
-                                            if($scope.FinalArray[j].mtype=="MATCH_ODDS" || $scope.FinalArray[j].btype=="ODDS"){
-                                                $scope.BindIndianFancy(dataResult['session'],$scope.FinalArray[j].id);
-                                            }
-                                            $scope.CallSocketMarket();
-                                        }
-                                    }
-
-
-                                }
-                                else if($scope.FinalArray[j].runners.length==0)
-                                {
-                                    $scope.FinalArray[j].runners=tempResult.data.runners;
-                                    for(var r=0;r<$scope.FinalArray[j].runners.length;r++)
-                                    {
-                                        if($scope.FinalArray[j].runners[r].name=="" || $scope.FinalArray[j].runners[r].name==angular.isUndefinedOrNull || true){
-                                            var sId=$scope.FinalArray[j].id +"-"+ $scope.FinalArray[j].runners[r].id;
-                                            $scope.FinalArray[j].runners[r].selection_id=sId;
-                                            $scope.market_sel_id.push(sId);
-                                        }
-
-                                    }
-
-
-                                }
-
-                                $scope.loading = false;
-                            }
-                            else{
-                                //Dialog.autohide("Odds not comming from api.");
-                                $scope.loading = false;
-                                //$scope.CallSocketMarket();
-                                //$scope.IsShowPage=false;
-                                //$timeout.cancel($scope.ajaxTimer);
-                                //$state.go("userDashboard.Home");
-                            }
-                        }
-
-                        if($scope.market_sel_id.length>0)
-                        {
-                            $scope.SelectionName=[];
-                            var selection_id=$scope.market_sel_id.join(',');
-
-                            get_userser.getSelectionList(selection_id,function(data) {
-
-                                $scope.SelectionName=data;
-                                for(var j=0;j<$scope.FinalArray.length;j++)
-                                {
-
-                                    if($scope.FinalArray[j].mtype=="MATCH_ODDS" || $scope.FinalArray[j].btype=="ODDS"){
-                                        $scope.BindIndianFancy(dataResult['session'],$scope.FinalArray[j].id);
-                                    }
-                                    for(var s=0;s<$scope.SelectionName.length;s++)
-                                    {
-                                        var indx=$scope.FinalArray[j].runners.findIndex(x=>x.selection_id==$scope.SelectionName[s].selection_id)
-                                        if(indx>-1)
-                                        {
-                                            $scope.FinalArray[j].runners[indx].name=$scope.SelectionName[s].runnername;
-                                        }
-                                    }
-                                    // $scope.FinalArray[j].runners=tempArray.runners;
-                                    if($scope.FinalArray[j].name=="Match Odds") {
-                                        $scope.GetMarketBackLayDataSelectionName = $scope.FinalArray[j].runners
-                                    }
-                                    $scope.CallSocketMarket();
-                                }
-
-                            });
-                        }
-
-
-
-
+                        $scope.GetMarketBackLayDataSelectionName=$scope.FinalArray[0].runners;
                     }
-                    else {
-                        if($scope.SPORTID == 4 && dataResult['session'].length==0 && dataResult['session'][0]==angular.isUndefinedOrNull)
-                        {
-                            $scope.isSessionNull=true;
-                        }
-                        $scope.loading = false;
 
-                    }
-                });
-      
+                }
 
             }
+            if($scope.sportId == 4) {
+                $scope.getFancyList(result.data[0].marketid);
+                $scope.MOddsMarketId=result.data[0].marketid;
+                //$scope.UpdateAdminFancyList(result.data[0].marketid);
+            }
+            //var callbackResult=$scope.SetResult($scope.marketIdLst);
+
+            $scope.MarketLst=$scope.marketIdLst.join(',');
+            $scope.MarketWinLoss($scope.MarketLst);
+            $scope.MarketId= $scope.MarketLst;
+            $scope.AllMarket =  $scope.MarketLst;
+            $scope.GetScore();
+            if(true){
+            }
+
+            get_userser.getSocketDataApiDetail($scope.MarketLst,function(data) {
+                $scope.market_sel_id=[];
+                //console.log(data);
+                var dataResult = data;
+                var tempResult =[];
+
+                if(dataResult !=angular.isUndefinedOrNull && dataResult['cricket'].length>0 && dataResult['cricket'][0]!=angular.isUndefinedOrNull)
+                {
+                    for(var j=0;j<$scope.FinalArray.length;j++)
+                    {
+                        var ind = dataResult['cricket'].findIndex(x=>x.id==$scope.FinalArray[j].marketid);
+
+                        if(ind>-1)
+                        {
+                            tempResult.data=dataResult['cricket'][ind];
+                            var tempArray=$scope.FinalArray[j];
+                            $scope.FinalArray[j].volumeLimit=tempArray.volumeLimit;
+                            $scope.FinalArray[j].IsMatchDisable=tempArray.IsMatchDisable;
+                            $scope.FinalArray[j].is_favourite=tempArray.is_favourite;
+                            $scope.FinalArray[j].id=tempResult.data.id;
+                            $scope.FinalArray[j].mtype=tempResult.data.mtype;
+                            $scope.FinalArray[j].btype=tempResult.data.btype;
+                            $scope.FinalArray[j].name=tempArray.market_name;
+                            $scope.FinalArray[j].status=tempResult.data.status;
+                            $scope.FinalArray[j].inplay=tempResult.data.inPlay;
+                            $scope.FinalArray[j].groupById=tempResult.data.matchid;
+                            $scope.FinalArray[j].isBetAllowedOnManualMatchOdds=tempArray.isBetAllowedOnManualMatchOdds;
+                            if($scope.FinalArray[j].name=="Match Odds") {
+                                $scope.GetMarketBackLayDataSelectionName = $scope.FinalArray[j].runners;
+                            }
+                            //data base runners exist
+                            if($scope.FinalArray[j].runners.length>0)
+                            {
+
+
+                                for(var r=0;r<$scope.FinalArray[j].runners.length;r++)
+                                {
+                                    if($scope.FinalArray[j].runners[r].selectionId != angular.isUndefinedOrNull){
+                                        $scope.FinalArray[j].runners[r].id=$scope.FinalArray[j].runners[r].selectionId;
+                                    }
+
+                                    if($scope.FinalArray[j].runners[r].name=="" || tempArray.runners[r].name==angular.isUndefinedOrNull){
+                                        var sId=$scope.FinalArray[j].id +"-"+ $scope.FinalArray[j].runners[r].id;
+                                        $scope.FinalArray[j].runners[r].selection_id=sId;
+
+                                        $scope.market_sel_id.push(sId);
+                                    }
+                                    else
+                                    {
+                                        var rindx=  $scope.FinalArray[j].runners.findIndex(x=>x.id==tempArray.runners[r].id);
+                                        if(rindx>-1)
+                                        {
+                                            $scope.FinalArray[j].runners[rindx].name=tempArray.runners[r].name;
+                                        }
+                                        if($scope.FinalArray[j].mtype=="MATCH_ODDS" || $scope.FinalArray[j].btype=="ODDS"){
+                                            $scope.BindIndianFancy(dataResult['session'],$scope.FinalArray[j].id);
+                                        }
+                                        $scope.CallSocketMarket();
+                                    }
+                                }
+
+
+                            }
+                            else if($scope.FinalArray[j].runners.length==0)
+                            {
+                                $scope.FinalArray[j].runners=tempResult.data.runners;
+                                for(var r=0;r<$scope.FinalArray[j].runners.length;r++)
+                                {
+                                    if($scope.FinalArray[j].runners[r].name=="" || $scope.FinalArray[j].runners[r].name==angular.isUndefinedOrNull || true){
+                                        var sId=$scope.FinalArray[j].id +"-"+ $scope.FinalArray[j].runners[r].id;
+                                        $scope.FinalArray[j].runners[r].selection_id=sId;
+                                        $scope.market_sel_id.push(sId);
+                                    }
+
+                                }
+
+
+                            }
+
+                            $scope.loading = false;
+                        }
+                        else{
+                            //Dialog.autohide("Odds not comming from api.");
+                            $scope.loading = false;
+                            //$scope.CallSocketMarket();
+                            //$scope.IsShowPage=false;
+                            //$timeout.cancel($scope.ajaxTimer);
+                            //$state.go("userDashboard.Home");
+                        }
+                    }
+
+                    if($scope.market_sel_id.length>0)
+                    {
+                        $scope.SelectionName=[];
+                        var selection_id=$scope.market_sel_id.join(',');
+
+                        get_userser.getSelectionList(selection_id,function(data) {
+
+                            $scope.SelectionName=data;
+                            for(var j=0;j<$scope.FinalArray.length;j++)
+                            {
+
+                                if($scope.FinalArray[j].mtype=="MATCH_ODDS" || $scope.FinalArray[j].btype=="ODDS"){
+                                    $scope.BindIndianFancy(dataResult['session'],$scope.FinalArray[j].id);
+                                }
+                                for(var s=0;s<$scope.SelectionName.length;s++)
+                                {
+                                    var indx=$scope.FinalArray[j].runners.findIndex(x=>x.selection_id==$scope.SelectionName[s].selection_id)
+                                    if(indx>-1)
+                                    {
+                                        $scope.FinalArray[j].runners[indx].name=$scope.SelectionName[s].runnername;
+                                    }
+                                }
+                                if($scope.FinalArray[j].name=="Match Odds") {
+                                    $scope.GetMarketBackLayDataSelectionName = $scope.FinalArray[j].runners
+                                }
+                                // $scope.FinalArray[j].runners=tempArray.runners;
+
+                                $scope.CallSocketMarket();
+                            }
+
+                        });
+                    }
+
+
+
+
+                }
+                else {
+                    if($scope.SPORTID == 4 && dataResult['session'].length==0 && dataResult['session'][0]==angular.isUndefinedOrNull)
+                    {
+                        $scope.isSessionNull=true;
+                    }
+                    $scope.loading = false;
+
+                }
+                $scope.CallSocketMarket();
+            });
+
+
+        }
 
     }
 $scope.$on('$destroy', function () {
@@ -1031,14 +1211,14 @@ callType1="2";
 	 			 var dataResult = data;
 		                     var tempResult =[];
 		                
-		                         if(dataResult !=angular.isUndefinedOrNull && dataResult.length>0 && dataResult[0] !=angular.isUndefinedOrNull)
+		                         if(dataResult !=angular.isUndefinedOrNull && dataResult['cricket'].length>0 && dataResult['cricket'][0] !=angular.isUndefinedOrNull)
 		                         {
 		                            for(var j=0;j<$scope.FinalArray.length;j++)
 						{
-					             var ind = dataResult.findIndex(x=>x.marketId==$scope.FinalArray[j].id);
+					             var ind = dataResult['cricket'].findIndex(x=>x.id==$scope.FinalArray[j].id);
 				                     if(ind>-1)
 				                     {
-		                                        tempResult.data=dataResult[ind];
+		                                        tempResult.data=dataResult['cricket'][ind];
                                          $scope.FinalArray[j].status=tempResult.data.status;
                                          $scope.FinalArray[j].inPlay=tempResult.data.inPlay;
 							if($scope.FinalArray[j].mtype=="MATCH_ODDS"){
@@ -1259,10 +1439,11 @@ if($scope.AdminFancyLiveData.length>0)
 //step5
 $scope.SocketMarket = function(result)
 {
-    debugger;
+	
+    
     //$scope.FancyLiveData = result.session;
     var market = result.data.runners;
-    var j = $scope.FinalArray.findIndex(x=>x.marketid==result.data.marketId);
+    var j = $scope.FinalArray.findIndex(x=>x.id==result.data.id);
     if(market!=angular.isUndefinedOrNull)
     {
      
@@ -1271,32 +1452,32 @@ $scope.SocketMarket = function(result)
          //   ;
 	 
 		if(j>-1){
-           var inde = $scope.FinalArray[j].runners.findIndex(img => img.id ===market[m].selectionId);
+           var inde = $scope.FinalArray[j].runners.findIndex(img => img.id ===market[m].id);
            if(inde>-1)
            {
 	       $scope.FinalArray[j].IsMatchDisable=false;
-               for(var b=0;b<$scope.FinalArray[j].runners[inde] .ex.availableToBack.length;b++)
+               for(var b=0;b<$scope.FinalArray[j].runners[inde].back.length;b++)
                {
                 var count = b+1;  
                 try{
-                    $scope.FinalArray[j].runners[inde] .ex.availableToBack[b].selected =  $scope.CallColor($scope.FinalArray[j].runners[inde] .ex.availableToBack[b].price,$scope.FinalArray[j].runners[inde] .ex.availableToBack[b].size, market[m] .ex.availableToBack[b].price,market[m] .ex.availableToBack[b].size);                 
+                    $scope.FinalArray[j].runners[inde].back[b].selected =  $scope.CallColor($scope.FinalArray[j].runners[inde].back[b].price,$scope.FinalArray[j].runners[inde].back[b].size, market[m].back[b].price,market[m].back[b].size);                 
                 }
                 catch(e)
                 {
 
                 }
                try{
-                $scope.FinalArray[j].runners[inde] .ex.availableToBack[b].price = market[m] .ex.availableToBack[b].price;
+                $scope.FinalArray[j].runners[inde].back[b].price = market[m].back[b].price;
                }
                catch(e)
                {
-                if($scope.FinalArray[j].runners[inde] .ex.availableToBack[b]!=angular.isUndefinedOrNull)
+                if($scope.FinalArray[j].runners[inde].back[b]!=angular.isUndefinedOrNull)
                 {
-                    $scope.FinalArray[j].runners[inde] .ex.availableToBack[b].price="";
+                    $scope.FinalArray[j].runners[inde].back[b].price="";
                 }
                }
                try{
-                $scope.FinalArray[j].runners[inde] .ex.availableToBack[b].size = market[m] .ex.availableToBack[b].size;
+                $scope.FinalArray[j].runners[inde].back[b].size = market[m].back[b].size;
                  }
                 catch(e)
                 {
@@ -1305,28 +1486,28 @@ $scope.SocketMarket = function(result)
                 
               
                }
-               for(var b=0;b<$scope.FinalArray[j].runners[inde] .ex.availableToLay.length;b++)
+               for(var b=0;b<$scope.FinalArray[j].runners[inde].lay.length;b++)
                {
                 var count = b+1;  
 		try{
-                $scope.FinalArray[j].runners[inde] .ex.availableToLay[b].selected =  $scope.CallColor($scope.FinalArray[j].runners[inde] .ex.availableToLay[b].price,$scope.FinalArray[j].runners[inde] .ex.availableToLay[b].size, market[m] .ex.availableToLay[b].price,market[m] .ex.availableToLay[b].size);  
+                $scope.FinalArray[j].runners[inde].lay[b].selected =  $scope.CallColor($scope.FinalArray[j].runners[inde].lay[b].price,$scope.FinalArray[j].runners[inde].lay[b].size, market[m].lay[b].price,market[m].lay[b].size);  
 		}     
 		catch(e)
                 {
 		}          
                 try{
-                    $scope.FinalArray[j].runners[inde] .ex.availableToLay[b].price = market[m] .ex.availableToLay[b].price;
+                    $scope.FinalArray[j].runners[inde].lay[b].price = market[m].lay[b].price;
                 }
                 catch(e)
                 {
-                        if($scope.FinalArray[j].runners[inde] .ex.availableToLay[b]!=angular.isUndefinedOrNull)
+                        if($scope.FinalArray[j].runners[inde].lay[b]!=angular.isUndefinedOrNull)
                     {
-                        $scope.FinalArray[j].runners[inde] .ex.availableToLay[b].price="";
+                        $scope.FinalArray[j].runners[inde].lay[b].price="";
                     }
                 }
 
                    try{
-                       $scope.FinalArray[j].runners[inde] .ex.availableToLay[b].size = market[m] .ex.availableToLay[b].size;
+                       $scope.FinalArray[j].runners[inde].lay[b].size = market[m].lay[b].size;
                    }
                    catch (e) {
 
@@ -1396,8 +1577,40 @@ $scope.SocketMarket = function(result)
 		}
 		else
 		{
-			if(result.data!=angular.isUndefinedOrNull)
-			 $scope.FancyDataTemp= result.data;
+            if(result.data!=angular.isUndefinedOrNull){
+                $scope.FancyDataTemp= result.data;
+                for(var i=0;i<$scope.FancyData.length;i++) {
+                    var inde = $scope.FancyDataTemp.findIndex(x=>x.ID==$scope.FancyData[i].ID);
+                    if (inde > -1) {
+                        /*      if($scope.FancyDataTemp[inde].fancy_position.length>0)
+                              {
+                                  $scope.FancyData[i].fancy_position=$scope.FancyDataTemp[inde].fancy_position;
+                                  $scope.FancyData[i].max_exposure=$scope.FancyDataTemp[inde].max_exposure;
+                              }*/
+                        $scope.FancyData[i].max_session_bet_liability=$scope.FancyDataTemp[inde].max_session_bet_liability;
+                        $scope.FancyData[i].max_session_liability=$scope.FancyDataTemp[inde].max_session_liability;
+                        $scope.FancyData[i].HeadName=$scope.FancyDataTemp[inde].HeadName;
+                        $scope.FancyData[i].MaxStake=$scope.FancyDataTemp[inde].MaxStake;
+                        $scope.FancyData[i].fancy_mode=$scope.FancyDataTemp[inde].fancy_mode;
+                        if($scope.FancyDataTemp[inde].fancy_mode=='M')
+                        {
+
+
+                            $scope.FancyData[i].SessInptNo=$scope.FancyDataTemp[inde].SessInptNo;
+                            $scope.FancyData[i].NoValume=$scope.FancyDataTemp[inde].NoValume;
+                            $scope.FancyData[i].SessInptYes=$scope.FancyDataTemp[inde].SessInptYes;
+                            $scope.FancyData[i].YesValume=$scope.FancyDataTemp[inde].YesValume;
+                            $scope.FancyData[i].isIndianShow = true;
+                            $scope.FancyData[i].pointDiff=$scope.FancyDataTemp[inde].pointDiff;
+                            $scope.FancyData[i].rateDiff=$scope.FancyDataTemp[inde].rateDiff;
+                            $scope.FancyData[i].fancyRange=$scope.FancyDataTemp[inde].fancyRange;
+                            $scope.FancyData[i].DisplayMsg=$scope.FancyDataTemp[inde].DisplayMsg;
+                            $scope.FancyData[i].active=$scope.FancyDataTemp[inde].active;
+                        }
+                    }
+
+                }
+            }
 		}
           $scope.getFancyList(marketId);
 }).error(function(err){
@@ -1430,28 +1643,28 @@ $scope.SocketMarket = function(result)
                                var inde = $scope.FinalArray[0].runners.findIndex(img => img.id ===market[m].SelectionId);
                                if(inde>-1)
                                {
-                                for(var b=0;b<$scope.FinalArray[0].runners[inde] .ex.availableToBack.length;b++)
+                                for(var b=0;b<$scope.FinalArray[0].runners[inde].back.length;b++)
                                 {
                                  var count = b+1;  
                                  try{
-                                     $scope.FinalArray[0].runners[inde] .ex.availableToBack[b].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde] .ex.availableToBack[b].price,$scope.FinalArray[0].runners[inde] .ex.availableToBack[b].size, market[m]["BackPrice"+count],market[m]["BackSize"+count]);                 
+                                     $scope.FinalArray[0].runners[inde].back[b].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde].back[b].price,$scope.FinalArray[0].runners[inde].back[b].size, market[m]["BackPrice"+count],market[m]["BackSize"+count]);                 
                                  }
                                  catch(e)
                                  {
 
                                  }
                                 try{
-                                 $scope.FinalArray[0].runners[inde] .ex.availableToBack[b].price = market[m]["BackPrice"+count];
+                                 $scope.FinalArray[0].runners[inde].back[b].price = market[m]["BackPrice"+count];
                                 }
                                 catch(e)
                                 {
-                                 if($scope.FinalArray[0].runners[inde] .ex.availableToBack[b]!=angular.isUndefinedOrNull)
+                                 if($scope.FinalArray[0].runners[inde].back[b]!=angular.isUndefinedOrNull)
                                  {
-                                     $scope.FinalArray[0].runners[inde] .ex.availableToBack[b].price="";
+                                     $scope.FinalArray[0].runners[inde].back[b].price="";
                                  }
                                 }
                                 try{
-                                 $scope.FinalArray[0].runners[inde] .ex.availableToBack[b].size = market[m]["BackSize"+count];
+                                 $scope.FinalArray[0].runners[inde].back[b].size = market[m]["BackSize"+count];
                                   }
                                  catch(e)
                                  {
@@ -1460,70 +1673,70 @@ $scope.SocketMarket = function(result)
                                  
                                
                                 }
-                                for(var b=0;b<$scope.FinalArray[0].runners[inde] .ex.availableToLay.length;b++)
+                                for(var b=0;b<$scope.FinalArray[0].runners[inde].lay.length;b++)
                                 {
                                  var count = b+1;  
-                                 $scope.FinalArray[0].runners[inde] .ex.availableToLay[b].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde] .ex.availableToLay[b].price,$scope.FinalArray[0].runners[inde] .ex.availableToLay[b].size, market[m]["LayPrice"+count],market[m]["LaySize"+count]);                 
+                                 $scope.FinalArray[0].runners[inde].lay[b].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde].lay[b].price,$scope.FinalArray[0].runners[inde].lay[b].size, market[m]["LayPrice"+count],market[m]["LaySize"+count]);                 
                                  try{
-                                     $scope.FinalArray[0].runners[inde] .ex.availableToLay[b].price = market[m]["LayPrice"+count];
+                                     $scope.FinalArray[0].runners[inde].lay[b].price = market[m]["LayPrice"+count];
                                  }
                                  catch(e)
                                  {
-                                         if($scope.FinalArray[0].runners[inde] .ex.availableToLay[b]!=angular.isUndefinedOrNull)
+                                         if($scope.FinalArray[0].runners[inde].lay[b]!=angular.isUndefinedOrNull)
                                      {
-                                         $scope.FinalArray[0].runners[inde] .ex.availableToLay[b].price="";
+                                         $scope.FinalArray[0].runners[inde].lay[b].price="";
                                      }
                                  }
                                  
-                                 $scope.FinalArray[0].runners[inde] .ex.availableToLay[b].size = market[m]["LaySize"+count];
+                                 $scope.FinalArray[0].runners[inde].lay[b].size = market[m]["LaySize"+count];
                                 }
                                   /* try{
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToBack[0].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde] .ex.availableToBack[0].price,$scope.FinalArray[0].runners[inde] .ex.availableToBack[0].size, market[m].BackPrice1,market[m].BackSize1);                 
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToBack[0].price = market[m].BackPrice1;
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToBack[1].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde] .ex.availableToBack[1].price,$scope.FinalArray[0].runners[inde] .ex.availableToBack[1].size, market[m].BackPrice2,market[m].BackSize2);  
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToBack[1].price = market[m].BackPrice2;
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToBack[2].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde] .ex.availableToBack[2].price,$scope.FinalArray[0].runners[inde] .ex.availableToBack[2].size, market[m].BackPrice3,market[m].BackSize3); 
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToBack[2].price = market[m].BackPrice3;
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToLay[0].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde] .ex.availableToLay[0].price,$scope.FinalArray[0].runners[inde] .ex.availableToLay[0].size, market[m].LayPrice1,market[m].LaySize1); 
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToLay[0].price = market[m].LayPrice1;
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToLay[1].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde] .ex.availableToLay[1].price,$scope.FinalArray[0].runners[inde] .ex.availableToLay[1].size, market[m].LayPrice2,market[m].LaySize2); 
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToLay[1].price = market[m].LayPrice2;
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToLay[2].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde] .ex.availableToLay[2].price,$scope.FinalArray[0].runners[inde] .ex.availableToLay[2].size, market[m].LayPrice3,market[m].LaySize3); 
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToLay[2].price = market[m].LayPrice3;
+                                   $scope.FinalArray[0].runners[inde].back[0].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde].back[0].price,$scope.FinalArray[0].runners[inde].back[0].size, market[m].BackPrice1,market[m].BackSize1);                 
+                                   $scope.FinalArray[0].runners[inde].back[0].price = market[m].BackPrice1;
+                                   $scope.FinalArray[0].runners[inde].back[1].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde].back[1].price,$scope.FinalArray[0].runners[inde].back[1].size, market[m].BackPrice2,market[m].BackSize2);  
+                                   $scope.FinalArray[0].runners[inde].back[1].price = market[m].BackPrice2;
+                                   $scope.FinalArray[0].runners[inde].back[2].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde].back[2].price,$scope.FinalArray[0].runners[inde].back[2].size, market[m].BackPrice3,market[m].BackSize3); 
+                                   $scope.FinalArray[0].runners[inde].back[2].price = market[m].BackPrice3;
+                                   $scope.FinalArray[0].runners[inde].lay[0].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde].lay[0].price,$scope.FinalArray[0].runners[inde].lay[0].size, market[m].LayPrice1,market[m].LaySize1); 
+                                   $scope.FinalArray[0].runners[inde].lay[0].price = market[m].LayPrice1;
+                                   $scope.FinalArray[0].runners[inde].lay[1].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde].lay[1].price,$scope.FinalArray[0].runners[inde].lay[1].size, market[m].LayPrice2,market[m].LaySize2); 
+                                   $scope.FinalArray[0].runners[inde].lay[1].price = market[m].LayPrice2;
+                                   $scope.FinalArray[0].runners[inde].lay[2].selected =  $scope.CallColor($scope.FinalArray[0].runners[inde].lay[2].price,$scope.FinalArray[0].runners[inde].lay[2].size, market[m].LayPrice3,market[m].LaySize3); 
+                                   $scope.FinalArray[0].runners[inde].lay[2].price = market[m].LayPrice3;
                
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToBack[0].size = market[m].BackSize1;
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToBack[1].size = market[m].BackSize2;
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToBack[2].size = market[m].BackSize3;
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToLay[0].size = market[m].LaySize1;
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToLay[1].size = market[m].LaySize2;
-                                   $scope.FinalArray[0].runners[inde] .ex.availableToLay[2].size = market[m].LaySize3;
+                                   $scope.FinalArray[0].runners[inde].back[0].size = market[m].BackSize1;
+                                   $scope.FinalArray[0].runners[inde].back[1].size = market[m].BackSize2;
+                                   $scope.FinalArray[0].runners[inde].back[2].size = market[m].BackSize3;
+                                   $scope.FinalArray[0].runners[inde].lay[0].size = market[m].LaySize1;
+                                   $scope.FinalArray[0].runners[inde].lay[1].size = market[m].LaySize2;
+                                   $scope.FinalArray[0].runners[inde].lay[2].size = market[m].LaySize3;
                                }
                                catch(e)
                                {
-                                       if($scope.FinalArray[0].runners[inde] .ex.availableToBack[0]!=angular.isUndefinedOrNull)
+                                       if($scope.FinalArray[0].runners[inde].back[0]!=angular.isUndefinedOrNull)
                                        {
-                                           $scope.FinalArray[0].runners[inde] .ex.availableToBack[0].price="";
+                                           $scope.FinalArray[0].runners[inde].back[0].price="";
                                        }
-                                       if($scope.FinalArray[0].runners[inde] .ex.availableToBack[1]!=angular.isUndefinedOrNull)
+                                       if($scope.FinalArray[0].runners[inde].back[1]!=angular.isUndefinedOrNull)
                                        {
-                                           $scope.FinalArray[0].runners[inde] .ex.availableToBack[1].price="";
+                                           $scope.FinalArray[0].runners[inde].back[1].price="";
                                        }
-                                       if($scope.FinalArray[0].runners[inde] .ex.availableToBack[2]!=angular.isUndefinedOrNull)
+                                       if($scope.FinalArray[0].runners[inde].back[2]!=angular.isUndefinedOrNull)
                                        {
-                                           $scope.FinalArray[0].runners[inde] .ex.availableToBack[2].price="";
+                                           $scope.FinalArray[0].runners[inde].back[2].price="";
                                        }
                
-                                       if($scope.FinalArray[0].runners[inde] .ex.availableToLay[0]!=angular.isUndefinedOrNull)
+                                       if($scope.FinalArray[0].runners[inde].lay[0]!=angular.isUndefinedOrNull)
                                        {
-                                           $scope.FinalArray[0].runners[inde] .ex.availableToLay[0].price="";
+                                           $scope.FinalArray[0].runners[inde].lay[0].price="";
                                        }
-                                       if($scope.FinalArray[0].runners[inde] .ex.availableToLay[1]!=angular.isUndefinedOrNull)
+                                       if($scope.FinalArray[0].runners[inde].lay[1]!=angular.isUndefinedOrNull)
                                        {
-                                           $scope.FinalArray[0].runners[inde] .ex.availableToLay[1].price="";
+                                           $scope.FinalArray[0].runners[inde].lay[1].price="";
                                        }
-                                       if($scope.FinalArray[0].runners[inde] .ex.availableToLay[2]!=angular.isUndefinedOrNull)
+                                       if($scope.FinalArray[0].runners[inde].lay[2]!=angular.isUndefinedOrNull)
                                        {
-                                           $scope.FinalArray[0].runners[inde] .ex.availableToLay[2].price="";
+                                           $scope.FinalArray[0].runners[inde].lay[2].price="";
                                        }
                                }*/
                
@@ -1775,10 +1988,21 @@ $scope.ClearAllTimeOut=function()
         $scope.updateManualbetAllow(isBetAllowedOnManualMatchOdds,marketitem);
         $scope.UpdateManualOdds(pointDiff,runnerlength,index,marketitem);
     }
+    $scope.RupeesChange="";
     $scope.UpdateManualOdds = function(pointDiff,runnerlength,index,marketitem)
-    { var team1;
-        var team2;
-        var teamdrow;
+    {
+        if($scope.RupeesChange=="")
+        {
+            $scope.RupeesChange=marketitem.IsRs;
+
+        }
+        else if($scope.RupeesChange!=marketitem.IsRs) {
+            $scope.RupeesChange=true;
+        }
+        else
+        {
+            $scope.RupeesChange=false;
+        }
         if(runnerlength ==3 && false) {
 
             if (index == 0) {
@@ -1810,9 +2034,7 @@ $scope.ClearAllTimeOut=function()
                     $scope.team1layodd[2+marketitem.id] =$scope.team1Suspend[2+marketitem.id]!=true ? 0 : "";
                     $scope.team1backodd[1+marketitem.id] =$scope.team1Suspend[1+marketitem.id]!=true ? 0 : "";
                     $scope.team1backodd[2+marketitem.id] =$scope.team1Suspend[2+marketitem.id]!=true ? 0 : "";
-                    team1 = true;
-                    team2 = false;
-                    teamdrow = false;
+
                 } else if (index == 1) {
 
                     $scope.team1layodd[0+marketitem.id] =$scope.team1Suspend[0+marketitem.id]!=true ? 0 : "";
@@ -1821,9 +2043,7 @@ $scope.ClearAllTimeOut=function()
                     $scope.team1layodd[2+marketitem.id] =$scope.team1Suspend[2+marketitem.id]!=true ? 0 : "";
                     $scope.team1backodd[0+marketitem.id] =$scope.team1Suspend[0+marketitem.id]!=true ? 0 : "";
                     $scope.team1backodd[2+marketitem.id] = $scope.team1Suspend[2+marketitem.id]!=true ? 0 : "";
-                    team1 = false;
-                    team2 = true;
-                    teamdrow = false;
+
 
                 }
                 else {
@@ -1833,9 +2053,6 @@ $scope.ClearAllTimeOut=function()
                     $scope.team1backodd[1+marketitem.id] =$scope.team1Suspend[1+marketitem.id]!=true ? 0 : "";
                     $scope.team1layodd[2+marketitem.id] = $scope.team1Suspend[2+marketitem.id]!=true ? (parseFloat($scope.team1backodd[2+marketitem.id]) + marketitem.pointDiff).toFixed(2) : "";
                     $scope.team1layodd[2+marketitem.id]=$scope.team1Suspend[2+marketitem.id]!=true ? parseFloat($scope.team1layodd[2+marketitem.id]) : "";
-                    team1 = false;
-                    team2 = false;
-                    teamdrow = true;
                 }
             }else {
 
@@ -1845,9 +2062,7 @@ $scope.ClearAllTimeOut=function()
                     $scope.team1layodd[2+marketitem.id] =$scope.team1Suspend[2+marketitem.id]!=true ? 0 : "";
                     $scope.team1backodd[1+marketitem.id] =$scope.team1Suspend[1+marketitem.id]!=true ? $scope.team1backodd[0+marketitem.id]:"";
                     $scope.team1backodd[2+marketitem.id] =$scope.team1Suspend[2+marketitem.id]!=true ? $scope.team1backodd[0+marketitem.id] : "";
-                    team1 = true;
-                    team2 = false;
-                    teamdrow = false;
+
 
                 } else if (index == 1) {
 
@@ -1856,9 +2071,7 @@ $scope.ClearAllTimeOut=function()
                     $scope.team1layodd[2+marketitem.id] =$scope.team1Suspend[2+marketitem.id]!=true ? 0 : "";
                     $scope.team1backodd[0+marketitem.id] = $scope.team1Suspend[0+marketitem.id]!=true ? $scope.team1backodd[1+marketitem.id] : "";
                     $scope.team1backodd[2+marketitem.id] = $scope.team1Suspend[2+marketitem.id]!=true ? $scope.team1backodd[1+marketitem.id] : "";
-                    team1 = false;
-                    team2 = true;
-                    teamdrow = false;
+
 
                 }
                 else {
@@ -1867,9 +2080,6 @@ $scope.ClearAllTimeOut=function()
                     $scope.team1backodd[0+marketitem.id] =$scope.team1Suspend[0+marketitem.id]!=true ? $scope.team1backodd[2+marketitem.id] : "";
                     $scope.team1backodd[1+marketitem.id] =$scope.team1Suspend[1+marketitem.id]!=true ? $scope.team1backodd[2+marketitem.id] : "";
                     $scope.team1layodd[2+marketitem.id] = $scope.team1Suspend[2]!=true ? 0 : "";
-                    team1 = false;
-                    team2 = false;
-                    teamdrow = true
                 }
             }
 
@@ -1883,13 +2093,15 @@ $scope.ClearAllTimeOut=function()
             "team2_lay":$scope.team1layodd[1+marketitem.id],
             "draw_back":$scope.team1backodd[2+marketitem.id],
             "draw_lay":$scope.team1layodd[2+marketitem.id],
-            "active_team1":team1,
-            "active_team2":team2,
-            "active_draw":teamdrow,
+            "active_team1":$scope.team1Suspend[0+marketitem.id],
+            "active_team2":$scope.team1Suspend[1+marketitem.id],
+            "active_draw":$scope.team1Suspend[2+marketitem.id],
             "dlay_time":marketitem.pointDiff,
             "selection_1":marketitem.runners[0].selectionId,
             "selection_2":marketitem.runners[1].selectionId,
-            "selection_3":marketitem.runners.length==3 ? marketitem.runners[2].selectionId : ''
+            "selection_3":marketitem.runners.length==3 ? marketitem.runners[2].selectionId : '',
+            "IsChange":$scope.RupeesChange,
+            "IsRs":marketitem.IsRs
         };
         var url = BASE_URL + "Lstsavemstrcontroller/saveManualMatchOdds";
         $http.post(url, formData).success(function (response) {
@@ -2040,7 +2252,7 @@ if(userId!=oldUId || userType != oldUType){
 	oldUId=userId;
 	$scope.loading1=true;
 	$timeout.cancel($scope.si_getCrntUserPosition);
-
+    callType=1;
 	}
 $scope.si_getCrntUserPosition = $timeout(function(){
                 $scope.crntusep_userId = userId;
@@ -2055,9 +2267,31 @@ $scope.si_getCrntUserPosition = $timeout(function(){
                         $scope.userOwnPosition = data.userOwnPosition;
                         if ($scope.userPosition != angular.isUndefinedOrNull) //sourabh 170107
                             for (var i = 0; i < $scope.userPosition.result_array.length; i++) {
-                                $scope.totalTeamA = parseFloat($scope.totalTeamA) + parseFloat($scope.userPosition.result_array[i].TeamA);
-                                $scope.totalTeamB = parseFloat($scope.totalTeamB) + parseFloat($scope.userPosition.result_array[i].TeamB);
-                                $scope.totaltheDraw = parseFloat($scope.totaltheDraw) + parseFloat($scope.userPosition.result_array[i].theDraw);
+                                if($scope.userPosition.result_array[i].TypeId==3 && false)
+                                {
+                                    $scope.totalTeamA = parseFloat($scope.totalTeamA) + parseFloat($scope.userPosition.result_array[i].TeamA);
+                                    $scope.totalTeamB = parseFloat($scope.totalTeamB) + parseFloat($scope.userPosition.result_array[i].TeamB);
+                                    $scope.totaltheDraw = parseFloat($scope.totaltheDraw) + parseFloat($scope.userPosition.result_array[i].theDraw);
+                                    $scope.totalTeamA =  $scope.totalTeamA < 0 ?  $scope.totalTeamA * -1 : $scope.totalTeamA > 0 ? $scope.totalTeamA * -1 : $scope.totalTeamA;
+                                    $scope.totalTeamB =  $scope.totalTeamB < 0 ?  $scope.totalTeamB * -1 : $scope.totalTeamB > 0 ?  $scope.totalTeamB * -1 : $scope.totalTeamB;
+                                    $scope.totaltheDraw =  $scope.totaltheDraw < 0 ?  $scope.totaltheDraw * -1 : $scope.totaltheDraw > 0 ?  $scope.totaltheDraw * -1 : $scope.totaltheDraw;
+
+                                    $scope.userPosition.result_array[i].TeamA=$scope.userPosition.result_array[i].TeamA < 0 ? $scope.userPosition.result_array[i].TeamA * -1 : $scope.userPosition.result_array[i].TeamA > 0 ? $scope.userPosition.result_array[i].TeamA * -1 : $scope.userPosition.result_array[i].TeamA;
+
+                                    $scope.userPosition.result_array[i].TeamB=$scope.userPosition.result_array[i].TeamB < 0 ? $scope.userPosition.result_array[i].TeamB * -1 : $scope.userPosition.result_array[i].TeamB > 0 ? $scope.userPosition.result_array[i].TeamB * -1 : $scope.userPosition.result_array[i].TeamB;
+                                    $scope.userPosition.result_array[i].theDraw=$scope.userPosition.result_array[i].theDraw < 0 ? $scope.userPosition.result_array[i].theDraw * -1 : $scope.userPosition.result_array[i].theDraw > 0 ? $scope.userPosition.result_array[i].theDraw * -1 : $scope.userPosition.result_array[i].theDraw ;
+
+                                    $scope.userOwnPosition.result_array[0].TeamA=$scope.userOwnPosition.result_array[0].TeamA < 0 ? $scope.userOwnPosition.result_array[0].TeamA * -1 : $scope.userOwnPosition.result_array[0].TeamA > 0 ? $scope.userOwnPosition.result_array[0].TeamA * -1 : $scope.userOwnPosition.result_array[0].TeamA;
+
+                                    $scope.userOwnPosition.result_array[0].TeamB=$scope.userOwnPosition.result_array[0].TeamB < 0 ? $scope.userOwnPosition.result_array[0].TeamB * -1 : $scope.userOwnPosition.result_array[0].TeamB > 0 ? $scope.userOwnPosition.result_array[0].TeamB * -1 : $scope.userOwnPosition.result_array[0].TeamB;
+                                    $scope.userOwnPosition.result_array[0].theDraw=$scope.userOwnPosition.result_array[0].theDraw < 0 ? $scope.userOwnPosition.result_array[0].theDraw * -1 : $scope.userOwnPosition.result_array[0].theDraw > 0 ? $scope.userOwnPosition.result_array[0].theDraw * -1 : $scope.userOwnPosition.result_array[0].theDraw ;
+                                }
+                                else
+                                {
+                                    $scope.totalTeamA = parseFloat($scope.totalTeamA) + parseFloat($scope.userPosition.result_array[i].TeamA);
+                                    $scope.totalTeamB = parseFloat($scope.totalTeamB) + parseFloat($scope.userPosition.result_array[i].TeamB);
+                                    $scope.totaltheDraw = parseFloat($scope.totaltheDraw) + parseFloat($scope.userPosition.result_array[i].theDraw);
+                                }
                             }
                         /*console.log($scope.totalTeamA);
                          //

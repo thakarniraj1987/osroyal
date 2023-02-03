@@ -113,8 +113,7 @@ $scope.getMarketlstTimer=$timeout(function(){
             url: 'Apicontroller/getMarketListing/'+$scope.MatchId,
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         }).success(function(data) {
-            
-            $scope.scoreboard_id = data.data[0].volumeLimit[0].scoreboard_id
+
             if(data.error)
             {
                 Dialog.autohide(data.message);
@@ -124,9 +123,14 @@ $scope.getMarketlstTimer=$timeout(function(){
             }
             else
             {
-                $scope.BindManulalOdds(data.data[0].runners);
+
+                $scope.BindManulalOdds(data.runners_manual);
                 $scope.isManualMatchOdds=data.isManualMatchOdds;
                 $scope.isManualMatch=data.is_manual;
+                if(data.scoreboard_id != angular.isUndefinedOrNull){
+                    $scope.scoreboard_id=data.scoreboard_id;
+
+                }
                 $rootScope.MatchStack=data.match_stack;
                 $rootScope.SessionStack=data.session_stack;
                 // $scope.isFavoriteVal=data.data.is_favourite;
@@ -142,7 +146,7 @@ $scope.getMarketlstTimer=$timeout(function(){
 
                 else if(callType1==1){
                     var tResult = data;
-
+                    $scope.ScoreBoard();
                     //  $scope.oddsLimit=parseFloat(tResult.data.volumeLimit[0].oddsLimit);
                     //   $scope.volumeLimit=parseFloat(tResult.data.volumeLimit[0].volumeLimit);
                     $timeout.cancel($scope.ajaxTimer);
@@ -168,12 +172,12 @@ $scope.getMarketlstTimer=$timeout(function(){
             callType1=2;
         }).error(function(err){
             $scope.loading = false;
-
+            $scope.GetMarketListId();
         });
     }
 
          
-	},1000);
+	},callType1==1 ? 0 : 1000);
     }
     $scope.BindManulalOdds=function(result)
 	{
@@ -377,51 +381,88 @@ $scope.CommonFun=function(msg)
 
     $scope.FancyData=[];
     $scope.BindSoketMarketSecondStep=function(result)
-	{
+    {
 
-       	    if(result.data != angular.isUndefinedOrNull)
-            {
-		if(result.data.length!=$scope.FinalArray.length)
-		{
-			$scope.loading = true;
-			$scope.FinalArray=[];
-			 for(var i=0;i<result.data.length;i++){
-				$scope.FinalArray.push(result.data[i]);
-			}
-			$scope.BindSoketMarket(result)
-			$scope.loading = false;
-		}
-        else
+        if(result.data != angular.isUndefinedOrNull)
         {
-            for(var i=0;i<result.data.length;i++){
-                var ind=$scope.FinalArray.findIndex(x=>x.marketid==result.data[i].marketid && x.is_auto==result.data[i].is_auto);
-                if(ind>-1)
-                {
-                    $scope.FinalArray[ind].visibility=result.data[i].visibility;
-
-                    $scope.FinalArray[ind].day=result.data[i].day;
-                    $scope.Day= $scope.FinalArray[ind].day;
-                    if($scope.FinalArray[ind].is_auto=='M')
+            if(result.data.length!=$scope.FinalArray.length)
+            {
+                $scope.loading = true;
+                $scope.FinalArray=[];
+                for(var i=0;i<result.data.length;i++){
+                    $scope.FinalArray.push(result.data[i]);
+                }
+                $scope.BindSoketMarket(result)
+                $scope.loading = false;
+            }
+            else
+            {
+                for(var i=0;i<result.data.length;i++){
+                    var ind=$scope.FinalArray.findIndex(x=>x.marketid==result.data[i].marketid && x.is_auto==result.data[i].is_auto);
+                    if(ind>-1)
                     {
-                        $scope.FinalArray[ind].runners=result.data[i].runners;
-                        $scope.FinalArray[ind].isBetAllowedOnManualMatchOdds=result.data[i].isBetAllowedOnManualMatchOdds;
-                        $scope.FinalArray[ind].isManualMatchOdds=result.data[i].isManualMatchOdds;
-                        $scope.FinalArray[ind].is_manual=result.data[i].is_manual;
+                        $scope.FinalArray[ind].visibility=result.data[i].visibility;
+                        $scope.FinalArray[ind].day=result.data[i].day;
+                        $scope.Day= $scope.FinalArray[ind].day;
+                        $scope.FinalArray[ind].IsRs=result.data[i].IsRs;
+
+                        if($scope.FinalArray[ind].is_auto=='M')
+                        {
+                            $scope.FinalArray[ind].runners=result.data[i].runners;
+                            $scope.FinalArray[ind].isBetAllowedOnManualMatchOdds=result.data[i].isBetAllowedOnManualMatchOdds;
+                            $scope.FinalArray[ind].isManualMatchOdds=result.data[i].isManualMatchOdds;
+                            $scope.FinalArray[ind].is_manual=result.data[i].is_manual;
+
+
+                        }
+                        if(result.data[i].is_manual==1)
+                        {
+                            $scope.FinalArray[ind].id=result.data[i].marketid;
+                        }
+                        $scope.FinalArray[ind].name=result.data[i].market_name;
 
                     }
-                    if(result.data[i].is_manual==1)
-                    {
-                        $scope.FinalArray[ind].id=result.data[i].marketid;
-                    }
-                    $scope.FinalArray[ind].name=result.data[i].market_name;
 
                 }
-
             }
         }
-	    }
-	}
+    }
     $scope.market_sel_id=[];
+    $scope.$on('CallBackFromRightBar',function(event,data) {
+        $rootScope.$broadcast('BindUserBets',{MatchId:$scope.MatchId});
+
+        if($rootScope.stakeIds.length==angular.isUndefinedOrNull || $rootScope.stakeIds.length==0)
+        {
+
+            for(var j=0;j<$scope.FinalArray.length;j++) {
+                for (var r = 0; r < $scope.FinalArray[j].runners.length; r++) {
+                    $scope.AssignKeyInitBack($scope.FinalArray[j].runners[r].id, $scope.FinalArray[j].matchid,$scope.FinalArray[j].id);
+                }
+            }
+         }
+
+    });
+
+    $scope.AssignKeyInitBack=function(SelectionId,MatchId,MarketId)
+    {
+
+        var UId=SelectionId+"_"+MatchId+"_"+MarketId; //for uniqueness we combine selction id and match id
+        var obj={'placeName':'','TeamW':0,'TeamL':0,'UId':UId,'MatchId':MatchId,'MarketId':MarketId};
+        var ind = $rootScope.FinalTeam.findIndex(x=>x.UId==UId);
+        if(ind==-1)
+        {
+            $rootScope.FinalTeam.push(obj);
+        }
+        var obj1={'MatchId':MatchId,'UId':UId,'MarketId':MarketId};
+        var ind1= $rootScope.stakeIds.findIndex(x=>x.UId==UId);
+        if(ind1==-1){
+
+            $rootScope.stakeIds.push(obj1);
+            $rootScope.stake2['field_' + UId] =0;
+            $rootScope.stake2['loss_' + UId] =0;
+            $rootScope.stake2['win_' + UId] =0;
+        }
+    }
     $scope.BindSoketMarket=function(result)
     {
 
@@ -436,19 +477,20 @@ $scope.CommonFun=function(msg)
                  $scope.marketIdLst.push(result.data[i].marketid);
              }
 
-           		
+
 			if(callType1==1)
 			{
 	 	   	  $scope.FinalArray.push(result.data[i]);
 			}
-			if($scope.SPORTID == 4)
-			{
-                $scope.getFancyList(result.data[i].marketid);
-                $scope.UpdateAdminFancyList(result.data[i].marketid);
-			}
+
 
 		    }
-		
+                if($scope.SPORTID == 4)
+                {
+                    $scope.getFancyList(result.data[0].marketid);
+                    $scope.MOddsMarketId=result.data[0].marketid;
+                   // $scope.UpdateAdminFancyList(result.data[0].marketid);
+                }
             //var callbackResult=$scope.SetResult($scope.marketIdLst);
          
             $scope.MarketLst=$scope.marketIdLst.join(',');
@@ -457,7 +499,7 @@ $scope.CommonFun=function(msg)
 	    $scope.MarketId= $scope.MarketLst;
             $scope.AllMarket =  $scope.MarketLst;
 
-		$rootScope.$broadcast('BindUserBets',{MatchId:$scope.MatchId});
+                $rootScope.$broadcast('BindUserBets',{MatchId:$scope.MatchId});
 		
 		 $scope.GetScore();
 		if(true){
@@ -465,8 +507,9 @@ $scope.CommonFun=function(msg)
                 if($scope.FinalArray[j].is_manual==1)
                 {
                     $scope.FinalArray[j].id=$scope.FinalArray[j].marketid;
+                    $scope.FinalArray[j].IsRs=$scope.FinalArray[j].IsRs;
                 }
-
+                                                           
                 for (var r = 0; r < $scope.FinalArray[j].runners.length; r++) {
                     $scope.SetCommonProperty($scope.FinalArray[j].runners[r].id, $scope.FinalArray[j]);
                 }
@@ -474,20 +517,20 @@ $scope.CommonFun=function(msg)
 }
 	       get_userser.getSocketDataApiDetail($scope.MarketLst,function(data) {
                $scope.market_sel_id=[];
-            //console.log(data);
+			//console.log(data);
 	 			 var dataResult = data;
 		                     var tempResult =[];
 
-		                         if(dataResult !=angular.isUndefinedOrNull && dataResult.length>0 && dataResult[0]!=angular.isUndefinedOrNull)
+		                         if(dataResult !=angular.isUndefinedOrNull && dataResult['cricket'].length>0 && dataResult['cricket'][0]!=angular.isUndefinedOrNull)
 		                         {
 						for(var j=0;j<$scope.FinalArray.length;j++)
 						{
-					             var ind = dataResult.findIndex(x=>x.marketId==$scope.FinalArray[j].marketid);
+					             var ind = dataResult['cricket'].findIndex(x=>x.id==$scope.FinalArray[j].marketid);
 				                     if(ind>-1)
 				                     {
 
 
-				                         tempResult.data=dataResult[ind];
+				                         tempResult.data=dataResult['cricket'][ind];
 							 var tempArray=$scope.FinalArray[j];
 							 $scope.FinalArray[j].volumeLimit=tempArray.volumeLimit;
 							 $scope.FinalArray[j].IsMatchDisable=tempArray.IsMatchDisable;
@@ -530,7 +573,7 @@ $scope.CommonFun=function(msg)
                                         }
 
 
-                                        $scope.CallSocketMarket();
+
 									}
 								}
 
@@ -555,8 +598,6 @@ $scope.CommonFun=function(msg)
 				                         $scope.loading = false;
 							}
 							else{
-                                // debugger;
-                                $scope.doMatchDisabled();
 								//Dialog.autohide("Odds not comming from api.");
 								 $scope.loading = false;
 								 //$scope.CallSocketMarket();
@@ -601,9 +642,7 @@ $scope.CommonFun=function(msg)
 		                       
 					}
 				else {
-                    
-                    $scope.doMatchDisabled()
-					if($scope.SPORTID == 4 && dataResult.length==0 && dataResult[0]==angular.isUndefinedOrNull)
+					if($scope.SPORTID == 4 && dataResult['session'].length==0 && dataResult['session'][0]==angular.isUndefinedOrNull)
 					{
 						$scope.isSessionNull=true;
 
@@ -611,69 +650,61 @@ $scope.CommonFun=function(msg)
                     $scope.loading = false;
 
 				 }
-			});
-      
+               $scope.CallSocketMarket();
+	       });
+
 
             }
 
-    }
-
-    // FOR SUSPENDED MATCH
-    $scope.doMatchDisabled = function(){
-         for(var j=0;j<$scope.FinalArray.length;j++)
-        {
-            if($scope.FinalArray[j].is_manual != 1){
-
-            $scope.FinalArray[j].status='SUSPENDED';
-            }
-
-        }
-    
     }
 
     $scope.CallSocketMarket=function(){
 $scope.ajaxTimer = $timeout(function(){
 callType1="2";
  //$scope.GetMarketListId();
-		   get_userser.getSocketDataApiDetail($scope.MarketLst,function(data) {
-  		   	try{
-                // debugger;
-	 			 var dataResult = data;
-		                     var tempResult =[];
-		                
-		                         if(dataResult !=angular.isUndefinedOrNull && dataResult.length>0 && dataResult[0] !=angular.isUndefinedOrNull)
-		                         {
-		                            for(var j=0;j<$scope.FinalArray.length;j++)
-						{
-					             var ind = dataResult.findIndex(x=>x.marketId==$scope.FinalArray[j].marketid);
-				                     if(ind>-1)
-				                     {
+    if($state.current.name=="userDashboard.Matchodds")
+    {
+        get_userser.getSocketDataApiDetail($scope.MarketLst,function(data) {
+            try{
 
-		                                        tempResult.data=dataResult[ind];
-                                         $scope.FinalArray[j].status=tempResult.data.status;
-                                         $scope.FinalArray[j].inPlay=tempResult.data.inPlay;
-                                         if($scope.FinalArray[j].mtype=="MATCH_ODDS" || $scope.FinalArray[j].btype=="ODDS"){
-		                                         $scope.BindIndianFancy(dataResult['session'],$scope.FinalArray[j].marketid);
-							}
-                                         if($scope.SPORTID == 4)
-                                         {
-                                             $scope.BindIndianFancy(dataResult['session'],$scope.FinalArray[j].marketid);
-                                         }
+                var dataResult = data;
+                var tempResult =[];
 
-							 $scope.SocketMarket(tempResult);
-			                                 $scope.loading = false;
-						
-						     }
-						}
-					}
-					$timeout.cancel($scope.ajaxTimer);
+                if(dataResult !=angular.isUndefinedOrNull && dataResult['cricket'].length>0 && dataResult['cricket'][0] !=angular.isUndefinedOrNull)
+                {
+                    for(var j=0;j<$scope.FinalArray.length;j++)
+                    {
+                        var ind = dataResult['cricket'].findIndex(x=>x.id==$scope.FinalArray[j].id);
+                        if(ind>-1)
+                        {
+
+                            tempResult.data=dataResult['cricket'][ind];
+                            $scope.FinalArray[j].status=tempResult.data.status;
+                            $scope.FinalArray[j].inPlay=tempResult.data.inPlay;
+                            if($scope.FinalArray[j].mtype=="MATCH_ODDS" || $scope.FinalArray[j].btype=="ODDS"){
+                                $scope.BindIndianFancy(dataResult['session'],$scope.FinalArray[j].id);
+                            }
+                            if($scope.SPORTID == 4)
+                            {
+                                $scope.BindIndianFancy(dataResult['session'],$scope.FinalArray[j].id);
+                            }
+
+                            $scope.SocketMarket(tempResult);
+                            $scope.loading = false;
+
+                        }
+                    }
+                }
+                $timeout.cancel($scope.ajaxTimer);
 
                 $scope.CallSocketMarket();
             }
             catch (e) {
                 $scope.CallSocketMarket();
             }
-				});
+        });
+    }
+
 
 if($scope.SPORTID==4)
 {
@@ -690,6 +721,9 @@ if($scope.SPORTID==4)
 
         if($scope.FancyData!=angular.isUndefinedOrNull) {
             for (var i = $scope.FancyData.length; i--;) {
+
+
+
                     if ($scope.FancyData[i].is_indian_fancy == 1 && $scope.FancyData[i].fancy_mode == "A") {
 
                         $scope.FancyData[i].isIndianShow = false;
@@ -702,17 +736,58 @@ if($scope.SPORTID==4)
 	$scope.isExistIndianFancy=true;
     $scope.isExistFancy=true;
     $scope.InClick=-1;
-    $scope.LeaderShow=function(indx)
+    $scope.LeaderShow=function(indx,fancy)
 	{
-		if(indx==$scope.InClick)
-		{
-            $scope.InClick=-1;
-		}
-		else {
-            $scope.InClick=indx;
-		}
+	    if(true)
+        {
+            //$scope.loading=true;
+            $http({
+                url:BASE_URL+'Apicontroller/userScorePosition/'+fancy.ID,
+                method:'GET'
+            }).success(function(response){
+                $scope.loading=false;
+                if(response.fancy_position.length>0)
+                {
+                    fancy.max_exposure=response.max_exposure;
+                    fancy.fancy_position=response.fancy_position;
+                    if(indx==$scope.InClick)
+                    {
+                        $scope.InClick=-1;
+                    }
+                    else {
+                        $scope.InClick=indx;
+                    }
+                }
+                else{
+                    fancy.max_exposure="";
+                    fancy.fancy_position=[];
+                    if(indx==$scope.InClick)
+                    {
+                        $scope.InClick=-1;
+                    }
+                    else {
+                        $scope.InClick=indx;
+                    }
+                }
+
+
+            });
+        }
+	    else
+        {
+            if(indx==$scope.InClick)
+            {
+                $scope.InClick=-1;
+            }
+            else {
+                $scope.InClick=indx;
+            }
+        }
+
+
 
 	}
+
     $scope.BindIndianFancy=function(data,mId)
     {
 
@@ -874,9 +949,10 @@ if($scope.SPORTID==4)
 $scope.SocketMarket = function(result)
 {
 	
+
     //$scope.FancyLiveData = result.session;
     var market = result.data.runners;
-    var j = $scope.FinalArray.findIndex(x=>x.marketid==result.data.marketId);
+    var j = $scope.FinalArray.findIndex(x=>x.id==result.data.id);
     if(market!=angular.isUndefinedOrNull)
     {
     	if(j>-1){
@@ -888,36 +964,36 @@ $scope.SocketMarket = function(result)
 
 	 
 		if(j>-1){
-           var inde = $scope.FinalArray[j].runners.findIndex(img => img.id ===market[m].selectionId || img.id === market[m].selectionId);
+           var inde = $scope.FinalArray[j].runners.findIndex(img => img.id ===market[m].id || img.id === market[m].id);
            if(inde>-1)
            {
 	       $scope.FinalArray[j].IsMatchDisable=false;
-               for(var b=0;b<$scope.FinalArray[j].runners[inde].ex.availableToBack.length;b++)
+               for(var b=0;b<$scope.FinalArray[j].runners[inde].back.length;b++)
                {
 
 
                 var count = b+1;  
                 try{
-                    $scope.FinalArray[j].runners[inde].ex.availableToBack[b].selected =  $scope.CallColor($scope.FinalArray[j].runners[inde].ex.availableToBack[b].price, market[m].ex.availableToBack[b].price);
+                    $scope.FinalArray[j].runners[inde].back[b].selected =  $scope.CallColor($scope.FinalArray[j].runners[inde].back[b].price, market[m].back[b].price);
 
-                   // $scope.CallColor($scope.FinalArray[j].runners[inde].ex.availableToBack[b].price,$scope.FinalArray[j].runners[inde].ex.availableToBack[b].size, market[m].ex.availableToBack[b].price,market[m].ex.availableToBack[b].size);
+                   // $scope.CallColor($scope.FinalArray[j].runners[inde].back[b].price,$scope.FinalArray[j].runners[inde].back[b].size, market[m].back[b].price,market[m].back[b].size);
                 }
                 catch(e)
                 {
 
                 }
                try{
-                $scope.FinalArray[j].runners[inde].ex.availableToBack[b].price = market[m].ex.availableToBack[b].price;
+                $scope.FinalArray[j].runners[inde].back[b].price = market[m].back[b].price;
                }
                catch(e)
                {
-                if($scope.FinalArray[j].runners[inde].ex.availableToBack[b]!=angular.isUndefinedOrNull)
+                if($scope.FinalArray[j].runners[inde].back[b]!=angular.isUndefinedOrNull)
                 {
-                    $scope.FinalArray[j].runners[inde].ex.availableToBack[b].price="";
+                    $scope.FinalArray[j].runners[inde].back[b].price="";
                 }
                }
                try{
-                $scope.FinalArray[j].runners[inde].ex.availableToBack[b].size = market[m].ex.availableToBack[b].size;
+                $scope.FinalArray[j].runners[inde].back[b].size = market[m].back[b].size;
                  }
                 catch(e)
                 {
@@ -926,30 +1002,30 @@ $scope.SocketMarket = function(result)
                 
               
                }
-               for(var b=0;b<$scope.FinalArray[j].runners[inde].ex.availableToLay.length;b++)
+               for(var b=0;b<$scope.FinalArray[j].runners[inde].lay.length;b++)
                {
                 var count = b+1;
                 try{
-                    $scope.FinalArray[j].runners[inde].ex.availableToLay[b].selected =  $scope.CallColor($scope.FinalArray[j].runners[inde].ex.availableToLay[b].price,market[m].ex.availableToLay[b].price);
+                    $scope.FinalArray[j].runners[inde].lay[b].selected =  $scope.CallColor($scope.FinalArray[j].runners[inde].lay[b].price,market[m].lay[b].price);
 				}
 				catch (e) {
 
                 }
 
                 try{
-                    $scope.FinalArray[j].runners[inde].ex.availableToLay[b].price = market[m].ex.availableToLay[b].price;
+                    $scope.FinalArray[j].runners[inde].lay[b].price = market[m].lay[b].price;
                 }
                 catch(e)
                 {
-                        if($scope.FinalArray[j].runners[inde].ex.availableToLay[b]!=angular.isUndefinedOrNull)
+                        if($scope.FinalArray[j].runners[inde].lay[b]!=angular.isUndefinedOrNull)
                     {
-                        $scope.FinalArray[j].runners[inde].ex.availableToLay[b].price="";
+                        $scope.FinalArray[j].runners[inde].lay[b].price="";
                     }
                 }
 
 
                    try{
-                       $scope.FinalArray[j].runners[inde].ex.availableToLay[b].size = market[m].ex.availableToLay[b].size;
+                       $scope.FinalArray[j].runners[inde].lay[b].size = market[m].lay[b].size;
                    }
                    catch (e) {
 
@@ -1139,14 +1215,14 @@ $scope.CheckBet=function(i)
                         $scope.FinalArray[i].runners.find(function (item, j) {
                             if (item.id == $rootScope.GUserData[u].SelectionId && ($scope.FinalArray[i].id == $rootScope.GUserData[u].MarketId) && ($rootScope.GUserData[u].MatchId == $stateParams.MatchId) && ($rootScope.GUserData[u].IsMatched == 0)) {
                                 if ($rootScope.GUserData[u].isBack == 0) {
-                                    if (item.ex.availableToBack.length != 0 && $rootScope.GUserData[u].Odds <= (item.ex.availableToBack[0].price + parseFloat($scope.FinalArray[i].volumeLimit[0].oddsLimit)).toFixed(2)) {
+                                    if (item.back.length != 0 && $rootScope.GUserData[u].Odds <= (item.back[0].price + parseFloat($scope.FinalArray[i].volumeLimit[0].oddsLimit)).toFixed(2)) {
                                         $http.get('Betentrycntr/updateUnMatchedData/' + $rootScope.GUserData[u].MstCode + '/' + 0 + '/' + $scope.FinalArray[i].id + '/' + sessionService.get('type') + '/' + sessionService.get('user_id') + '/' + $stateParams.MatchId).success(function (data, status, headers, config) {
                                             $rootScope.$broadcast('BindUserBets', {MatchId: $scope.MatchId});
                                             // $scope.getBetsData();
                                         });
                                     }
                                 } else {
-                                    if (item.ex.availableToLay.length != 0 && $rootScope.GUserData[u].Odds >= (item.ex.availableToLay[0].price + parseFloat($scope.FinalArray[i].volumeLimit[0].oddsLimit)).toFixed(2)) {
+                                    if (item.lay.length != 0 && $rootScope.GUserData[u].Odds >= (item.lay[0].price + parseFloat($scope.FinalArray[i].volumeLimit[0].oddsLimit)).toFixed(2)) {
                                         $http.get('Betentrycntr/updateUnMatchedData/' + $rootScope.GUserData[u].MstCode + '/' + 1 + '/' + $scope.FinalArray[i].id + '/' + sessionService.get('type') + '/' + sessionService.get('user_id') + '/' + $stateParams.MatchId).success(function (data, status, headers, config) {
                                             $rootScope.$broadcast('BindUserBets', {MatchId: $scope.MatchId});
                                             // $scope.getBetsData();
@@ -1185,6 +1261,7 @@ $scope.CheckBet=function(i)
             headers:{'Content-Type':'application/x-www-form-urlencoded'}
         }).success(function(data){
             //
+
             var tempResult=data.data;
             for(var i=0;i<tempResult.length;i++)
             {
@@ -1200,7 +1277,7 @@ $scope.CheckBet=function(i)
     $scope.CallMarketLiability = function()
     {
 
-        $http({
+     /*   $http({
             method:"POST",
             url:BASE_URL+'/Apicontroller/update_market_win_loss',
             data: {"matchId":$scope.MatchId,"MarketId":$scope.MarketLst},
@@ -1211,7 +1288,7 @@ $scope.CheckBet=function(i)
             {
                 $scope.TRunnerValue1['field_'+tempResult[i].marketId] = tempResult[i];
             }
-        })
+        })*/
 
 
     }
@@ -1223,6 +1300,7 @@ $scope.CheckBet=function(i)
 
     $scope.MarketWinLossByMId = function(MarketId)
 	{
+		
 		var obj = null;
 		if($scope.TRunnerValue1 != angular.isUndefinedOrNull && MarketId!= angular.isUndefinedOrNull)
 		{
@@ -1241,7 +1319,6 @@ $scope.CheckBet=function(i)
     $scope.GetScore=function(){      
 	$scope.GetScoreTimer=$timeout(function(){
             var eventIds = $stateParams.MatchId;
-         if($scope.scoreboard_id == null)   {
          //var eventIds = '28448035';
         $http.get(BASE_URL+'Geteventcntr/GetScoreApi/'+eventIds).then(function(result) {
             
@@ -1269,26 +1346,14 @@ $scope.CheckBet=function(i)
 		 $scope.GetScore();
 		
         });
-    }else{
-        $http.get(BASE_URL+'Apiusercontroller/scoreboard/'+$scope.scoreboard_id).then(function(result) {
-            debugger
-       
-            $scope.ScoreResult=result.data.data;
-            $scope.ballByBallScore=result.data.data;
-        });
-        $scope.GetScore();
-    }
 	},1000);
-    // $timeout.cancel($scope.GetScoreTimer);
-
     }
-        $timeout.cancel($scope.GetScoreTimer);
+    $scope.stopScore = $interval(function () {
+                    //Display the current time.
+      $scope.GetScore();
+    }, 5000);
 
-    // $scope.stopScore = $interval(function () {
-    //                 //Display the current time.
-    //   $scope.GetScore();
-    // }, 5000);
-
+    $interval.cancel($scope.stopScore);
     
     $scope.priceVal1 = {};
     $scope.formStatus={};
@@ -1299,7 +1364,7 @@ $scope.CheckBet=function(i)
     $scope.arrayObj={};
     $scope.getOddValueManual = function(item, priceVal,oddsLimit, matchId, back_layStatus, placeName, selectionId,index,MarketId,currentpos,active,marketitem) {
         //$scope.btnPlaceDis = true;
-        if(active==1){
+		if(active==0){
 
             $rootScope.currentpos=currentpos;
             priceVal = parseFloat(priceVal) + parseFloat(oddsLimit);
@@ -1311,7 +1376,28 @@ $scope.CheckBet=function(i)
             $scope.loginId = sessionService.get('user_id');
             $scope.slctUseTypeID = sessionService.get('slctUseTypeID');
             $scope.stake = 0;
+            $scope.step=0.01;
             $scope.priceVal =priceVal != angular.isUndefinedOrNull ?  parseFloat(priceVal.toFixed(2)) : 0;
+            if(!marketitem.IsRs)
+            {
+                if(($scope.priceVal+"").length>2)
+                {
+                    priceVal=$scope.priceVal/10000;
+                    $scope.step=0.0001;
+                }
+                if(($scope.priceVal+"").length==1)
+                {
+                    priceVal=$scope.priceVal/100;
+                }
+                if(($scope.priceVal+"").length==2)
+                {
+                    priceVal=$scope.priceVal/100;
+                }
+            }
+            else {
+                $scope.step=1;
+            }
+
             $scope.priceVal1['field_' + index]=parseFloat($scope.priceVal.toFixed(2));
             $scope.MatchId = $scope.MatchId;
             $scope.displayTable = true;
@@ -1356,10 +1442,12 @@ $scope.CheckBet=function(i)
                 SportId:$scope.SPORTID,
                 matchdate:$scope.dateForm,
 				isManual:true,
-				teamName:'team_'+currentpos
+				teamName:'team_'+currentpos,
+                IsRs:marketitem.IsRs,
+                step:$scope.step
             };
             $rootScope.$broadcast('CallAddBackOrLay',$scope.arrayObj);
-            /*  if(back_layStatus==0) //ex.availableToBack
+            /*  if(back_layStatus==0) //back
             {
                 var ind=$scope.backArray.findIndex(x=>x.uniqueId==index);
                 if(ind==-1)
@@ -1380,6 +1468,7 @@ $scope.CheckBet=function(i)
     };
     $scope.getOddValue = function(item, priceVal,oddsLimit, matchId, back_layStatus, placeName, selectionId,index,MarketId,currentpos,isMatchDisable,marketitem) {
                        //$scope.btnPlaceDis = true;
+
 	if(!isMatchDisable && marketitem.visibility==1 && marketitem.status!='SUSPENDED' && marketitem.status!='CLOSED'){
 	$rootScope.currentpos=currentpos;
 	priceVal = parseFloat(priceVal) + parseFloat(oddsLimit);
@@ -1466,7 +1555,6 @@ $scope.CheckBet=function(i)
                 stake:'',
                 priceVal: priceVal,
                 p_l: '',
-            
                 MarketId: MarketId,
                 isMatched: 1,
                 UserTypeId: $scope.UserTypeId,
@@ -1922,12 +2010,25 @@ else if (parseInt($scope.viewUserAc1.stakeLimit) != 0 && parseInt($scope.viewUse
         if (z > 0) return z;
         else return "";
     }
-    $scope.getManulaPrice=function(p)
+    $scope.getManulaPrice=function(p,IsRs)
     {
 
         if(isInt_number(p))
         {
-           return parseFloat(p);
+            if(!IsRs)
+            {
+                if((p+"").length==4 || (p+"").length==3)
+                {
+                    return parseFloat(p/100);
+                }
+                else {
+                    return parseFloat(p);
+                }
+            }
+            else {
+                return parseFloat(p);
+            }
+
         }
         else
         {
@@ -2003,7 +2104,7 @@ else if (parseInt($scope.viewUserAc1.stakeLimit) != 0 && parseInt($scope.viewUse
                 stake:0,
                 priceVal: parseInt(OddsNumber),
                 p_l: 0,
-                MarketId: FancyObject.market_id,
+                MarketId: $scope.MOddsMarketId,
                 isMatched: 1,
                 UserTypeId: $scope.UserTypeId,
                 placeName: '',
@@ -2286,117 +2387,141 @@ if(FancyData.MaxStake >= getbetval){
   $scope.FancyDataTemp=[];
     $scope.getFancyList = function(marketId) {
 	$scope.getFancyTimer=$timeout(function(){
-      $http({
-                    method: 'GET',
-                    url: 'Apicontroller/matchLstIndianSession/'+$scope.MatchId+'/'+marketId,
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                }).success(function(result) {
+        if($state.current.name=='userDashboard.Matchodds'){
+            $http({
+                method: 'GET',
+                url: 'Apicontroller/matchLstIndianSession/'+$scope.MatchId+'/'+marketId,
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            }).success(function(result) {
 
-		if(result.data!=angular.isUndefinedOrNull && result.data.length!=$scope.FancyData.length)
-		{
-		 $scope.FancyData = result.data;
-		}
-		else
-		{
-            $scope.FancyData = result.data;
-            if(result.data!=angular.isUndefinedOrNull){
-                $scope.FancyDataTemp= result.data;
-                for(var i=0;i<$scope.FancyData.length;i++) {
-                    var inde = $scope.FancyDataTemp.findIndex(x=>x.ID==$scope.FancyData[i].ID);
-                    if (inde > -1) {
-                        
-                        if($scope.FancyDataTemp[inde].fancy_position.length>0)
-                        {
-                            $scope.FancyData[i].fancy_position=$scope.FancyDataTemp[inde].fancy_position;
-                            $scope.FancyData[i].max_exposure=$scope.FancyDataTemp[inde].max_exposure;
+                if(result.data!=angular.isUndefinedOrNull && result.data.length!=$scope.FancyData.length)
+                {
+
+                    $scope.FancyData = result.data;
+                }
+                else
+                {
+
+                    if(result.data!=angular.isUndefinedOrNull){
+                        $scope.FancyDataTemp= result.data;
+                        for(var i=0;i<$scope.FancyData.length;i++) {
+                            var inde = $scope.FancyDataTemp.findIndex(x=>x.ID==$scope.FancyData[i].ID);
+                            if (inde > -1) {
+                          /*      if($scope.FancyDataTemp[inde].fancy_position.length>0)
+                                {
+                                    $scope.FancyData[i].fancy_position=$scope.FancyDataTemp[inde].fancy_position;
+                                    $scope.FancyData[i].max_exposure=$scope.FancyDataTemp[inde].max_exposure;
+                                }*/
+                                $scope.FancyData[i].max_session_bet_liability=$scope.FancyDataTemp[inde].max_session_bet_liability;
+                                $scope.FancyData[i].max_session_liability=$scope.FancyDataTemp[inde].max_session_liability;
+                                $scope.FancyData[i].HeadName=$scope.FancyDataTemp[inde].HeadName;
+                                $scope.FancyData[i].MaxStake=$scope.FancyDataTemp[inde].MaxStake;
+                                $scope.FancyData[i].fancy_mode=$scope.FancyDataTemp[inde].fancy_mode;
+                               // $scope.FancyData[i].max_exposure=$scope.FancyDataTemp[inde].max_exposure;
+                                if($scope.FancyDataTemp[inde].fancy_mode=='M')
+                                {
+
+
+                                    $scope.FancyData[i].SessInptNo=$scope.FancyDataTemp[inde].SessInptNo;
+                                    $scope.FancyData[i].NoValume=$scope.FancyDataTemp[inde].NoValume;
+                                    $scope.FancyData[i].SessInptYes=$scope.FancyDataTemp[inde].SessInptYes;
+                                    $scope.FancyData[i].YesValume=$scope.FancyDataTemp[inde].YesValume;
+                                    $scope.FancyData[i].isIndianShow = true;
+                                    $scope.FancyData[i].pointDiff=$scope.FancyDataTemp[inde].pointDiff;
+                                    $scope.FancyData[i].rateDiff=$scope.FancyDataTemp[inde].rateDiff;
+                                    $scope.FancyData[i].fancyRange=$scope.FancyDataTemp[inde].fancyRange;
+                                    $scope.FancyData[i].DisplayMsg=$scope.FancyDataTemp[inde].DisplayMsg;
+                                    $scope.FancyData[i].active=$scope.FancyDataTemp[inde].active;
+                                }
+                            }
+
                         }
-                        $scope.FancyData[i].max_session_bet_liability=$scope.FancyDataTemp[inde].max_session_bet_liability;
-                        $scope.FancyData[i].max_session_liability=$scope.FancyDataTemp[inde].max_session_liability;
-
                     }
 
+
                 }
-            }
 
+                if($scope.isSessionNull)
+                {
 
-		}
+                    $scope.FancyNull();
+                }
+                $scope.getFancyList(marketId);
+            }).error(function(err){
+                $scope.loading = false;
+                $scope.getFancyList(marketId);
+            });
+        }
 
-		if($scope.isSessionNull)
-		{
-
-            $scope.FancyNull();
-		}
-$scope.getFancyList(marketId);	
-}).error(function(err){
-			 $scope.loading = false;
-          $scope.getFancyList(marketId);
-		});
 		
-	},1000);	
+	},1000);
 
     }
 
     $scope.UpdateAdminFancyList = function(marketId) {
 $scope.UpdateAdminFancyTimer=$timeout(function(){
-      $http({
-                    method: 'GET',
-                    url: 'Apicontroller/matchLstAdminSession/'+$stateParams.MatchId+'/'+marketId,
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                }).success(function(result) {
+    if($state.current.name=='userDashboard.Matchodds'){
+        $http({
+            method: 'GET',
+            url: 'Apicontroller/matchLstAdminSession/'+$stateParams.MatchId+'/'+marketId,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        }).success(function(result) {
 
-$scope.AdminFancyLiveData=result.data;
-if($scope.AdminFancyLiveData.length>0)
-{
-				       for(var i=0;i<$scope.FancyData.length;i++)
+            $scope.AdminFancyLiveData=result.data;
+            if($scope.AdminFancyLiveData.length>0)
+            {
+                for(var i=0;i<$scope.FancyData.length;i++)
+                {
+
+                    if($scope.FancyData[i].fancy_mode=="M")
+                    {
+
+                        var  inde = $scope.AdminFancyLiveData.findIndex(img => img.ID ===$scope.FancyData[i].ID);
+                        if(inde > -1)
                         {
-                            
-                            if($scope.FancyData[i].fancy_mode=="M")
+                            var obj = $scope.AdminFancyLiveData[inde];
+                            if(obj!=angular.isUndefinedOrNull)
                             {
-			
-				var  inde = $scope.AdminFancyLiveData.findIndex(img => img.ID ===$scope.FancyData[i].ID);
-                                if(inde > -1)
-                                {
-                                var obj = $scope.AdminFancyLiveData[inde];
-                                if(obj!=angular.isUndefinedOrNull)
-                                {
                                 $scope.FancyData[i].SessInptNo=obj.SessInptNo;
                                 $scope.FancyData[i].SessInptYes=obj.SessInptYes;
-				$scope.FancyData[i].NoValume=obj.NoValume;
+                                $scope.FancyData[i].NoValume=obj.NoValume;
                                 $scope.FancyData[i].YesValume=obj.YesValume;
-				$scope.FancyData[i].MaxStake=obj.MaxStake;
+                                $scope.FancyData[i].MaxStake=obj.MaxStake;
                                 $scope.FancyData[i].pointDiff=obj.pointDiff;
-				$scope.FancyData[i].rateDiff=obj.rateDiff;
+                                $scope.FancyData[i].rateDiff=obj.rateDiff;
                                 $scope.FancyData[i].fancyRange=obj.fancyRange;
                                 $scope.FancyData[i].DisplayMsg=obj.DisplayMsg;
-                                  $scope.FancyData[i].active=obj.active;
-                                  $scope.FancyData[i].max_session_bet_liability=obj.max_session_bet_liability;
-                                   // $scope.FancyData[i].fancy_position=obj.fancy_position;
+                                $scope.FancyData[i].active=obj.active;
+                                $scope.FancyData[i].max_session_bet_liability=obj.max_session_bet_liability;
+                                // $scope.FancyData[i].fancy_position=obj.fancy_position;
 
-                                }
-    
-                                }
-                                else
-                                {
-                                $scope.FancyData[i].SessInptNo='';
-                                $scope.FancyData[i].SessInptYes='';
-                                $scope.FancyData[i].DisplayMsg='Result Awaiting';
-                                    $scope.FancyData[i].active= 4;
-
-                                }
-    
-                            
                             }
+
                         }
-}
-else {
+                        else
+                        {
+                            $scope.FancyData[i].SessInptNo='';
+                            $scope.FancyData[i].SessInptYes='';
+                            $scope.FancyData[i].DisplayMsg='Result Awaiting';
+                            $scope.FancyData[i].active= 4;
 
-}
-		 $scope.UpdateAdminFancyList(marketId);
+                        }
 
-			}).error(function(err){
-			 $scope.loading = false;
-          $scope.UpdateAdminFancyList(marketId);
-		});	
+
+                    }
+                }
+            }
+            else {
+
+            }
+            $scope.UpdateAdminFancyList(marketId);
+
+        }).error(function(err){
+            $scope.loading = false;
+            $scope.UpdateAdminFancyList(marketId);
+        });
+    }
+
 },1000);
     }
 
@@ -2414,22 +2539,105 @@ else {
 
 $scope.ScoreBoard=function()
 {
+   // debugger
     $scope.scoreTimeOut = $timeout(function(){
-	$http.get("https://www.lotusbook.com/api/match-center/stats/4/"+$scope.MatchId).success(function(data){
+        $.ajax({
+            url:$rootScope.MatchScoreApi+$scope.scoreboard_id,
+            type:"GET",
+            success:function(data){
+                $scope.ScoreResult=data;
+                if(data.length != 0){
+                    $scope.lastover=(data[0].lb).split('|');
+                    if($scope.ScoreResult[0].bd%6 != 0){
+                        $scope.overlast=(($scope.ScoreResult[0].bd-($scope.ScoreResult[0].bd%6))/6)+1;
+                    }else{
+                        $scope.overlast=(($scope.ScoreResult[0].bd-($scope.ScoreResult[0].bd%6))/6);
+                    }
+
+
+
+                    if($scope.lastover.length==4 && $scope.lastover[3] != " "){
+                        // $scope.lastover=($scope.lastover[]).split('.');
+                        $scope.lastover1=($scope.lastover[3]).split('.');
+                        $scope.lastover2=($scope.lastover[2]).split('.');
+                        $scope.lastover3=($scope.lastover[1]).split('.');
+                        $scope.overlast1=$scope.overlast-1;
+                        $scope.overlast2=$scope.overlast-2;
+
+                    }
+                    else if($scope.lastover.length==4 && $scope.lastover[2] != " "){
+                        $scope.lastover1=($scope.lastover[2]).split('.');
+                        $scope.lastover2=($scope.lastover[1]).split('.');
+                        $scope.lastover3=($scope.lastover[0]).split('.');
+                        $scope.overlast1=$scope.overlast-1;
+                        $scope.overlast2=$scope.overlast-2;
+                    }
+                    else if($scope.lastover.length==3 && $scope.lastover[2] != " "){
+                        $scope.lastover1=($scope.lastover[2]).split('.');
+                        $scope.lastover2=($scope.lastover[1]).split('.');
+                        $scope.lastover3=($scope.lastover[0]).split('.');
+                        $scope.overlast1=$scope.overlast-1;
+                        $scope.overlast2=$scope.overlast-2;
+                    }
+                    else if($scope.lastover.length==3 && $scope.lastover[2] == " "){
+                        $scope.lastover1=($scope.lastover[1]).split('.');
+                        $scope.lastover2=($scope.lastover[0]).split('.');
+                        $scope.overlast1=$scope.overlast-1;
+                        //$scope.lastover3=($scope.lastover[0]).split('.');
+                    }
+                    else if($scope.lastover.length==2 && $scope.lastover[1] != " "){
+                        $scope.lastover1=($scope.lastover[1]).split('.');
+                        $scope.lastover2=($scope.lastover[0]).split('.');
+                        $scope.overlast1=$scope.overlast-1;
+                    }
+                    else if($scope.lastover.length==2 && $scope.lastover[1] == " "){
+                        $scope.lastover1=($scope.lastover[0]).split('.');
+                        //$scope.lastover3=($scope.lastover[0]).split('.');
+                    }
+                    else if($scope.lastover.length==1 && $scope.lastover[0] != " "){
+                        $scope.lastover1=($scope.lastover[0]).split('.');
+                        //$scope.lastover3=($scope.lastover[0]).split('.');
+                    }
+                    else{
+                        $scope.lastover1='';
+
+                    }
+                    /*  $scope.lastover1=($scope.lastover[0]).split('.');
+
+                      if(data[0].lb != ''){
+                          $scope.lastover2=(($scope.lastover[1]).split('.'));
+                          $scope.lastover3=($scope.lastover[2]).split('.');
+                      }*/
+
+
+                    $scope.ScoreBoard();
+                }else
+                {
+                    $scope.ScoreResult=undefined;
+
+                }
+
+            },
+            error:function(data)
+            {
+
+                $scope.ScoreBoard();
+            }
+        })
+/*	$http.get("https://www.lotusbook.com/api/match-center/stats/4/"+$scope.MatchId).success(function(data){
 
 		$scope.ScoreResult=data.result;
 		$scope.ScoreBoard();
-	});
+	});*/
 },1000)
 }
-	$scope.ScoreBoard();
+	//$scope.ScoreBoard();
 
     $scope.$on('$destroy', function () {
 	    $timeout.cancel($scope.ajaxTimer);
 	    $timeout.cancel($scope.getMarketlstTimer);
 	    $timeout.cancel($scope.getFancyTimer);
-	    // $timeout.cancel($scope.GetScoreTimer);
-        
+	    $timeout.cancel($scope.GetScoreTimer);
 	    $timeout.cancel($scope.UpdateAdminFancyTimer);
 		  $timeout.cancel($scope.scoreTimeOut);
    });
@@ -2439,8 +2647,9 @@ $scope.ClearAllTimeOut=function()
 	    $timeout.cancel($scope.getMarketlstTimer);
 	    $timeout.cancel($scope.ajaxTimer);
 	    $timeout.cancel($scope.getFancyTimer);
-	    // $timeout.cancel($scope.GetScoreTimer);
+	    $timeout.cancel($scope.GetScoreTimer);
 	    $timeout.cancel($scope.UpdateAdminFancyTimer);
+		$scope.GetScoreTimer=null;
 		  $timeout.cancel($scope.scoreTimeOut);
 }
 $scope.$on('MatchOddsTimeOut',function(event,data){

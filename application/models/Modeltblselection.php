@@ -9,21 +9,6 @@ class Modeltblselection extends CI_Model
 		parent::__construct();
 		$_POST = json_decode(file_get_contents('php://input'), true);
 	}
-
-	function findBySelectionNameMarket($selectionId=0,$marketId=0){
-		$this->db->select('selectionName');
-		$this->db->from('tblselection');
-		$this->db->where('selectionId',$selectionId);		
-		$this->db->where('marketId',$marketId);		
-		$this->db->limit(1);
-		$query = $this->db->get();
-
-		$selName = '';
-		if(!empty($query->row()->selectionName)){
-			$selName = $query->row()->selectionName;	
-		}
-		return $selName;
-	}
 	
 	function findBySelectionName($selectionId=0){
 		$this->db->select('selectionName');

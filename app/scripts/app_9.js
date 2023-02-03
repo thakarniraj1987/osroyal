@@ -1,15 +1,16 @@
-﻿'use strict';
+'use strict';
 var app = angular.module('ApsilonApp', ['ui.router', 'oc.lazyLoad', 'ui.bootstrap', 'angularTreeview', 'ngMaterial', 'agGrid', 'ng.deviceDetector']);
 
 app.factory('http', ['$http',
       function(http) {
         return {
           get: function(getUrl) {
+
             return http.get(getUrl).then(function(response) {
 		;
               return response;
             }, function() {
-		;
+
               //handle errors here
             });
           },
@@ -134,11 +135,7 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
     $ocLazyLoadProvider.config({ debug: false, events: true, });
 	//$locationProvider.html5Mode(true).hashPrefix('!');
     $urlRouterProvider.otherwise('/login');
-  var _isNotMobile = (function() {
-        var check = false;
-        (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))check = true})(navigator.userAgent||navigator.vendor||window.opera);
-        return !check;
-    })();
+
    /* document.addEventListener( "contextmenu", function(e) {
       //
       console.log(e);
@@ -207,10 +204,11 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                       name: 'ApsilonApp',
                       files: [
                         'app/scripts/services/get_userser.js',
-                        'app/scripts/directives/header/header_0.js?ver='+Math.random(),
-                        'app/scripts/directives/header/header-notification/header-notification_1.js?ver='+Math.random(),
-                        'app/scripts/directives/sidebar/sidebar_1.js?ver='+Math.random(),
-                        'app/scripts/directives/sidebar/sidebar-search/sidebar-search.js?ver='+Math.random()
+                          'app/scripts/directives/sidebar/sidebar_1.js',
+                        'app/scripts/directives/header/header_0.js',
+                        'app/scripts/directives/header/header-notification/header-notification_1.js',
+
+                        'app/scripts/directives/sidebar/sidebar-search/sidebar-search.js'
 
                       ]
                   }),
@@ -232,8 +230,6 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                             'app/scripts/services/get_userser.js',
                             'app/scripts/directives/dashboard/homedashboard.js?ver='+Math.random(),
                             'app/scripts/controllers/Lstcontroller.js?ver='+Math.random(),
-                            'app/dist/agGrid.js?ignore=notused19',
-                            'app/scripts/controllers/Main.js',
                             'app/assets/js/contextmenu.js',
                             'app/js/shortcutKey.js',
                            // 'app/lib/angular-animate.min.js'
@@ -259,11 +255,11 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                   return $ocLazyLoad.load({
                       name: 'ApsilonApp',
                       files: [
-                        'app/scripts/directives/header/userheader.js?ver='+Math.random(),
-                        'app/scripts/directives/header/header-notification/header-notification_user.js?ver='+Math.random(),
-                        'app/scripts/directives/sidebar/usersidebar.js?ver='+Math.random(),
-			'app/scripts/directives/sidebar/userrightbar.js?ver='+Math.random(),
-                        'app/scripts/directives/sidebar/sidebar-search/sidebar-search.js?ver='+Math.random(),
+                        'app/scripts/directives/header/userheader.js',
+                        'app/scripts/directives/header/header-notification/header-notification_user.js',
+                        'app/scripts/directives/sidebar/usersidebar.js',
+			'app/scripts/directives/sidebar/userrightbar.js',
+                        'app/scripts/directives/sidebar/sidebar-search/sidebar-search.js',
                         'app/scripts/services/get_userser.js'
                    
                       ]
@@ -276,7 +272,7 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
           }
       })
       .state('userDashboard.Home', {
-          url: '/Home',
+          url: '/Home?SportType?SeriesId',
           controller: 'homedashboard',
           templateUrl: 'dashboard/userDashboard',
 	  params:      {'SportType': null,'SeriesId':null},
@@ -285,8 +281,10 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                   return $ocLazyLoad.load({
                       name: 'ApsilonApp',
                       files: [
+                          'app/scripts/directives/sidebar/usersidebar.js',
+
                             'app/scripts/directives/dashboard/homedashboard.js?ver=1.5',
-                            'app/scripts/controllers/Lstcontroller.js?ver='+Math.random(),
+                            'app/scripts/controllers/Lstcontroller.js',
                           "app/assets/js/TVLoad.js"
                       ]
                   })
@@ -428,15 +426,15 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                       files: [
                                 'app/scripts/controllers/OnePageRprtCntr.js?ver='+Math.random(),
                           "app/js/libs/FileSaver.js",
-                          "app/js/libs/jszip.js",
                           "app/js/libs/xlsx.js",
+                          "app/js/libs/jszip.js",
 
                       ]
                   })
               }
           }
       })
-        
+
         .state('dashboard.manualSeries', {
             templateUrl: 'app/views/pages/manualSeries.html?ver=' + Math.random(),
             controller: 'manualSeriesCntr',
@@ -447,6 +445,7 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                         name: 'ApsilonApp',
                         files: [
                             'app/scripts/controllers/manualSeriesCntr.js?ver=' + Math.random(),
+                            "app/js/manualdatetime.js"
                         ]
                     })
                 }
@@ -481,8 +480,8 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                       files: [
                                 'app/scripts/controllers/OnePageRprtCntr.js?ver='+Math.random(),
                           "app/js/libs/FileSaver.js",
-                          "app/js/libs/jszip.js",
                           "app/js/libs/xlsx.js",
+                          "app/js/libs/jszip.js",
 
                       ]
                   })
@@ -500,8 +499,8 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                       files: [
                                 'app/scripts/controllers/OnePageRprtCntr.js?ver='+Math.random(),
                           "app/js/libs/FileSaver.js",
+                          "app/js/libs/xlsx.js",
                           "app/js/libs/jszip.js",
-                          "app/js/libs/xlsx.js"
                       ]
                   })
               }
@@ -518,8 +517,8 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                       files: [
                                 'app/scripts/controllers/OnePageRprtCntr.js?ver='+Math.random(),
                           "app/js/libs/FileSaver.js",
+                          "app/js/libs/xlsx.js",
                           "app/js/libs/jszip.js",
-                          "app/js/libs/xlsx.js"
                       ]
                   })
               }
@@ -1429,6 +1428,21 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
               }
           }
       })
+        .state('dashboard.makebet', {
+            templateUrl: 'app/views/pages/makebet.html?ver='+Math.random(),
+            controller: 'makebetCntr',
+            url: '/makebet',
+            resolve: {
+                loadMyFiles: function ($ocLazyLoad) {
+                    return $ocLazyLoad.load({
+                        name: 'ApsilonApp',
+                        files: [
+                            'app/scripts/controllers/makebet.js?ver='+Math.random(),
+                        ]
+                    })
+                }
+            }
+        })
       .state('dashboard.Sportmst', {
           templateUrl: 'app/views/pages/Sportmst.html?ver='+Math.random(),
           controller: 'Sportmstcontroller',
@@ -1869,8 +1883,9 @@ app.config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider','$loca
                   return $ocLazyLoad.load({
                       name: 'ApsilonApp',
                       files: [
+                          "app/scripts/directives/sidebar/sidebar_1.js?ver="+Math.random(),
                                 'app/scripts/controllers/Matchoddscntr_3.js?ver='+Math.random(),
-                                "app/scripts/directives/sidebar/sidebar_1.js?ver="+Math.random(),
+
                                 'app/dist/ng-device-detector.js',
                                 'app/js/moment.min.js'
                       ]
@@ -2759,24 +2774,73 @@ app.factory('Dialog', ['$mdDialog', '$timeout', function ($mdDialog, $timeout) {
         );
         }
     }
+	
 }]);
 app.run(function ($rootScope, sessionService,$location,$state,$templateCache,$http,$q) {
 
  $rootScope.$on("$stateChangeStart", function (evt, toState, toParams, fromState, fromParams) {
-
-     if (window.location.protocol == 'http:') {      
-         $rootScope.GApiPath=BASE_URL+"Apicontroller/";
-         
+     var canceller = $q.defer();
+     canceller.resolve();
+     if (window.location.protocol == 'http:') {
+		 
+      //  $rootScope.GApiPath="https://crakex.in:9998/"; //BR//
+		//$rootScope.GApiPath="http://185.3.95.140/apis/"; //PC//
+		 // $rootScope.GApiPath="http://45.79.122.19/apis/"; //MS//
+		 $rootScope.GApiPath="http://13.127.18.45/";
+		 
      }
      else {
-         $rootScope.GApiPath=BASE_URL+"Apicontroller/";
+          //$rootScope.GApiPath="https://crakex.in:9998/"; //BR//
+		//$rootScope.GApiPath="http://213.219.39.230/betfair_api/v1/"; //PC//
+		 $rootScope.GApiPath="http://109.74.202.195/api/v1/"; //MS//
      }
- $rootScope.isNotMobile = (function() {
-        var check = false;
-        (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))check = true})(navigator.userAgent||navigator.vendor||window.opera);
-        return !check;
-    })();
 
+	 
+     if(toState.name=="dashboard.makebet")
+     {
+         if(sessionService.get('makeBatUrl')!='Y')
+         {
+             $location.path('/dashboard/Home');
+             window.location.reload();
+         }
+     }
+   /*  socket.emit('chat', {
+         message: 'hello'
+
+     });
+     var receiveTime=0;
+     var sendTime=0;
+
+     socket.on('chat', function (data) {
+         receiveTime=new Date().getSeconds();
+     });
+     socket.on('connection', function() {
+
+     });
+     socket.on('disconnect', function () {
+         // window.location.reload();
+     });
+    var SenderTimeId= setInterval(function(){
+         sendTime=new Date().getSeconds();
+         socket.emit('chat', {
+             message: 'hello'
+
+         });
+     },1000);
+
+     var TimeId= setInterval(function(){
+         if(Math.abs(sendTime-receiveTime)>9)
+         {
+             // internet disconnect;
+             //window.location.reload();
+         }
+     },4000);*/
+
+
+ /*    setInterval(function(){
+         debugger;
+         var chkNet=checkNetConnection();
+     },1000);*/
 $rootScope.userType=sessionService.get('type');
 $rootScope.$broadcast('MatchOddsTimeOut',{});
 $rootScope.$broadcast('clearTimeOut',{});//home page
@@ -2807,7 +2871,7 @@ $rootScope.globleTitle="betdip";
     $rootScope.Liability = sessionService.get('Liability');
     $rootScope.gurlIp="ws://18.130.213.12";
     $rootScope.gIndurlIp="ws://35.178.148.162";
-
+    $rootScope.MatchScoreApi="#";
 
         //"https://crakex.in:8383/";
     $rootScope.gUrlArray=[{'SportId':4,'url':'ws://139.162.242.237:8090'},
@@ -3085,3 +3149,15 @@ app.controller('speechController', function($scope) {
     };
 
 });
+
+function checkNetConnection(){
+    jQuery.ajaxSetup({async:false});
+    var re="";
+    var r=Math.round(Math.random() * 10000);
+    $.get("http://139.162.219.17/app/images/logo.png",{subins:r},function(d){
+        re=true;
+    }).error(function(){
+        re=false;
+    });
+    return re;
+}

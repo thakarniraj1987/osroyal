@@ -18,24 +18,4 @@ class Modeltblresult extends CI_Model
 		$query = $this->db->get();
 		return $query->row_array();	
 	}
-
-	function validateDeclareResult($sportid=NULL,$matchid=NULL,$marketid=NULL){
-		$result = array();
-		$this->db->select('*');
-		$this->db->from('tblresult');
-		$this->db->where('tblresult.sportId',$sportid);
-		$this->db->where('tblresult.matchId',$matchid);
-		$this->db->where('tblresult.marketId',$marketid);
-		$this->db->limit(1);  
-		$query = $this->db->get();
-		$userData = $query->row_array();	
-
-	
-        if (!empty($userData)) {
-            $result = array('code' => 1 ,'error'=>true,'message' => 'Already Saved ...');
-			return $result;	
-        }
-		return $result;
-	}
-
 }

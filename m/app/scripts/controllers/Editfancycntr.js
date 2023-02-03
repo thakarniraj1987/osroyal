@@ -1,4 +1,4 @@
-app.controller('Editfancycntr', function ($scope, $rootScope, $http, $stateParams, Dialog, $mdDialog, $location,get_userser,sessionService,Base64,$timeout,$interval) {
+app.controller('Editfancycntr', function ($scope, $rootScope, $http, $stateParams, Dialog, $mdDialog, $location,get_userser,sessionService,Base64,$timeout,$interval,$state) {
     if ($rootScope.HelperAllRights != angular.isUndefinedOrNull && $rootScope.HelperAllRights.EditFancy == 0) { $location.path('/dashboard/Home'); }
     $scope.MatchName = $stateParams.MatchName;
     $scope.IsIndianVal = $stateParams.is_indian_fancy;
@@ -13,30 +13,25 @@ var authdata = Base64.encode(sessionService.get('user') + ':'+ sessionService.ge
 $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata;
 
      $scope.getadminIndianSession = function(){
-if($scope.IsIndianVal == 1){
-      $http.get( BASE_URL+'Apicontroller/adminIndianSession/'+$stateParams.mFancyId + '/' +$stateParams.MarketId ).success(function (data, status, headers, config) {
-              $scope.GetindianfancysessionData = data.data;
-console.log($scope.GetindianfancysessionData);
-	
-      });
-}
-else{
-        $interval.cancel(interval);
-}
+         $scope.fancyTimeOut=$timeout(function(){
+             if($state.current.name=="dashboard.Editfancycntr")
+             {
+                 if($scope.IsIndianVal == 1){
+                     $http.get( BASE_URL+'Apicontroller/adminIndianSession/'+$stateParams.mFancyId + '/' +$stateParams.MarketId ).success(function (data, status, headers, config) {
+                         $scope.GetindianfancysessionData = data.data;
+                         $scope.getadminIndianSession();
+                     });
+                 }
+
+             }
+         },2000)
+
 
 }
 var interval;
 if($scope.IsIndianVal == 1)
 $scope.getadminIndianSession();
-if($scope.IsIndianVal == 1){
-console.log($scope.IsIndianVal);
 
-
-interval =$interval(function(){$scope.getadminIndianSession()},2000);
-}
-else{
-        $interval.cancel(interval);
-}
 
     // $scope.setMessage = function (msgChk) {
     //     if (msgChk == 1) {
@@ -64,6 +59,10 @@ else{
 			$scope.UpdateFancyMode();
 			
 		}
+        else {
+            $scope.fancy_mode = 'M';
+            $scope.UpdateFancyMode();
+        }
 	}
     $scope.UpdateSessionLiability=function(values,type)
     {
@@ -91,7 +90,7 @@ else{
     $scope.UpdateFancyMode = function()
 	{
 		
-		 var formData = {"FancyId":$stateParams.FancyID,"fancy_mode":$scope.fancy_mode};
+		 var formData = {"FancyId":$stateParams.FancyID,"fancy_mode":$scope.fancy_mode,"MatchID":$stateParams.MatchID};
         var url = BASE_URL + "Apicontroller/updateFancyMode";
             $http.post(url, formData).success(function (response) {
 			if(!response.error){}
@@ -100,7 +99,7 @@ else{
     $scope.setMessage = function (msgChk) {
         
         var TypeId = 2;
-        var formData = { TypeId: TypeId, message: msgChk,MatchID: $stateParams.MatchID};
+        var formData = { TypeId: TypeId, message: msgChk,MatchID: $stateParams.MatchID,FancyID: $stateParams.FancyID};
         var url = BASE_URL + "Lstsavemstrcontroller/setFancyMsg/";
             $http.post(url, formData).success(function (response) {
                 
@@ -131,7 +130,7 @@ else{
         $scope.callActiveDeactive();
     }
     $scope.get_fancyData = function () {
-        $http.get( BASE_URL+'Lstsavemstrcontroller/getFancyByEdit/' + $stateParams.FancyID + '/' + $stateParams.TypeID).success(function (data, status, headers, config) {
+        $http.get( BASE_URL+'Lstsavemstrcontroller/getFancyByEdit/' + $stateParams.FancyID + '/' + $stateParams.TypeID+ '/' + $stateParams.MatchID).success(function (data, status, headers, config) {
             
             
             $scope.SessionData = data.FancyData;
@@ -144,7 +143,7 @@ else{
             }else{
             	$scope.rateDiff = parseInt(data.FancyData[0].rateDiff);
             }
-            
+            $scope.fancy_mode=data.FancyData[0].fancy_mode;
             $scope.MaxStake = parseInt(data.FancyData[0].MaxStake);
             $scope.headName = data.FancyData[0].HeadName;
             $scope.MatchID = data.FancyData[0].MatchID;
@@ -161,6 +160,8 @@ else{
             $scope.YesLayRange = parseInt(data.FancyData[0].SessInptYes) + $scope.rangeLimit;
             $scope.max_session_bet_liability=parseInt(data.FancyData[0].max_session_bet_liability);
             $scope.max_session_liability=parseInt(data.FancyData[0].max_session_liability);
+            $scope.IsToggle = $scope.fancy_mode == 'A' ? true : false;
+            $scope.ToggleTitle = $scope.fancy_mode == 'A' ? 'Auto' : 'Manual';
             if ($rootScope.active == 1) {
                // document.getElementById('inputNo').disabled = true;
               //  document.getElementById('inputNo').readOnly = true;
@@ -392,7 +393,7 @@ else{
             $scope.myVar=0;
             
             $scope.get_fancyData();
-            $scope.$parent.vChkUserUpdate = setInterval($scope.$parent.ChkUserUpdate, 1000);
+            $scope.$parent.vChkUserUpdate =$scope.$parent.ChkUserUpdate();
             $('#inputNo').focus();
             $scope.NoValume = 100;
             $scope.YesValume = 100;
@@ -412,7 +413,7 @@ else{
         {
             $scope.loading=true;
             var FancyID = parseInt($stateParams.FancyID);
-            var formData = { HeadName: $scope.FormFancy.FancyName, id: FancyID };
+            var formData = { HeadName: $scope.FormFancy.FancyName, id: FancyID,'MatchID':$stateParams.MatchID };
             var url = BASE_URL + "Lstsavemstrcontroller/updateFancyHeader";
             $http.post(url, formData).success(function (response) {
                 if(response.error==0)
@@ -438,7 +439,7 @@ app.directive('userlist', function () {
         restrict: 'E',
         replace: true,
         scope: { myVar: '=' },
-        controller: function ($scope, $http, $stateParams, get_userser) {
+        controller: function ($scope, $http, $stateParams, get_userser,$timeout,$state) {
 
             get_userser.GetAllSessFancyBet($stateParams.FancyID, function (response) {
                 $scope.myVar = 0
@@ -453,31 +454,53 @@ app.directive('userlist', function () {
             });
             $scope.$parent.myVar = $scope.myVar;
             $scope.$parent.ChkUserUpdate = function () {
-                get_userser.GetAllSessFancyBet($stateParams.FancyID, function (response) {
-                   
-                    $scope.GetSesFancyUserLst = response;
- var s = $scope.GetSesFancyUserLst.length;
-                    var t = response.length;
-                    get_userser.GetFancyBal($stateParams.FancyID, function (response1) {
-                    
-                        $scope.myVar =parseInt(response1);
-                    });
-                   /* if (s == t) {
 
-                    } else {
-                        $scope.GetSesFancyUserLst = response;
-                        $scope.myVar = 0;
-                        for (var i = 0; i < $scope.GetSesFancyUserLst.length; i++) {
-                            $scope.myVar = parseInt($scope.myVar) + parseInt($scope.GetSesFancyUserLst[i].bet_value);
-                        };
-                    }*/
-                  /*  if ($scope.myVar == $scope.$parent.totalStke) {
-                        if ($scope.$parent.active != 4) {
-                            $http.get( BASE_URL+'Lstsavemstrcontroller/updateRateChangeMsg/' + $stateParams.FancyID + '/' + $stateParams.TypeID).success(function (data, status, headers, config) {
+                $scope.GetAllSessFancyBet=function(){
+
+                    $scope.allsfbetTime=$timeout(function(){
+                        if($state.current.name=="dashboard.Editfancycntr")
+                        {
+                            get_userser.GetAllSessFancyBet($stateParams.FancyID, function (response) {
+
+                                $scope.GetSesFancyUserLst = response;
+                                var s = $scope.GetSesFancyUserLst.length;
+                                var t = response.length;
+                                $scope.GetAllSessFancyBet();
+                                /* if (s == t) {
+
+                                 } else {
+                                     $scope.GetSesFancyUserLst = response;
+                                     $scope.myVar = 0;
+                                     for (var i = 0; i < $scope.GetSesFancyUserLst.length; i++) {
+                                         $scope.myVar = parseInt($scope.myVar) + parseInt($scope.GetSesFancyUserLst[i].bet_value);
+                                     };
+                                 }*/
+                                /*  if ($scope.myVar == $scope.$parent.totalStke) {
+                                      if ($scope.$parent.active != 4) {
+                                          $http.get( BASE_URL+'Lstsavemstrcontroller/updateRateChangeMsg/' + $stateParams.FancyID + '/' + $stateParams.TypeID).success(function (data, status, headers, config) {
+                                          });
+                                      }
+                                  }*/
                             });
                         }
-                    }*/
-                });
+                    },2000)
+
+                }
+                $scope.getFancyBal=function(){
+                    $scope.fancyBalTime=$timeout(function() {
+                        if ($state.current.name == "dashboard.Editfancycntr") {
+                            get_userser.GetFancyBal($stateParams.FancyID, function (response1) {
+
+                                $scope.myVar =parseInt(response1);
+                                $scope.getFancyBal();
+                            });
+
+                        }
+                    },1000)
+
+                }
+                $scope.GetAllSessFancyBet();
+                $scope.getFancyBal();
                 $scope.deleteRecord = function (betId, userId,MarketId) {
                     var result = confirm("Are you sure want to delete Records ");
                     if (result) {
@@ -493,7 +516,7 @@ app.directive('userlist', function () {
                     $scope.myVar =parseInt(response1);
                 });
             }
-            $scope.$parent.vChkUserUpdate = setInterval($scope.$parent.ChkUserUpdate, 1000);//170304
+            $scope.$parent.vChkUserUpdate = $scope.$parent.ChkUserUpdate();//170304
             $scope.$on("$destroy", function (event) {
                 clearInterval($scope.$parent.vChkUserUpdate);
                 $scope.$parent.vChkUserUpdate = angular.isUndefinedOrNull;//170304

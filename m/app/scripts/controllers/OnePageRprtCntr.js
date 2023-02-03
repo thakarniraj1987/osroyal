@@ -126,18 +126,36 @@ $scope.GetDealer(sessionService.get('user_id'),$scope.UserType);
 	
 	$scope.loading= true;
 	$scope.currentPage=page;
-	  var ReportData = {
-		 user_id: $scope.selectedId,
-          from_date:$filter('date')($scope.formData.from_date, 'yyyy-MM-dd'),
-          to_date:$filter('date')($scope.formData.to_date, 'yyyy-MM-dd'),
-		from_time:$scope.formData.from_time,
-		to_time:$scope.formData.to_time,
+        if($scope.formData.ReportType==3)
+        {
+            var ReportData = {
+                user_id: $scope.selectedId,
+                from_date:$filter('date')($scope.formData.from_date, 'yyyy-MM-dd'),
+                to_date:$filter('date')($scope.formData.to_date, 'yyyy-MM-dd'),
+                from_time:$scope.formData.from_time,
+                to_time:$scope.formData.to_time,
                 type: $scope.ReportType,
-		page_no: page,
+                page_no: page,
                 sport_id:0,
-          bet_type:$scope.IsBtnTypes,
-          transaction_type:$scope.formData.transaction_type
+                bet_type:$scope.IsBtnTypes,
+                transaction_type:$scope.formData.transaction_type,
+                ac_type:$scope.formData.Ac_type
             }
+        }
+        else
+        {
+            var ReportData = {
+                user_id: $scope.selectedId,
+                from_date:$filter('date')($scope.formData.from_date, 'yyyy-MM-dd'),
+                to_date:$filter('date')($scope.formData.to_date, 'yyyy-MM-dd'),
+                from_time:$scope.formData.from_time,
+                to_time:$scope.formData.to_time,
+                type: $scope.ReportType,
+                page_no: page,
+                sport_id:0,
+                bet_type:$scope.IsBtnTypes
+            }
+        }
 		$http({
                         method: 'POST',
                         url: BASE_URL+'Apiadmincontroller/one_page_report/',
@@ -215,17 +233,33 @@ $scope.ProfitLossByMatchId = function(matchs,index)
 $scope.ExportAllDate=function(){
 
 
-	  var ReportData = {
-		 user_id: $scope.selectedId,
-          from_date:$filter('date')($scope.formData.from_date, 'yyyy-MM-dd'),
-          to_date:$filter('date')($scope.formData.to_date, 'yyyy-MM-dd'),
-		from_time:$scope.formData.from_time,
-		to_time:$scope.formData.to_time,
-                type: $scope.ReportType,
-          bet_type:$scope.IsBtnTypes,
-          transaction_type:$scope.formData.transaction_type
-             
-            }
+    if($scope.formData.ReportType==3) {
+        var ReportData = {
+            user_id: $scope.selectedId,
+            from_date: $filter('date')($scope.formData.from_date, 'yyyy-MM-dd'),
+            to_date: $filter('date')($scope.formData.to_date, 'yyyy-MM-dd'),
+            from_time: $scope.formData.from_time,
+            to_time: $scope.formData.to_time,
+            type: $scope.ReportType,
+            bet_type: $scope.IsBtnTypes,
+            transaction_type: $scope.formData.transaction_type,
+            ac_type:$scope.formData.Ac_type
+
+        }
+    }
+    else {
+        var ReportData = {
+            user_id: $scope.selectedId,
+            from_date: $filter('date')($scope.formData.from_date, 'yyyy-MM-dd'),
+            to_date: $filter('date')($scope.formData.to_date, 'yyyy-MM-dd'),
+            from_time: $scope.formData.from_time,
+            to_time: $scope.formData.to_time,
+            type: $scope.ReportType,
+            bet_type: $scope.IsBtnTypes
+
+
+        }
+    }
 		$http({
                         method: 'POST',
                         url: BASE_URL+'Apiadmincontroller/one_page_report_export/',

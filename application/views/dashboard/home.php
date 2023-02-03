@@ -29,7 +29,7 @@
  
     <div class="widget-content  login_table">
          <!--  {{matchResult}} -->
-         
+
          <div class="binding"> <h1>My Market</h1> </div>
           <table class="table table-striped my-market" >
             <thead>

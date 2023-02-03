@@ -188,7 +188,7 @@
               
 
                     <span ng-show="$root.HelperAllRights==angular.isUndefinedOrNull || $root.HelperAllRights.ChipHistory==1">
-                    <md-button ng-if="IsShowMenu('ChipSummary')" onClick="addClass(this)" ui-sref="dashboard.newChipHistory" ><span class="drp-txt">Balance Summary</span></md-button>
+                    <md-button ng-if="IsShowMenu('ChipSummary')" onClick="addClass(this)" ui-sref="dashboard.newChipHistory" ><span class="drp-txt">Chip Summary</span></md-button>
                     
         </md-menu>
     

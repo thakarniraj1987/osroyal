@@ -24,19 +24,63 @@ app.directive('masterheader', ['$location','$http', 'sessionService', '$timeout'
             }
             $scope.upBal="";
             $scope.callbal=1;
+            $scope.changePassPopup = function () {
+
+                $mdDialog.show({
+                    controller: ChangePassCntr,
+                    templateUrl: 'app/scripts/directives/timeline/changePassword.html',
+                    clickOutsideToClose: false,
+                    fullscreen: false,
+                    escapeToClose: false
+                });
+            };
+            function ChangePassCntr($scope, get_userser) {
+                $scope.updatePassword = function (oldPassword, newPassword, cnfnewPassword) {
+                    if (oldPassword != "" && oldPassword != angular.isUndefinedOrNull && newPassword != "" && newPassword != angular.isUndefinedOrNull && cnfnewPassword != "" && cnfnewPassword != angular.isUndefinedOrNull) {
+                        if (newPassword == cnfnewPassword) {
+                            get_userser.changePassword(oldPassword, newPassword, sessionService.get('user_id'), function (response) {
+                                if (response.error == 0) {
+                                    Dialog.autohide(response.message);
+                                    sessionService.set('ChangePas', '1');
+                                } else {
+                                    alert(response.message);
+                                }
+                            });
+                        } else {
+                            alert("New Password and Comfirm Password not Match");
+                        }
+                    } else {
+                        alert("All Field Required...");
+                    }
+                }
+            }
+            var changePass = sessionService.get('ChangePas');
+
+            var userType = sessionService.get('type');
+            if (userType == 0) {
+            } else if (userType != 0 && changePass == 0) {
+                $scope.changePassPopup();
+            } else {
+                /* localStorage.getItem("$_") == null ? $scope.showTermAndCondition() : "";
+                 localStorage.setItem("$_", true);*/
+            }
           $scope.UpdateBalance = function()
 		{
             $scope.upBal = $timeout(function(){
-			      $http.get( BASE_URL+'Chipscntrl/getChipDataById/' + localStorage.user_id).success(function (data, status, headers, config) {
+                if(sessionService.get('user_id')!=null)
+                {
+			      $http.get( BASE_URL+'Chipscntrl/getChipDataById/' + sessionService.get('user_id')).success(function (data, status, headers, config) {
                 $scope.cipsData = data.betLibility;
-                sessionService.set('FreeChips', $scope.cipsData[0].FreeChip);
-                sessionService.set('ChipInOut', $scope.cipsData[0].Chip);
-                sessionService.set('Liability', $scope.cipsData[0].Liability);
-                sessionService.set('Balance', $scope.cipsData[0].Balance);
-                sessionService.set('P_L', $scope.cipsData[0].P_L);
-                      sessionService.set('IsShowTv',$scope.cipsData[0].ShowVideoTv);
-                      sessionService.set('IsSettlementBtn',$scope.cipsData[0].ShowSettlementButton);
-                      sessionService.set('IsShowOtherBet',$scope.cipsData[0].ShowOtherBets);
+                      if($scope.cipsData !=angular.isUndefinedOrNull) {
+                          sessionService.set('FreeChips', $scope.cipsData[0].FreeChip);
+                          sessionService.set('ChipInOut', $scope.cipsData[0].Chip);
+                          sessionService.set('Liability', $scope.cipsData[0].Liability);
+                          sessionService.set('Balance', $scope.cipsData[0].Balance);
+                          sessionService.set('P_L', $scope.cipsData[0].P_L);
+                          sessionService.set('IsShowTv', $scope.cipsData[0].ShowVideoTv);
+                          sessionService.set('IsSettlementBtn', $scope.cipsData[0].ShowSettlementButton);
+                          sessionService.set('IsShowOtherBet', $scope.cipsData[0].ShowOtherBets);
+                      }
                 $scope.$watch('sessionService', function (newVal, oldVal) {
                     $scope.FreeChips = $scope.cipsData[0].FreeChip;
                     $scope.ChipInOut = $scope.cipsData[0].Chip;
@@ -59,7 +103,10 @@ app.directive('masterheader', ['$location','$http', 'sessionService', '$timeout'
                           $scope.UpdateBalance();
                       }
                   });
-
+                }
+                else {
+                    loginService.logout();
+                }
         },$scope.callbal==1 ? 0 : 5000)
 		}
 	    $scope.UpdateBalance();

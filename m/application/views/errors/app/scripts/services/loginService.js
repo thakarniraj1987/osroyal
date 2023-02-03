@@ -107,7 +107,7 @@ app.factory('loginService', function ($http, $location, sessionService, $rootSco
         },
         logout: function ($callback) {
             var Data = { userId: sessionService.get('user_id'), sessionId: sessionService.get('lgnstatus'), lastLogin: sessionService.get('last_login_id') };
-            //
+            //debugger;
             var $promise = $http.post(BASE_URL + 'Loginauthcontroller/logout/', Data);
             //var $promise = $http({ method: 'POST', url: 'Lstsavemstrcontroller/changeLgnPassword/', Data: Data });
             $promise.then(function (response) {

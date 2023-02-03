@@ -2,7 +2,7 @@ app.controller('OnePageRprtCntr',['$scope', '$http', 'sessionService', '$locatio
 $scope.UserType=sessionService.get('type');
 
 $scope.formData={};
-
+$scope.formData.transaction_type="";
 $scope.formData.from_date =new Date();
 $scope.formData.to_date=new Date();
 $scope.formData.MaxDate1=new Date();
@@ -127,18 +127,37 @@ $scope.GetDealer(sessionService.get('user_id'),$scope.UserType);
     $scope.Allsport=function(page){
 	$scope.loading= true;
 	$scope.currentPage=page;
-	  var ReportData = {
-		 user_id: $scope.selectedId,
-                from_date:$filter('date')($scope.formData.from_date, 'yyyy-MM-dd'),
-                to_date:$filter('date')($scope.formData.to_date, 'yyyy-MM-dd'),
-		from_time:$scope.formData.from_time,
-		to_time:$scope.formData.to_time,
-                type: $scope.ReportType,
-		page_no: page,
-                sport_id:0,
-          bet_type:$scope.IsBtnTypes,
-          transaction_type:$scope.formData.transaction_type
-            }
+	if($scope.formData.ReportType==3)
+    {
+        var ReportData = {
+            user_id: $scope.selectedId,
+            from_date:$filter('date')($scope.formData.from_date, 'yyyy-MM-dd'),
+            to_date:$filter('date')($scope.formData.to_date, 'yyyy-MM-dd'),
+            from_time:$scope.formData.from_time,
+            to_time:$scope.formData.to_time,
+            type: $scope.ReportType,
+            page_no: page,
+            sport_id:0,
+            bet_type:$scope.IsBtnTypes,
+            transaction_type:$scope.formData.transaction_type,
+            ac_type:$scope.formData.Ac_type
+        }
+    }
+	else
+    {
+        var ReportData = {
+            user_id: $scope.selectedId,
+            from_date:$filter('date')($scope.formData.from_date, 'yyyy-MM-dd'),
+            to_date:$filter('date')($scope.formData.to_date, 'yyyy-MM-dd'),
+            from_time:$scope.formData.from_time,
+            to_time:$scope.formData.to_time,
+            type: $scope.ReportType,
+            page_no: page,
+            sport_id:0,
+            bet_type:$scope.IsBtnTypes
+        }
+    }
+
 		$http({
                         method: 'POST',
                         url: 'Apiadmincontroller/one_page_report/',
@@ -215,18 +234,33 @@ $scope.ProfitLossByMatchId = function(matchs,index)
 /////////////////////////////	
 $scope.ExportAllDate=function(){
 
+    if($scope.formData.ReportType==3) {
+        var ReportData = {
+            user_id: $scope.selectedId,
+            from_date: $filter('date')($scope.formData.from_date, 'yyyy-MM-dd'),
+            to_date: $filter('date')($scope.formData.to_date, 'yyyy-MM-dd'),
+            from_time: $scope.formData.from_time,
+            to_time: $scope.formData.to_time,
+            type: $scope.ReportType,
+            bet_type: $scope.IsBtnTypes,
+            transaction_type: $scope.formData.transaction_type,
+            ac_type:$scope.formData.Ac_type
 
-	  var ReportData = {
-		 user_id: $scope.selectedId,
-          from_date:$filter('date')($scope.formData.from_date, 'yyyy-MM-dd'),
-          to_date:$filter('date')($scope.formData.to_date, 'yyyy-MM-dd'),
-		from_time:$scope.formData.from_time,
-		to_time:$scope.formData.to_time,
-                type: $scope.ReportType,
-          bet_type:$scope.IsBtnTypes,
-          transaction_type:$scope.formData.transaction_type
-             
-            }
+        }
+    }
+    else {
+        var ReportData = {
+            user_id: $scope.selectedId,
+            from_date: $filter('date')($scope.formData.from_date, 'yyyy-MM-dd'),
+            to_date: $filter('date')($scope.formData.to_date, 'yyyy-MM-dd'),
+            from_time: $scope.formData.from_time,
+            to_time: $scope.formData.to_time,
+            type: $scope.ReportType,
+            bet_type: $scope.IsBtnTypes
+
+
+        }
+    }
 		$http({
                         method: 'POST',
                         url: 'Apiadmincontroller/one_page_report_export/',

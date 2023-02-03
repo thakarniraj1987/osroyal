@@ -36,7 +36,9 @@
                 <option  value="1">Bet History</option>       
                 <option  value="2">profit & Loss</option>           
                 <option  value="3">Account Statements</option>           
-                <option  value="4">Login History</option>               
+                <option  value="4">Login History</option>
+                <option  value="5" ng-if="UserType == 0">Delete Bet History</option>
+
             </select>
         </div>
     <div ng-if="formData.ReportType==3" class="form-group  col-lg-3 col-md-3 col-sm-12 col-xs-12 padding" >
@@ -46,6 +48,20 @@
             <option  value="">All</option>
             <option  value="DR">Debit</option>
             <option  value="CR">Credit</option>
+
+        </select>
+    </div>
+
+
+    <div ng-if="formData.ReportType==3" class="form-group  col-lg-3 col-md-3 col-sm-12 col-xs-12 padding" ng-init="formData.Ac_type='ALL'">
+        <label>Account Type</label>
+        <select name="Ac_type" ng-model="formData.Ac_type" class="form-control">
+
+            <option  value="ALL">All</option>
+            <option value="LEDGER">Ledger</option>
+            <option value="COMMISSION">Commission</option>
+            <option value="SETTLEMENT">Settlement</option>
+            <option value="CREDITLIMIT">Credit Limit</option>
 
         </select>
     </div>
@@ -69,8 +85,8 @@
 		          <label>To Time</label>
 	       		         <input id="to_time" placeholder="please enter end time" ng-disabled="formData.to_date == ''" ng-model="formData.to_time" type="text" onkeydown="return false;" class="time form-control" />
 		        </div>
-    <div ng-if="formData.ReportType==1">
-        <div class="form-group  col-lg-3 col-md-3 col-sm-12 col-xs-12 padding" >
+    <div ng-if="formData.ReportType==1 || formData.ReportType==5">
+        <div class="form-group  col-lg-12 col-md-3 col-sm-12 col-xs-12 padding" >
            <button type="button" ng-class="{'active':IsBtnActive==1}" class="btn btn-success" ng-click="FilterBetHistory('M',1)">Matched</button>
             <button type="button" ng-class="{'active':IsBtnActive==2}" class="btn btn-success" ng-click="FilterBetHistory('U',2)">Unmatched</button>
             <button type="button" ng-class="{'active':IsBtnActive==3}" class="btn btn-success" ng-click="FilterBetHistory('P',3)">Past</button>
@@ -195,7 +211,54 @@
         </table>
         
      </div>   
-        
+<div class="onepagehitdiv  table-responsive login_table">
+
+ <table class="table onepagehit table-condensed table-striped  my-market" ng-show="selectedtype == '5'">
+         <thead>
+            <tr class="bg-primary">
+               <th>SNo</th>
+                <th>{{(IsBtnTypes=='M' || IsBtnTypes=='U') ? 'Placed' : 'Settled'}}</th>
+               <th colspan="2">Description</th>
+	       <th ng-if="UserType=='1'">Dealer</th>
+               <th ng-if="UserType!=3">User Name</th>
+               <th ng-if="false">Selection Name</th>
+               <th>Type</th>
+               <th>Odds</th>
+               <th>Stack</th>
+               <th ng-if="false">Date</th>
+               <th ng-if="IsBtnTypes!='P'">Liability</th>
+                <th>{{IsBtnTypes=='P' ? 'Profit/Loss' : 'Potential Profit'}}</th>
+               <th ng-if="IsBtnTypes=='P'">Status</th>
+
+            </tr>
+         </thead>
+         <tbody>
+            <tr ng-repeat="GetbetData in userPL" >
+               <td>{{(currentPage-1)*entryLimit +$index+1}}</td>
+              <td>{{GetbetData.MstDate}}</td>
+	 <td colspan="2" class="text-left">{{GetbetData.Description}}<br>
+         <b>{{GetbetData.selectionName}} - </b>{{GetbetData.marketName}} <br>
+           Bet ID: {{GetbetData.mstcode}} | {{IsBtnTypes=='M' ? 'Matched :' : IsBtnTypes=='P' ?  'Placed :' : ''}} {{GetbetData.MatchedDate}}
+        </td>
+	<td ng-if="UserType=='1'">{{GetbetData.DealerNm}}</td>
+               <td ng-if="UserType!=3">{{GetbetData.UserNm}}</td>
+               <td ng-if="false">{{GetbetData.selectionName}}</td>
+               <td><span class="badge " ng-class="{'badge-danger': GetbetData.Type == 'Lay' ,'badge-info': GetbetData.Type == 'Back' } ">{{GetbetData.Type}}</span></td>
+               <td>{{GetbetData.Odds}}</td>
+               <td>{{GetbetData.Stack}}</td>
+               <td ng-if="false">{{GetbetData.MstDate}}</td>
+
+               <td ng-if="IsBtnTypes!='P'" ng-class="{'green':GetbetData.Liability>0,'red':GetbetData.Liability<0}">{{GetbetData.Liability}}</td>
+
+                <td  ng-class="{'green':GetbetData.P_L>0,'red':GetbetData.P_L<0}">{{GetbetData.P_L}}</td>
+               <td ng-if="IsBtnTypes=='P'" ng-class="{'green':GetbetData.STATUS=='WON','red':GetbetData.STATUS=='LOST'}">{{GetbetData.STATUS}}</td>
+
+            </tr>
+         </tbody>
+        </table>
+
+     </div>
+
         
 <div class="total-box clearfix" ng-show="selectedtype == '1' && userPL.length > 0 ">
                         <h1 class="total-green">Total P&L: <span ng-class="{'green':CalculateSum(userPL,'P_L')>0,'red':CalculateSum(userPL,'P_L')<0}" >{{userPL | sumOfValue:'P_L' | number:2}}</span></h1>
@@ -328,10 +391,10 @@
                       <td>{{(currentPage-1)*entryLimit +$index+1}}</td>
                       <td>{{pldata.Sdate}}</td>
                       <td>{{pldata.mstrUserId}}</td>
-                      <td>{{pldata.Narration}}</td>
+                      <td>{{pldata.Narration}} <span ng-if="pldata.remarkV!=''" title="{{pldata.remarkV}}"><i class="fa fa-info-circle" aria-hidden="true"></i></span></td>
                       <td class="green">{{pldata.Credit}}</td>
                       <td class="red">{{pldata.Debit}}</td>
-                      <td ng-class="{'green':pldata.Balance>0,'red':pldata.Balance<0}">{{pldata.Balance}}</td>
+                      <td ng-class="{'green':pldata.Balance>0,'red':pldata.Balance<0}">{{pldata.Balance | number : 2}}</td>
                      
                     </tr>
                   <tbody>

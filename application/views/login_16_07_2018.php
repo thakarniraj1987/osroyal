@@ -493,7 +493,7 @@
         <li><a href="#">Terms &amp; Conditions</a></li>
       </ul>
     </div>
-    <div class="footer_bottom_blk">Copyright 2018 &copy; goldbar All Rights Reserved</div>
+    <div class="footer_bottom_blk">Copyright 2018 &copy; Betdip All Rights Reserved</div>
   </footer>
   <div class="modal fade login" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">

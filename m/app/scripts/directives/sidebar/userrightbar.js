@@ -42,7 +42,23 @@ $scope.UserData =[];
 $scope.SportIds=[];
 $rootScope.GUserData=[];
 $scope.timerAllbets='';
+			$scope.OddReturn=function(odds)
+			{
 
+				var value= (odds+"");
+				value = value.toString();
+
+
+				if (value.indexOf('.') === -1) {
+					return value;
+				}
+
+				// as long as the last character is a 0 or a dot, remove it
+				while((value.slice(-1) === '0' || value.slice(-1) === '.') && value.indexOf('.') !== -1) {
+					value = value.substr(0, value.length - 1);
+				}
+				return value;
+			}
 	   // $scope.ischeckconfirm=sessionService.get('is_confirm_bet');
 
 	  //  $("#main-menu").show();
@@ -103,7 +119,7 @@ $scope.timerAllbets='';
                                 {
                                     for(var i=0;i<data.betUserData.length;i++)
                                     {
-                                        var ind=$scope.UserData.findIndex(x=>x.MstCode==data.betUserData[i].MstCode && x.IsMatched!=data.betUserData[i].IsMatched);
+                                        var ind=$scope.UserData.findIndex(x=>x.MstCode==data.betUserData[i].MstCode && (x.IsMatched!=data.betUserData[i].IsMatched || x.void!=data.betUserData[i].void));
                                         if(ind>-1)
                                         {
                                             $scope.UserData[ind]=data.betUserData[i];
@@ -205,6 +221,9 @@ if($state.current.name!='userDashboard.Matchodds')
 	{
 	  $scope.GetAllBets();
 	}
+			if($state.current.name=='userDashboard.Matchodds'){
+				$rootScope.$broadcast('CallBackFromRightBar',{});
+			}
             $scope.displaysubmenu=function(id){
                   // 
                      $("#main-menu").hide();

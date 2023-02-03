@@ -15,6 +15,7 @@
 		<li  ng-class="{'active':inplaytab==1}" ng-click="getSportList(1,'Soccer')"><a data-toggle="tab"  href="javascript:void();">Soccer</a></li>
 		<li ng-class="{'active':inplaytab==2}" ng-click="getSportList(2,'Tennis')"><a data-toggle="tab"  href="javascript:void();">Tennis</a></li>
           
+
           </ul>
 
  <div class="sport_blk newdesign" id="menuinplay">
@@ -33,7 +34,6 @@
             </thead>
 
             <tbody id="tblData">
-
                 <tr ng-repeat-start="sportsSeries in filtered = (GetSeriesData.seriesfrmApi | filter:search | orderBy : predicate :reverse) | startFrom:(currentPage-1)*entryLimit | limitTo:entryLimit">
 
                     <td data-label="Serial No">{{(currentPage-1)*entryLimit +$index+1}}</td>
@@ -68,13 +68,11 @@
       <input type="checkbox" ng-model="selectAll" ng-click="allChk(selectAll)" ng-checked="{{selectAll}}" > </span> -->
         </th>
 			    		        </tr>
-
 		    		            
-
+		    		        
 		    		      </thead><!-- | date: 'yyyy-MM-dd HH:mm:ss' -->
                           <tbody id="tblData1">
-		    		     	<tr ng-repeat-start="sportsMatch in filtered = (GetMatchData.matchfrmApi | filter:search | orderBy : predicate :reverse) | startFrom:(currentPage1-1)*entryLimit | limitTo:entryLimit"><!--sourabh 170105--> 
-
+		    		     	<tr ng-repeat-start="sportsMatch in filtered = (GetMatchData.matchfrmApi | filter:search | orderBy : predicate :reverse) | startFrom:(currentPage1-1)*entryLimit | limitTo:entryLimit"><!--sourabh 170105-->
 							<td ng-init="sportsMatch.value2=false" data-label="Serial No">{{(currentPage1-1)*entryLimit +$index+1}}</td>
 								<td data-label="Match Id">{{sportsMatch.eventId}}</td>
 								<td data-label="Match Name">{{sportsMatch.eventName}}</td>

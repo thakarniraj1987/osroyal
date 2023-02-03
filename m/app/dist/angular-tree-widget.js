@@ -174,19 +174,19 @@
             }
         }]);
        /* sourabh 5-oct .directive('modal1', function () {
-
+           
             return {
 
-              template: '<div class="modal fade">' +
-                  '<div class="modal-dialog">' +
-                    '<div class="modal-content">' +
-                      '<div class="modal-header">' +
-                        '<button type="button" class="close" data-dismiss="modal1" aria-hidden="true">&times;</button>' +
-                        '<h4 class="modal-title">Create NewUser </h4>' +
-                      '</div>' +
-                      '<div class="modal-body" ng-transclude></div>' +
-                    '</div>' +
-                  '</div>' +
+              template: '<div class="modal fade">' + 
+                  '<div class="modal-dialog">' + 
+                    '<div class="modal-content">' + 
+                      '<div class="modal-header">' + 
+                        '<button type="button" class="close" data-dismiss="modal1" aria-hidden="true">&times;</button>' + 
+                        '<h4 class="modal-title">Create NewUser </h4>' + 
+                      '</div>' + 
+                      '<div class="modal-body" ng-transclude></div>' + 
+                    '</div>' + 
+                  '</div>' + 
                 '</div>',
               restrict: 'E',
               transclude: true,

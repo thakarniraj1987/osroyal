@@ -808,15 +808,70 @@ body.addrightcls .main-sidebar {padding-top: 0;top: 0 !important;}
 .searchbar .form-control{padding: 0px;}	
 .cdate{width: 69%;}
 #navbarResponsive .navbar-nav li:first-child{display: none;}
-div#navbarResponsive width: 41%;padding-right: 20px;}
+div#navbarResponsive{ width: 41%;padding-right: 20px;}
 .searchbar .ng-pristine {width: 230px;padding-left: 10px;}
 }
 
+.newballcls li{
+    display: inline-block;
+    font-weight: bold;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+    background: #43944e;
+    line-height: 24px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 12px;
+    margin: 0 2px 2px;
+    vertical-align: middle;
+}
+.cbclass {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 10px;
+    font-size: 12px;
+}
 
 
+span.right_box {
+    float: right;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: normal;
+}
 
 
+li.ballnew.wckball {
+    background: red;
+}
+li.ballnew.wckball1 {
+    background: red;
+}
+li.ballnew.wckball2 {
+    background: red;
+}
 
-
-
-
+li.ballnew.sixfourcolor {
+    background: #601c78;
+}
+li.ballnew.sixfourcolor1 {
+    background: #601c78;
+}
+li.ballnew.sixfourcolor2 {
+    background: #601c78;
+}
+li.ballnew.fourcolor {
+    background: #2d90d4;
+}li.ballnew.fourcolor2 {
+     background: #2d90d4;
+}li.ballnew.fourcolor1 {
+      background: #2d90d4;
+}
+li.ballnew.zerocolor {
+    background: gray;
+}li.ballnew.zerocolor1 {
+    background: gray;
+}li.ballnew.zerocolor2 {
+    background: gray;
+}

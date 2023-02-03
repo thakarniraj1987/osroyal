@@ -15,22 +15,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 			if ($this->session->userdata('user_id') != '' or $method_name=='updateFancyResultByFancyAdmin') { } else { redirect(base_url());}
         }
-
-        function updatescorekey($key,$matchId)//sourabh 30-nov-2016
-		{
-            $this->load->model('ModelUserRights');
-            $userRole = $this->ModelUserRights->hasRole('LimitMatch');
-            if($userRole['status']){
-                return $this->output->set_content_type('application/json')->set_output( json_encode(array('error' => 1 ,'message' => $userRole['message'])));
-            }
-			$condition=$this->Modelcreatemaster->updatescorekey($key,$matchId);
-			if ($condition) {
-				echo json_encode(array('error' => 0 ,'message' => 'Score key saved Successfully'));
-			}else{
-				echo json_encode(array('error' => 1 ,'message' => 'Score key not saved'));
-			}	
-		}
-
 		function index(){
 			
 			$data = $this->Modellstmaster->getLstMaster();
@@ -81,6 +65,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			$this->output->set_content_type('application/json')->set_output(json_encode($data));
 		}
 		function lstSaveMaster($userid,$userType,$helperid,$helperType){
+
+            $this->load->model('ModelUserRights');
+            $userRole = $this->ModelUserRights->hasRole('ViewUser');
+            if($userRole['status']){
+                return $this->output->set_content_type('application/json')->set_output( json_encode(array('error' => 1 ,'message' => $userRole['message'])));
+            }
 			$this->load->model('Modelcreatemaster');
 			$root=$userid;
 
@@ -216,32 +206,36 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
             $id = $_POST['id'];
 
-           $score_board_array =  json_decode($this->Modelcreatemaster->getScoreBoard($id)['score_board_json'],true);
+           	$score_board_array =  json_decode($this->Modelcreatemaster->getScoreBoard($id)['score_board_json'],true);
             $data = $score_board_array[0];
-            if($data['score']['home']['selection_id'] == $_POST['betting_team'] ){
 
-            $home = [
+            if($_POST['betting_team'] == $_POST['Selection1']){
+	           	$home = [
+	               'wickets'=>$_POST['Wickets'],
+	               'bettingTeam'=>$_POST['betting_team'],
+	               'toss'=>$_POST['toss_winner'],
+	               'overs'=>$_POST['Overs'],
+	               'runs'=>$data['score']['home']['inning1']['runs']+$_POST['Runs'],
+	           	];
+	            $data['score']['home']['inning1']= $home;
+	        }else{
+	            $away = [
+	               'wickets'=>$_POST['Wickets'],
+	               'bettingTeam'=>$_POST['betting_team'],
+	               'toss'=>$_POST['toss_winner'],
+	               'overs'=>$_POST['Overs'],
+	               'runs'=>$data['score']['away']['inning1']['runs']+$_POST['Runs'],
+	           	];
+	            $data['score']['away']['inning1']= $away;
+	        }
+
+	        $selectedScore = [
                'wickets'=>$_POST['Wickets'],
                'bettingTeam'=>$_POST['betting_team'],
                'toss'=>$_POST['toss_winner'],
-               'overs'=>$_POST['Overs'],
-               'runs'=>$data['score']['home']['inning1']['runs']+$_POST['Runs'],
-	           ];
-	        $data['score']['home']['inning1']= $home;
-
-            }else{
-
-            $away = [
-               'wickets'=>$_POST['Wickets'],
-               'bettingTeam'=>$_POST['betting_team'],
-               'toss'=>$_POST['toss_winner'],
-               'overs'=>$_POST['Overs'],
-               'runs'=>$data['score']['away']['inning1']['runs']+$_POST['Runs'],
-	           ];
-	        $data['score']['away']['inning1']= $away;
-
-            }
-           
+               'overs'=>$_POST['Overs']
+           	];
+            $data['selectedScore'] = $selectedScore;
 
             $finalData[] = $data;
 
@@ -253,6 +247,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
 
         }
+
 
 		function updateFancySatatusNew($id,$active){
 			
@@ -608,36 +603,56 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         function updateFancyResultByFancyAdmin(){
 
+            $this->load->model('Betentrymodel');
             $fancyData=$this->Modellstmaster->getFandyIdByFancySupaerAdminId($_POST['fancy_Id']);
             $_POST['fancy_Id']=$fancyData['ID'];
 
             $condition=$this->Modellstmaster->updateFancyResult();
 
-
-
             if($condition[0]['iReturn']==1){
                 $match_id = $_POST['match_id'];
                 $fancy_Id = $_POST['fancy_Id'];
-                $this->load->model('Betentrymodel');
+                $this->load->model('Modeltblbets');
+
+                $this->Modeltblbets->savePlByMatchDetail($match_id);
                 $this->Betentrymodel->updateBalByMatchSession($match_id,$fancy_Id);
+                try {
+                    $redis = new Redis();
+                    $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                     $key = $this->db->database.'ind_' . $match_id . '_'.$fancy_Id;
+                    $sessionOdds = $redis->delete($key);
+                    $redis->close();
+                } catch (Exception $e) {
+                }
             }
+
             //$condition=$condition[0]['iReturn'];
             echo json_encode(array('error' => $condition ,'message' => $condition[0]['sMsg']));die;
 
         }
 		function updateFancyResult(){
             $this->load->model('ModelUserRights');
+            $this->load->model('Modeltblbets');
             $userRole = $this->ModelUserRights->hasRole('Result');
             if($userRole['status']){
                 return $this->output->set_content_type('application/json')->set_output( json_encode(array('error' => 1 ,'message' => $userRole['message'])));
             }
 			$condition=$this->Modellstmaster->updateFancyResult();
-
+            //print_r($condition);die;
 			if($condition[0]['iReturn']==1){
 				$match_id = $_POST['match_id'];
 				$fancy_Id = $_POST['fancy_Id'];
 				$this->load->model('Betentrymodel');
-				$this->Betentrymodel->updateBalByMatchSession($match_id,$fancy_Id);
+                $this->Modeltblbets->savePlByMatchDetail($match_id);
+                $this->Betentrymodel->updateBalByMatchSession($match_id,$fancy_Id);
+                try {
+                    $redis = new Redis();
+                    $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                    $key = $this->db->database.'ind_' . $match_id . '_'.$fancy_Id;
+                    $sessionOdds = $redis->delete($key);
+                    $redis->close();
+                } catch (Exception $e) {
+                }
 			}
 			//$condition=$condition[0]['iReturn'];
 			echo json_encode(array('error' => $condition ,'message' => $condition[0]['sMsg']));
@@ -653,7 +668,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return $this->output->set_content_type('application/json')->set_output( json_encode(array('error' => 1 ,'message' => $userRole['message'])));
             }
 			$result = $this->Modeleventlst->SetAbandonedSessionResult($_POST);
-
+            try {
+                $redis = new Redis();
+                $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                $key = $this->db->database.'ind_' . $_POST['match_id'] . '_'.$_POST['fancy_Id'];
+                 $redis->delete($key);
+                $redis->close();
+            } catch (Exception $e) {
+            }
 			
 			//$condition=$condition[0]['iReturn'];
 			echo json_encode(array('error' => 0 ,'message' => 'Session fancy abandoned successfully'));
@@ -731,6 +753,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				echo json_encode(array('error' => 1 ,'message' => 'Max Stake Not Changes'));
 			}	
 		}
+
+        function updateMinAndMaxStackLimit()//sourabh 30-nov-2016
+        {
+            $this->load->model('ModelUserRights');
+            $userRole = $this->ModelUserRights->hasRole('LimitMatch');
+            if($userRole['status']){
+                return $this->output->set_content_type('application/json')->set_output( json_encode(array('error' => 1 ,'message' => $userRole['message'])));
+            }
+            $condition=$this->Modelcreatemaster->updateMinAndMaxStackLimit();
+            if ($condition) {
+                echo json_encode(array('error' => 0 ,'message' => 'Stack Limit Changes Successfully'));
+            }else{
+                echo json_encode(array('error' => 1 ,'message' => 'Stack Limit Not Changes'));
+            }
+        }
+
 		function updateVolumeLimit($limit,$matchId)//sourabh 30-nov-2016
 		{
             $this->load->model('ModelUserRights');
@@ -764,13 +802,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			}	
 
 		}
-		function getFancyByEdit($id,$type){
+		function getFancyByEdit($id,$type,$matchId=null){
             $this->load->model('ModelUserRights');
             $userRole = $this->ModelUserRights->hasRole('EditFancy');
             if($userRole['status']){
                 return $this->output->set_content_type('application/json')->set_output( json_encode(array('error' => 1 ,'message' => $userRole['message'])));
             }
-			$data['FancyData'] = $this->Modellstmaster->getFancyByEdit($id,$type);			
+			$data['FancyData'] = $this->Modellstmaster->getFancyByEdit($id,$type,$matchId);
 			$this->output->set_content_type('application/json')->set_output(json_encode($data));
 		}
 		function setFancyMsg(){
@@ -903,6 +941,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             echo json_encode(array('error' => 0,'message' => 'Match ODDS stored successfully'));
             die;
         }
+        function saveManualMarketStack(){
+            $result = $this->Modelcreatemaster->saveManualMarketStack();
+            echo json_encode(array('error' => 0,'message' => 'Books Maker Stack stored successfully'));
+            die;
+        }
 
         function manualMatchOddsDetails($market_id){
             $result = $this->Modelcreatemaster->manualMatchOddsDetails($market_id);
@@ -935,6 +978,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         function updateBetAllowedOnManualMatch($market_id, $status){
             $result = $this->Modelcreatemaster->updateBetAllowedOnManualMatch($market_id, $status);
             $message = $status == 0 ? 'Bet Locked Successfully' : 'Bet Opened Successfully';
+            echo json_encode(array('error' => 0,'message' => $message));
+            die;
+        }
+
+        function updateIsRs($market_id, $status){
+            $result = $this->Modelcreatemaster->updateIsRs($market_id, $status);
+            $message = $status == 0 ? ' Successfully' : '';
             echo json_encode(array('error' => 0,'message' => $message));
             die;
         }

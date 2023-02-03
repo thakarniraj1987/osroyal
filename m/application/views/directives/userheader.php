@@ -12,6 +12,7 @@
  <button  onclick="myfun()" class="navbar-toggler navbar-toggler-left" type="button">
           <i class="fa fa-bars"></i>
         </button>
+		 <a class="navbar-brand js-scroll-trigger" ui-sref="userDashboard.Home"><i  class="fa fa-home" aria-hidden="true"></i></a>
    <a class="navbar-brand js-scroll-trigger" ui-sref="userDashboard.Home"><img src="app/images/logo.png"></a>
 
 
@@ -113,6 +114,8 @@
             <a class="dropdown-item" href="#"  ui-sref="userDashboard.Chiphistorycntr">Transfer Statement</a>
             <a class="dropdown-item " href="#" ui-sref="userDashboard.ShowTermCondition">Term & Condition</a>
             <a class="dropdown-item " href="#" ui-sref="userDashboard.changePasswordUser">Change Password</a>
+     <!--<a class="dropdown-item " ng-if="apkDownloadUrl=='N'" href="/UtilityController/downloadApk">Download Apk</a>-->
+	 <a class="dropdown-item " href="http://skaigold.co/apk/skaigold.apk" >Download Apk</a>
 
  </div>
 
@@ -136,6 +139,24 @@
           <marquee hspace="0" scrollamount="5" BEHAVIOR="SCROLL" style="font-size:14px;color:#000;" onmouseover="this.stop();" onmouseout="this.start();">{{diplayMsg}}</marquee>
         </div>
       </div>
+	  
+	  
+ <div class="sportsbook">	
+	<ul>
+	<li><a  ui-sref="userDashboard.Home"> <span><img src="app/assets/img/Cricket.png"> </span> Cricket </a> </li>
+	<li><a  ui-sref="userDashboard.Home"><span><img src="app/assets/img/Soccer.png"> </span> Soccer </a></li>
+	<li><a  ui-sref="userDashboard.Home"> <span><img src="app/assets/img/Tennis.png"> </span>Tennis </a></li>
+	<li><a  ui-sref="userDashboard.Home"> <span><img src="app/assets/img/Pro-Kabbadi.png"> </span> Pro Kabbadi  </a></li>
+	<li><a  ui-sref="userDashboard.Home"> <span><img src="app/assets/img/Soccer.png"> </span> Horse Racing  </a></li>
+	<li><a  ui-sref="userDashboard.Home"> <span><img src="app/assets/img/Soccer.png"> </span> Exchange Games  </a></li>
+	<li><a  ui-sref="userDashboard.Home"> <span><img src="app/assets/img/Soccer.png"> </span> Others </a></li>
+	
+	</ul>
+ </div> 
+	  
+	  
+	  
+	  
  <aside class="main-sidebar">
     <section class="sidebar" style="height: auto;">
       <usersidebar></usersidebar>

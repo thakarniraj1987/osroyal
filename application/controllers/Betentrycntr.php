@@ -3,10 +3,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 	class Betentrycntr extends CI_Controller {
 		function __construct() {
+            header('Access-Control-Allow-Origin: *');
 		        parent::__construct();
 		        $this->load->model('Betentrymodel');
-		        if ($this->session->userdata('user_id') != '') { } else { redirect(base_url());}
-		}
+            $this->load->model('Modelchkuser');
+            $currentMethod = $this->router->method;
+            $allowAuth = array('moveUnMatchToMatch');
+            if(!in_array($currentMethod, $allowAuth)){
+                //$this->checkAuthentication();
+            }
+        }
 		function deleteGetbettingmatch($betId,$userId)
 		{
 			
@@ -54,7 +60,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		function deleteGetbettingmat($betId,$userId,$marketId){
 			
 			$condition=$this->Betentrymodel->deleteGetbettingmat($betId,$userId,$marketId);
-			var_dump($condition);die;
+			
 		
 			if ($condition) {
                 $this->load->model('Modelcreatemaster');
@@ -69,6 +75,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			}
 
 		}
+
+        function moveToAvoidBet($betId,$userId,$marketId){
+
+            $condition=$this->Betentrymodel->moveToAvoidBet($betId,$userId,$marketId);
+
+
+            if ($condition) {
+                $this->load->model('Modelcreatemaster');
+                $this->Modelcreatemaster->updateUserBalLiablity($userId);
+                $data['error'] = 0;
+                $data['message'] = 'Record deleted Successfully...';
+                echo json_encode($data);
+            }else{
+                $data['error'] = 1;
+                $data['message'] = 'Record deleted Successfully...';
+                echo json_encode($data);
+            }
+
+        }
+
+
 		function Save_bet($userId=null){
 			$this->load->model('Modelcreatemaster');
 			$this->load->model('Modelmatchmst');
@@ -213,8 +240,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 		function moveUnMatchToMatchBetByAdmin($betId,$userId){
 
-            if($this->Betentrymodel->updateUnMatchedData($betId)){
-                $this->load('Modelcreatemaster');
+            if($this->Betentrymodel->moveUnMatchToMatchBetByAdmin($betId)){
+                $this->load->model('Modelcreatemaster');
                 $this->Modelcreatemaster->updateUserBalLiablity($userId);
                 $validate = array('code' => 0 ,'error'=>true,'message' => 'successfully');
             }else{
@@ -224,12 +251,29 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $this->output->set_content_type('application/json')->set_output(json_encode($validate));
         }
 
+        function moveUnMatchToMatch($betId=null){
+           // var_dump(file_put_contents('test123.txt',$betId));
+            try {
+                if (!empty($betId)) {
+                    $ids = explode('-', $betId);
+                    foreach ($ids as $id) {
+                        $this->Betentrymodel->updateOddsProfitLossOnBetMoveUnmatchToMatch($id);
+                        $this->db->query(" UPDATE `tblbets` SET `MatchedDate`= now() WHERE MstCode = $id");
+                    }
+                }
+            } catch (Exception $e) {
+            }
+        }
+
 		function GatBetData($marketId,$userTypeId,$userId=null,$matchId=null){//170131
 				$this->load->model('Modelmatchmst');
 				$data['result'] = $this->Modelmatchmst->result($matchId);
 				$data['betUserData']=$this->Betentrymodel->getBetEntry($marketId,$userTypeId,$userId,$matchId);
 				$this->output->set_content_type('application/json')->set_output(json_encode($data));
 		}
+
+		
+
         function GatBetDataAll($marketId,$userTypeId,$userId=null,$matchId=null){
             $this->load->model('Modelmatchmst');
             $data['result'] = $this->Modelmatchmst->result($matchId);
@@ -391,6 +435,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 				
 				$this->output->set_content_type('application/json')->set_output(json_encode($data));
 		}
+
+        function activeUser(){
+            $this->load->model('Modelcreatemaster');
+
+            $data['activeUsers']=$this->Modelcreatemaster->activeUser();;
+            $this->output->set_content_type('application/json')->set_output(json_encode($data));
+        }
 		function getActiveMatches(){
 				$data['getActiveMatches']=$this->Betentrymodel->getActiveMatches();
 				
@@ -566,23 +617,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             if($userRole['status']){
                 return $this->output->set_content_type('application/json')->set_output( json_encode(array('error' => 1 ,'message' => $userRole['message'])));
             }
-			$condition=$this->Betentrymodel->setHeaderMsg();				
-				if ($condition[0]['resultV']==0) {
-					$data['error'] = $condition[0]['resultV'];
-					$data['message'] = '"'.$condition[0]['retMess'].'"';
-					$this->output->set_content_type('application/json')->set_output(json_encode($data));
-	            	
-				}else{
-					$data['error'] = $condition[0]['resultV'];
-					$data['message'] = '"'.$condition[0]['retMess'].'"';
-					$this->output->set_content_type('application/json')->set_output(json_encode($data));
-				}
+			$condition=$this->Betentrymodel->setHeaderMsg();
+
+            $data['error'] = 0;
+            $data['message'] = 'Successfully Updated';
+            $this->output->set_content_type('application/json')->set_output(json_encode($data));
+
 		}
 		function DisplayMsgOnHeader(){
 
 			$this->checkAuthentication();
 
-			$data['marqueMsg']=$this->Betentrymodel->DisplayMsgOnHeader();
+			$data['marqueMsg']=[["Marquee"=>$this->Betentrymodel->DisplayMsgOnHeader()]];
+
 			$this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($data));
 //			$this->output->set_content_type('application/json')->set_output(json_encode($data));
 		}

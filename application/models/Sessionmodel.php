@@ -19,8 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 			return $res;
 		}
         function scorePosition($userId,$fancyId,$typeId,$currentRun){
-        //    $query =$this->db->query("call sp_GetScorePosition($userId,$fancyId,$typeId,$currentRun)");
-            $query =$this->db->query("call sp_GetScorePosition($userId,$fancyId,$typeId)");
+            $query =$this->db->query("call sp_GetScorePosition($userId,$fancyId,$typeId,$currentRun)");
             $res = $query->result_array();
             $query->next_result();
             $query->free_result();

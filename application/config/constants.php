@@ -91,26 +91,26 @@ define('ONE_REPORT_PAGING_LIMIT', 15);
 define('SHOW_VIDEO_TV', 'Y');
 define('SHOW_SETTLEMENT_BUTTON', 'Y');
 define('SHOW_OTHER_BETS', 'Y');
+define('MAKE_BAT_URL', 'N');
+define('APK_DOWNLOAD_URL', 'N');
 
 define('CONFIG_SETTLEMENT', 'CREDIT'); // sunny45 -> CREDIT , kv7 -> CASH
 define('CONFIG_UNMATCHED', 'N');
-define('CONFIG_MANUAL_UNMATCHED', 'Y');
-define('CONFIG_MANUAL_SAME_RATE', 'Y');
 define('IS_MULTI_BET', 'N');
-define('CONFIG_MIN_ODD_LIMIT', 1);
-define('CONFIG_MAX_ODD_LIMIT', 50);
-define('CONFIG_LOGIN_TIME_OUT', 3600);
+define('CONFIG_MAX_ODD_LIMIT', 50000);
+define('CONFIG_LOGIN_TIME_OUT', 10800);
 
-define('MIN_STAKE', '1');
-define('ONE_CLICK_STAKE_OPTION', '[50,100,200]');
-define('MATCH_STAKE_OPTION', '[1000,5000,10000,25000,50000,100000,150000]');
-define('SESSION_STAKE_OPTION', '[500,1000,2000,5000,10000,15000,25000,50000]');
+define('MIN_STAKE', '500');
+define('MAX_STAKE', '999999999999999999999999');
+define('ONE_CLICK_STAKE_OPTION', '[5,10,20]');
+define('MATCH_STAKE_OPTION', '[1000,2000,5000,10000,25000,50000]');
+define('SESSION_STAKE_OPTION', '[500,1000,2000,5000,10000,25000]');
 
-define('MAX_BET_LIABLITY', 100000); 
-define('MAX_MARKET_LIABLITY', 500000); 
-define('MAX_SESSION_BET_LIABLITY', 100000); 
+define('MAX_BET_LIABLITY', 50000); 
+define('MAX_MARKET_LIABLITY', 50000); 
+define('MAX_SESSION_BET_LIABLITY', 500000); 
 define('MAX_SESSION_LIABLITY', 500000); 
-define('MAX_MARKET_PROFIT', 2000000);
+define('MAX_MARKET_PROFIT', 50000);
 define('CRICKET_BET_DELAY', 0);
 define('SOCCER_BET_DELAY', 0);
 define('TENNIS_BET_DELAY', 0);
@@ -143,10 +143,10 @@ define('ERROR_PARAM_REQUIRED', 11);
 define('ERROR_PARAM_REQUIRED_MSG', 'Invalid params'); 
 define('ERROR_EXITS', 12); 
 define('ERROR_EXITS_MSG', 'Already exists'); 
-define('ERROR_RECORD_NOT_EXITS', 13); 
+define('ERROR_RECORD_NOT_EXITS', 13);
 define('ERROR_RECORD_NOT_EXITS_MSG', 'Record does not exists'); 
 define('ERROR_RECORD_NOT_ACTIVE', 14); 
-define('ERROR_RECORD_NOT_ACTIVE_MSG', 'Record not active');
+define('ERROR_RECORD_NOT_ACTIVE_MSG', 'Record not active'); 
 define('ERROR_MIN_STAKE', 15);
 define('REDIS_UN_MATCH_BET_SERVER', '127.0.0.1');
 
@@ -154,51 +154,26 @@ define('REDIS_UN_MATCH_BET_SERVER', '127.0.0.1');
 define('BETFAIR_SPORT_CRICKET', 4); 
 define('BETFAIR_SPORT_TENNIS', 2);  
 define('BETFAIR_SPORT_SOCCER', 1); 
-define ('UN_MATCH_DELETE_TIME_IN_SECOND', 500000);
+ 
 
-define('BR_SUPER_AMDIN_URL','http://sa.betdip.com/BetfairApicontroller/');
-define('BR_SUPER_AMDIN_FANCY_URL','http://session.betdip.com/Savesession/sessionslist/');
-define('BETFAIR_SESSION_URL','http://142.93.36.1/api/v1/listMarketBookSession?match_id=');
-define('BETFAIR_SERIES_URL','http://142.93.36.1/api/v1/fetch_data?Action=listCompetitions&EventTypeID=');
-define('BETFAIR_MATCH_URL','http://142.93.36.1/api/v1/fetch_data?Action=listEvents&EventTypeID=');
-define('BETFAIR_MARKET_URL','http://142.93.36.1/api/v1/fetch_data?Action=listMarketTypes&EventID=');
-define('BETFAIR_BOOKMAKER_MARKET_URL','http://46.101.9.108/api/v1/fetch_data?Action=listBookmakerMarket&EventID=');
-define('BETFAIR_BOOKMAKER_ODDS_URL','http://46.101.9.108/api/v1/listBookmakerMarketOdds?market_id=');
-define('BETFAIR_FANCY_URL','http://142.93.36.1/api/v1/listMarketBookSession?match_id=');
-define('BETFAIR_ODDS_URL','http://142.93.36.1/api/v1/listMarketBookOdds?market_id=');
-define('BETFAIR_SCORE_URL','http://142.93.36.1/api/v1/score?match_id=');
-define('BETFAIR_SELECTION_URL','http://142.93.36.1/api/v1/fetch_data?Action=listMarketRunner&MarketID=');
-define('BETFAIR_BOOKMAKER_SELECTION_URL','http://46.101.9.108/api/v1/fetch_data?Action=listBookmakerMarketRunner&MarketID=');
-define('BETFAIR_RESULT_URL','http://142.93.36.1/api/v1/marketResult?market_id='); 
+define('BR_SERIES_SPORTS_URL','http://45.79.127.8/apis/get_series_by_sport.php?sport_id=');
+define('BR_SUPER_AMDIN_URL','http://45.79.127.8/apis/get_match_by_series.php?series_id=');
+define('BR_SUPER_AMDIN_ALLMATCHES_URL','http://45.79.127.8/apis/getAllMatches.php');  // Get All matches
+define('BR_SUPER_AMDIN_FANCY_URL','http://13.127.18.45/savesession_sessionslist.php?market_id=');
+define('BR_LIVE_SESSION_URL','http://13.127.18.45/get_match_betfair_session.php?market_id=');
+define('BR_LIVE_ODDS_URL','http://13.127.18.45/get_odds_by_market_ids.php?');
+define('BR_LIVE_SERIES_URL','http://45.79.127.8/apis/get_match_by_series.php?series_id=');
+define('BR_LIVE_RESULT_URL','http://13.127.18.45/apis/result.php?');
+define('EXCH_BACK_LAY_BY_MARKETS_URL','http://13.127.18.45/get_back_lay_price.php'); // check odd on markete bets
+define('EXCH_ODDS_BY_MARKETS_URL','http://13.127.18.45/get_odds_by_market_ids.php');
+define('BETFAIR_SELECTION_URL','http://45.79.127.8/apis/match_selection.php?market_id=');  // Get Match Selection
+
+define('BR_LIVE_MATCHES_ODDS_URL','http://139.162.242.237/betfair/betting_apis/multi_market.php?');  // not used
+define('BR_LIVE_CRICKET_SOCKET_URL','http://139.162.242.237/cricket_data.php');// not used
+define('BR_LIVE_SOCCER_SOCKET_URL','http://139.162.242.237/soccer_data.php');// not used
+define('BR_LIVE_TENNIS_SOCKET_URL','http://139.162.242.237/tennis_data.php');// not used
+define('BR_LIVE_SESSION_SOCKET_URL','http://139.162.242.237/session2_data.php');// not used
+define('BETFAIR_SESSION_URL','http://sa.betdip.com/BetfairApicontroller/get_betfair_session/'); // not used
 
 
-
-if ($_SERVER['REQUEST_SCHEME']=='https') {
-//	define('BETFAIR_SELECTION_URL','https://betapis.crakex.in/br_api/matchapi.php?Action=listMarketRunner&&MarketID=');
-	define('BR_LIVE_SESSION_URL','https://crakex.in/betfair/betting_apis/market_p.php?match_id=');
-	define('BR_LIVE_ODDS_URL','https://crakex.in/betfair/betting_apis/odds.php?');
-	define('BR_LIVE_SERIES_URL','https://crakex.in/betfair/betting_apis/series.php?series_id=');
-	define('BR_LIVE_MATCHES_URL','https://crakex.in/betfair/betting_apis/matches.php?');
-	define('BR_LIVE_RESULT_URL','https://crakex.in/betfair/betting_apis/result.php?');
-	define('BR_LIVE_MATCHES_ODDS_URL','https://crakex.in/betfair/betting_apis/multi_market.php?');
-	define('BR_LIVE_CRICKET_SOCKET_URL','https://crakex.in/cricket_data.php');
-	define('BR_LIVE_SOCCER_SOCKET_URL','https://crakex.in/soccer_data.php');
-	define('BR_LIVE_TENNIS_SOCKET_URL','https://crakex.in/tennis_data.php');
-	define('BR_LIVE_SESSION_SOCKET_URL','https://crakex.in/session2_data.php');
-	define('EXCH_BACK_LAY_BY_MARKETS_URL','https://crakex.in/get_back_lay_price.php');
-	define('EXCH_ODDS_BY_MARKETS_URL','https://crakex.in:9998/get_odds_by_market_ids.php');
-} else {
-//	define('BETFAIR_SELECTION_URL','http://176.58.100.128/br_api/matchapi.php?Action=listMarketRunner&&MarketID=');
-	define('BR_LIVE_SESSION_URL','http://139.162.242.237/betfair/betting_apis/market_p.php?match_id=');
-	define('BR_LIVE_ODDS_URL','http://139.162.242.237/betfair/betting_apis/odds.php?');
-	define('BR_LIVE_SERIES_URL','http://139.162.242.237/betfair/betting_apis/series.php?series_id=');
-	define('BR_LIVE_MATCHES_URL','http://139.162.242.237/betfair/betting_apis/matches.php?');
-	define('BR_LIVE_RESULT_URL','http://139.162.242.237/betfair/betting_apis/result.php?');
-	define('BR_LIVE_MATCHES_ODDS_URL','http://139.162.242.237/betfair/betting_apis/multi_market.php?');
-	define('BR_LIVE_CRICKET_SOCKET_URL','http://139.162.242.237/cricket_data.php');
-	define('BR_LIVE_SOCCER_SOCKET_URL','http://139.162.242.237/soccer_data.php');
-	define('BR_LIVE_TENNIS_SOCKET_URL','http://139.162.242.237/tennis_data.php');
-	define('BR_LIVE_SESSION_SOCKET_URL','http://139.162.242.237/session2_data.php');
-	define('EXCH_BACK_LAY_BY_MARKETS_URL','http://139.162.242.237/get_back_lay_price.php');
-	define('EXCH_ODDS_BY_MARKETS_URL','http://139.162.242.237:8383/get_odds_by_market_ids.php');
-}
+define ('UN_MATCH_DELETE_TIME_IN_SECOND', 55555555); 

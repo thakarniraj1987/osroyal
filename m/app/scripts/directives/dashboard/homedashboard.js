@@ -3,24 +3,36 @@ angular.module('ApsilonApp').controller('homedashboard',['$scope', '$http', 'ses
 
   var authdata = Base64.encode(sessionService.get('user') + ':' +    sessionService.get('lgPassword'));
     var Bauthdata='Basic ' + authdata;
-    $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata; 
+    $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata;
+    $http.defaults.headers.common['devicetype']='M';
 	 $("#main-menu").show();   
 
 $scope.socketCricket=[];
 $scope.socketSoccer=[];
 $scope.socketTennis=[];
-$scope.bindCricket=[];
+//$scope.bindCricket=[];
 $scope.bindSoccer=[];
 $scope.bindTennis=[];
 $rootScope.MatchStack=[];
 $rootScope.one_click_stack=[];
 $rootScope.SessionStack=[];
-
-var obj=[{'id':'Cricket','sportData':$scope.bindCricket},{'id':'Soccer','sportData':$scope.bindSoccer},{'id':'Tennis','sportData':$scope.bindTennis}];
-$scope.BindArrayItems=obj;
 $scope.ajaxTimerC="";
 $scope.ajaxTimerS="";
 $scope.ajaxTimerT="";
+$scope.InplayMarketId=[];
+    if(sessionService.get('BindArrayItems') != angular.isUndefinedOrNull)
+    {
+
+        $scope.FBindArrayItems = JSON.parse(sessionService.get('BindArrayItems'));
+        // $scope.bindCricket=[];
+        $scope.BindArrayItems=$scope.FBindArrayItems;
+    }
+    else {
+
+        var obj=[{'id':'Cricket','sportData':$scope.bindCricket},{'id':'Soccer','sportData':$scope.bindSoccer},{'id':'Tennis','sportData':$scope.bindTennis}];
+        $scope.BindArrayItems=obj;
+    }
+
 //step 1
 $scope.SetCommonProperty=function(SId,MId)
 {
@@ -222,6 +234,11 @@ $scope.CallCricketSocket=function(data)
 								if($scope.bindCricket[i].status=="OPEN" && $scope.bindCricket[i].inplay)
 								{
 									$scope.bindCricket[i].Sort=0;
+                                    var indc=$scope.InplayMarketId.findIndex(x=>x==$scope.bindCricket[i].marketid);
+                                    if(indc==-1)
+                                    {
+                                        $scope.InplayMarketId.push($scope.bindCricket[i].marketid);
+                                    }
 								}
 								else
 								{
@@ -289,6 +306,11 @@ $scope.CallTennisSocket=function(data)
 								if($scope.bindTennis[i].status=="OPEN" && $scope.bindTennis[i].inplay)
 								{
 									$scope.bindTennis[i].Sort=0;
+                                    var indt=$scope.InplayMarketId.findIndex(x=>x==$scope.bindTennis[i].marketid);
+                                    if(indt==-1)
+                                    {
+                                        $scope.InplayMarketId.push($scope.bindTennis[i].marketid);
+                                    }
 								}
 								else
 								{
@@ -340,6 +362,11 @@ $scope.CallSoccerSocket=function(data)
 								if($scope.bindSoccer[i].status=="OPEN" && $scope.bindSoccer[i].inplay)
 								{
 									$scope.bindSoccer[i].Sort=0;
+                                    var inds=$scope.InplayMarketId.findIndex(x=>x==$scope.bindSoccer[i].marketid);
+                                    if(inds==-1)
+                                    {
+                                        $scope.InplayMarketId.push($scope.bindSoccer[i].marketid);
+                                    }
 								}
 								else
 								{
@@ -389,9 +416,14 @@ function timeConverter(UNIX_timestamp){
         $scope.sportTime=$timeout(function() {
             if ($state.current.name == 'userDashboard.Home') {
                 if (callSport == 1) {
-                    $scope.loading = true;
+                    //$scope.loading = true;
+                    if($scope.bindCricket==angular.isUndefinedOrNull)
+                    {
+                        $scope.bindCricket=[];
+                    }
 
                 }
+                $http.defaults.headers.common['inplay']=$scope.InplayMarketId.join(',');
                 $http({
                     method: 'GET',
                     url: BASE_URL+'Apiusercontroller/getUserFavouriteMatchLst/'+sportId,
@@ -444,7 +476,7 @@ function timeConverter(UNIX_timestamp){
                                             $scope.bindCricket[indx].isfancy=value.isfancy;
                                             if($scope.bindCricket[indx].is_manual==1)
                                             {
-                                                $scope.bindCricket[indx].runners=values.runners;
+                                                $scope.bindCricket[indx].runners=value.runners;
                                             }
                                         }
 
@@ -480,7 +512,7 @@ function timeConverter(UNIX_timestamp){
 
                                             if($scope.bindTennis[indx].is_manual==1)
                                             {
-                                                $scope.bindTennis[indx].runners=values.runners;
+                                                $scope.bindTennis[indx].runners=value.runners;
                                             }
                                         }
 
@@ -515,7 +547,7 @@ function timeConverter(UNIX_timestamp){
                                             $scope.bindSoccer[indx].isBetAllowedOnManualMatchOdds=value.isBetAllowedOnManualMatchOdds;
                                             if($scope.bindSoccer[indx].is_manual==1)
                                             {
-                                                $scope.bindSoccer[indx].runners=values.runners;
+                                                $scope.bindSoccer[indx].runners=value.runners;
                                             }
                                         }
 
@@ -819,15 +851,16 @@ else
 	
 	if(rcall==1)
 	{
-	 $scope.loading = true;
+	 //$scope.loading = true;
 	}
 
 	$scope.getResultTime=$timeout(function(){
 	if($state.current.name=="dashboard.Home"){
         $http.get(BASE_URL+'Geteventcntr/getUserMatchResult/' + sessionService.get('slctUseID') + '/' + sessionService.get('slctUseTypeID')).success(function (data, status, headers, config) {
             //
-            $scope.matchResult = data.matchRslt;
-            $scope.datapoints = data.matchRslt;
+           /* $scope.matchResult = data.matchRslt;
+            $scope.datapoints = data.matchRslt;*/
+            $scope.TempResult=data;
 	     $scope.loading = false;
 	     rcall=2;
 	     $scope.getMatchResult();
@@ -840,12 +873,44 @@ else
     }
 if(localStorage.length > 1){
 	if($state.current.name=="dashboard.Home"){
+        if(sessionService.get('cart')!=angular.isUndefinedOrNull)
+        {
+            $scope.TempArray = JSON.parse(sessionService.get('cart'));
+            $scope.matchResult = $scope.TempArray.matchRslt;
+            $scope.datapoints = $scope.TempArray.matchRslt;
+        }
 	    $scope.getMatchResult();
 		}
 }
 
 else
   $location.path('login');
+
+    $scope.updateCart = function(){
+        if($scope.TempResult!=angular.isUndefinedOrNull)
+        {
+            sessionService.set('cart',JSON.stringify($scope.TempResult));
+            //alert('cart updated');
+            $scope.TempArray = JSON.parse(sessionService.get('cart'));
+            $scope.matchResult = $scope.TempArray.matchRslt;
+            $scope.datapoints = $scope.TempArray.matchRslt;
+        }
+
+    };
+
+    $scope.updateCricket = function(){
+        // debugger;
+        if($scope.BindArrayItems!=angular.isUndefinedOrNull)
+        {
+            sessionService.set('BindArrayItems',JSON.stringify($scope.BindArrayItems));
+            //alert('cart updated');
+            $scope.FBindArrayItems = JSON.parse(sessionService.get('BindArrayItems'));
+
+        }
+
+    };
+    $scope.$watch('BindArrayItems', $scope.updateCricket, true);
+    $scope.$watch('TempResult', $scope.updateCart, true);
 
     $scope.getValColor = function(val) { //20-dec-2016 asha
 	

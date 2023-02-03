@@ -19,6 +19,7 @@ $scope.Currentdate =  Date.now();
   $timeout(tick,1000);
 }
 tick();
+            $scope.apkDownloadUrl= sessionService.get('apkDownloadUrl');
 $scope.selected = undefined;
 var suggestionsContainer = angular.element(document).find('.md-autocomplete-suggestions-container');
 var virtualRepeaterContainer = angular.element(document).find('.md-virtual-repeat-sizer');
@@ -243,21 +244,30 @@ var formdata={"search":searchText};
             }
            
             //for Marque BY Manish
-            $scope.ShowMessageOnHeader = function(){
-		var authdata = Base64.encode(sessionService.get('user') + ':' +    sessionService.get('lgPassword'));
-		 $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata;
-                $http.get( BASE_URL+'Betentrycntr/DisplayMsgOnHeader/').success(function (data, status, headers, config) {
-                        //
-				if(data.marqueMsg != angular.isUndefinedOrNull){
-                        $scope.diplayMsg = data.marqueMsg[0].Marquee;
-}
-                        
-                }).error(function(data, status, headers, config){
-				if(status=="412")
-					{
-						loginService.logout();
-					}
-			});
+            var callmsg=1;
+            $scope.ShowMessageOnHeader = function () {
+                $scope.timerGo12 = $timeout(function(){
+                    var tempUrl = $location.absUrl();
+                    if (tempUrl.indexOf('userDashboard') > -1) {
+                        var authdata = Base64.encode(sessionService.get('user') + ':' + sessionService.get('lgPassword'));
+                        $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata;
+                        $http.get(BASE_URL+'Betentrycntr/DisplayMsgOnHeader/').success(function (data, status, headers, config) {
+                            //
+                            if (data.marqueMsg != angular.isUndefinedOrNull) {
+                                $scope.diplayMsg = data.marqueMsg[0].Marquee;
+                            }
+                            callmsg=2;
+                            $scope.ShowMessageOnHeader();
+
+                        }).error(function (data, status, headers, config) {
+                            $scope.ShowMessageOnHeader();
+                            if (status == "412") {
+                                loginService.logout();
+                            }
+                        });
+                    }
+                },callmsg==1 ? 0 : 10000)
+
             }
             var msgHeader=function check_Fancydisplay() {
                 $scope.ShowMessageOnHeader();             
@@ -266,7 +276,7 @@ var formdata={"search":searchText};
 		var tempUrl=$location.absUrl();
 		if(tempUrl.indexOf('userDashboard') > -1)
 		{
-			 $scope.timerGo12 = $interval(msgHeader, 10000);
+			// $scope.timerGo12 = $interval(msgHeader, 10000);
              		 $scope.ShowMessageOnHeader();
 		}
 		

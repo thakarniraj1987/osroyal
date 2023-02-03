@@ -21,20 +21,26 @@
   .interim {
     color: darkgrey;
   }
+  	.downloadbtn{    display: block;
+    margin-top: 15px;
+    text-align: center;
+    color: #fff;
+    text-decoration: none;
+    padding: 4px 0;}
   </style>
 
 				 <div class="load-box" ng-show="loading">
             <img id="mySpinner" src="app/images/loading1.gif" />
         </div>
         <div class="container-login100">
-			<div class="wrap-login100">
-			 
-                <form class="navbar-form login100-form validate-form" name="userForm" method="post" autocomplete>
-					<span class="login100-form-logo" style="background:none;"> 
+			
+<div class="wrap-login100">
+			 <span class="login100-form-logo" style="background:none;"> 
 						<i class="zmdi "><img src="app/images/logo.png"></i>
                        
 					</span>
-
+                <form class="navbar-form login100-form validate-form" name="userForm" method="post" autocomplete>
+					
 					<span class="login100-form-title p-b-34 p-t-27">
 						Log in 
 					</span>
@@ -66,16 +72,23 @@
 	 <input type="hidden" name="browser" class="form-control" ng-model="user.browser_info" />  
 					<div class="container-login100-form-btn">
 						<button class="login100-form-btn" type="submit" ng-click="submitForm(user)" ng-disabled="userForm.$invalid">
-							Login
+							Login  &nbsp; <i class=" ml-2 fa fa-sign-in"></i>
 						</button>
 					</div>
+					
+					
+					
 
 					<!--<div class="text-center p-t-90">
 						<a class="txt1" href="#">
 							Forgot Password?
 						</a>
 					</div>-->
+					
+					<a href="http://modernexch9.com/app.apk" class="btn btn-lg btn-success downloadbtn btn-block">  Download Apk  <i _ngcontent-rqs-c41="" class="fa fa-android"></i></a>
+					
 				</form>
+				 
 				     <button ng-if="false" class="login100-form-btn" ng-speech-recognition-start ng-speech-recognition-end="speech.displayTranscript()">
                                                                                         Press & Talk
                                                                                     </button>
@@ -88,9 +101,9 @@
                                                                                                                                                               </span>
                                                                                                                                                             </div>
                                                                                                                                                             <button ng-controller="speechController as spc" ng-click="spc.start()" ng-if="false">
-                                                                                                                                                              Start
+                                                                                                                                                            Start
                                                                                                                                                             </button>
-                  <div class="powerd"> <img style=" max-width: 130px;margin: 0px auto 0;display: block;position: absolute;left: 0;right: 0;bottom: 15px;" src="app/assets/newscreen/images/powered_by_betfair_light.svg" /></div>
+                  <div class="powerd" style="display: none;"> <img style=" max-width: 130px;margin: 0px auto 0;display: block;position: absolute;left: 0;right: 0;bottom: 15px;" src="app/assets/newscreen/images/powered_by_betfair_light.svg" /></div>
 			</div>
 		</div>
 	</div>

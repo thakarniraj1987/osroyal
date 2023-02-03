@@ -3,7 +3,6 @@ angular.module('ApsilonApp').controller('userdashboard',['$scope', '$http', 'ses
     /*start slider In Master dashboard */
    
     /*end of slider*/
-    $scope.isTrue = false;    
 
     $scope.getMatchDetail = function (matchId) {
 		$scope.sportDetail = angular.isUndefinedOrNull;

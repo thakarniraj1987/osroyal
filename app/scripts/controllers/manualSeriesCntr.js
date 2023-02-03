@@ -1,8 +1,8 @@
-//app = angular.module('ApsilonApp',["ui.bootstrap.datetimepicker"]);
+app = angular.module('ApsilonApp',["ui.bootstrap.datetimepicker"]);
 app.controller('manualSeriesCntr', ['$scope', '$http', 'sessionService', '$location', '$state', 'Dialog', '$filter', '$stateParams', function ($scope, $http, sessionService, $location, $state, Dialog, $filter, $stateParams) {
-  debugger;
     $scope.UserType = sessionService.get('type');
     $scope.SportID = '4';
+
    var that = this;
   
   $scope.date = {

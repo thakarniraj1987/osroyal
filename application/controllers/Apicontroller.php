@@ -22,14 +22,7 @@ class Apicontroller extends CI_Controller {
         // if ($this->session->userdata('user_id') != '') { } else { redirect(base_url());}
         $currentMethod = $this->router->method;
 //		       $allowAuth = array('chkLoginUser','getMarketListing','matchLstIndianSessionPublic');
-
-        if($currentMethod=='listMarketBookOdds'){
-            if(empty($this->session->userdata('user_id'))){
-                redirect(base_url());
-            }
-        }
-
-        $allowAuth = array('chkLoginUser','matchLstIndianSessionPublic','listMarketBookOdds','listBookmakerMarketOdds');
+        $allowAuth = array('chkLoginUser','matchLstIndianSessionPublic');
         if(!in_array($currentMethod, $allowAuth)){
             $this->checkAuthentication();
         }
@@ -39,7 +32,7 @@ class Apicontroller extends CI_Controller {
      * [checkAuthentication check user authentication by headers]
      * @return [type] [description]
      */
-/*    function checkAuthentication(){
+    function checkAuthentication(){
 
         $this->load->model('Modelcreatemaster');
 
@@ -77,7 +70,7 @@ class Apicontroller extends CI_Controller {
             $this->output->set_status_header(412)->set_content_type('application/json')->set_output(json_encode($response));
             exit();
         }
-    } */
+    }
 
     function chkLoginUser(){
 
@@ -352,10 +345,8 @@ class Apicontroller extends CI_Controller {
 
     function getMarketListing($matchId){
 
-    //    $redis = new Redis();
-    //    $redis->connect(REDIS_SERVER, 6379);
-
         $userId = $this->globalUserId;
+        $userType = $this->globalUserType;
 
         $response = array();
         $this->load->model('Modeleventlst');
@@ -390,11 +381,12 @@ class Apicontroller extends CI_Controller {
         $response["session_stack"] = $sessionStacks;
         $response["one_click_stack"] = $oneClickStacks;
 
-        $data = $this->Modeleventlst->mobileGetFavMrktByMatchId($matchId,$userId);
+        $data = $this->Modeleventlst->mobileGetFavMrktByMatchId($matchId,$userId,$userType);
+
         $resultDeclare = $this->Modelmatchmst->result($matchId);
 
-
-
+		$scoreboard_id = "";
+		$random_var = true;
         if(!empty($data)){
 
            $matchOddIndex =  array_search('Match Odds', array_column($data, 'market_name'));
@@ -404,14 +396,15 @@ class Apicontroller extends CI_Controller {
             usort($data, function  ($x, $y) {
                 return strcasecmp($x['market_name'], $y['market_name']);
             });
-           
+
             $data =  array_merge(array($tempData),$data);
 
             foreach($data as $mdata){
-
-            //    $mdata['runner_json'] = $redis->get('ODDS_'.$mdata['marketid']);
-
-                $dbMatch = array('matchName'=>$mdata['matchName'],'series_name'=>$mdata['series_name'],'matchid'=>$mdata['matchid'],'marketid'=>$mdata['marketid'],'visibility'=>$mdata['visibility'],'market_name'=>$mdata['market_name'],'matchdate'=>$mdata['MstDate'],'sportname'=>$mdata['sportname'],'is_favourite'=>$mdata['is_favourite'],'SportId'=>$mdata['SportId'],'max_bet_liability'=>$mdata['max_bet_liability'],'max_market_liability'=>$mdata['max_market_liability'],'is_manual'=>$mdata['is_manual'],'score_board_json'=>json_decode($mdata['score_board_json']),'isManualMatchOdds'=>$mdata['isManualMatchOdds'],'isBetAllowedOnManualMatchOdds'=>$mdata['isBetAllowedOnManualMatchOdds'],'day'=>$mdata['day']);
+				if($random_var){
+					$scoreboard_id = $mdata['scoreboard_id'];
+					$random_var = false;
+				}
+                $dbMatch = array('matchName'=>$mdata['matchName'],'scoreboard_id'=>$mdata['scoreboard_id'],'series_name'=>$mdata['series_name'],'matchid'=>$mdata['matchid'],'marketid'=>$mdata['marketid'],'visibility'=>$mdata['visibility'],'market_name'=>$mdata['market_name'],'matchdate'=>$mdata['MstDate'],'sportname'=>$mdata['sportname'],'is_favourite'=>$mdata['is_favourite'],'SportId'=>$mdata['SportId'],'max_bet_liability'=>$mdata['max_bet_liability'],'max_market_liability'=>$mdata['max_market_liability'],'is_manual'=>$mdata['is_manual'],'score_board_json'=>json_decode($mdata['score_board_json']),'isManualMatchOdds'=>$mdata['isManualMatchOdds'],'isBetAllowedOnManualMatchOdds'=>$mdata['isBetAllowedOnManualMatchOdds'],'day'=>$mdata['day'],'IsRs'=>(boolean)$mdata['IsRs']);
 
                 if($mdata['SportId']==4){
                     $dbMatch['socket_url'] = $mdata['cricket_socket_url'];
@@ -433,14 +426,14 @@ class Apicontroller extends CI_Controller {
 
                 $matchArr = array($matchId);
                 $volumeLimit = $this->Modelcreatemaster->getMatchOddsLimitByMatches($matchArr);
-          
+
                 if(!empty($mdata['runner_json'])){
                     $runnerArr = json_decode($mdata['runner_json'],true);
                     $backArr = array();
-                    $backArr = @$runnerArr[0]['ex']['availableToBack'];
-                    if(!empty($backArr[0]['price'])){
+                    $backArr = @$runnerArr[0]['back'];
+                    if(@$backArr[0]['price']=='--'){
                         $matchOdds['runners'] = $runnerArr;
-                        $matchOdds['IsMatchDisable'] = false;
+                        $matchOdds['IsMatchDisable'] = true;
                     }else{
                         $matchOdds['runners'] = $runnerArr;
                         $matchOdds['IsMatchDisable'] = true;
@@ -454,9 +447,6 @@ class Apicontroller extends CI_Controller {
                 if(!empty($volumeLimit)){
                     $matchOdds['volumeLimit'] = $volumeLimit;
                 }
-
-           //     print_r($matchOdds);
-
                 $temp = array_merge($temp,$matchOdds);
 
 
@@ -483,27 +473,16 @@ class Apicontroller extends CI_Controller {
 
                     $manualMatchOddsDetails = $temp['manual_market_data'];
 
-                    if (!empty($runnerArray)) {
-                        foreach ($runnerArray as $key => $runnerRec) {
-                            $key = $key + 1;
-                            if ($key <= 2) {
-                                $runner[] = ['selectionId' => $runnerRec['selectionId'], 'name' => @$runnerRec['name'], 'ex' =>['availableToBack' => [['price' => max(0,$manualMatchOddsDetails['team' . $key . '_back'] - 1), 'size' => '']], 'availableToLay' => [['price' => max(0,$manualMatchOddsDetails['team' . $key . '_lay'] - 1), 'size' => '']]], 'status' => $manualMatchOddsDetails['active_team' . $key]];
-                            } else {
-                                $runner[] = ['selectionId' => $runnerRec['selectionId'], 'name' => @$runnerRec['name'],'ex'=>[  'availableToBack' => [['price' => max(0,$manualMatchOddsDetails['draw_back'] - 1), 'size' => '']], 'availableToLay' => [['price' => max(0,$manualMatchOddsDetails['draw_lay'] - 1), 'size' => '']]], 'status' => $manualMatchOddsDetails['active_draw']];
-                            }
-                        }
-                    }
-
-               /*     foreach ($runnerArray as $key => $runnerRec) {
+                    foreach ($runnerArray as $key => $runnerRec) {
                         $key = $key + 1;
                         if ($key <= 2) {
-                            $runner[] = ['id' => $runnerRec['id'], 'name' => @$runnerRec['name'], 'back' => [['price' => $manualMatchOddsDetails['team' . $key . '_back'] - 1, 'size' => '']], 'lay' => [['price' => $manualMatchOddsDetails['team' . $key . '_lay'] - 1, 'size' => '']], 'active' => $manualMatchOddsDetails['active_team' . $key]];
+                            $runner[] = ['id' => $runnerRec['id'], 'name' => @$runnerRec['name'], 'back' => [['price' => $manualMatchOddsDetails['team' . $key . '_back'] - 0, 'size' => '']], 'lay' => [['price' => $manualMatchOddsDetails['team' . $key . '_lay'] - 0, 'size' => '']], 'active' => $manualMatchOddsDetails['active_team' . $key]];
                         } else {
-                            $runner[] = ['id' => $runnerRec['id'], 'name' => @$runnerRec['name'], 'back' => [['price' => $manualMatchOddsDetails['draw_back'] - 1, 'size' => '']], 'lay' => [['price' => $manualMatchOddsDetails['draw_lay'] - 1, 'size' => '']], 'active' => $manualMatchOddsDetails['active_draw']];
+                            $runner[] = ['id' => $runnerRec['id'], 'name' => @$runnerRec['name'], 'back' => [['price' => $manualMatchOddsDetails['draw_back'] - 0, 'size' => '']], 'lay' => [['price' => $manualMatchOddsDetails['draw_lay'] - 0, 'size' => '']], 'active' => $manualMatchOddsDetails['active_draw']];
                         }
 
 
-                    }  */
+                    }
 
                     $temp['runners']=$runner;
                     $response["selection"] = $runnerArray;
@@ -520,27 +499,16 @@ class Apicontroller extends CI_Controller {
 
                         $manualMatchOddsDetails = $this->Modelcreatemaster->manualMatchOddsDetails($mdata['marketid']);
 
-                    /*    if (!empty($runnerArray)) {
-                            foreach ($runnerArray as $key => $runnerRec) {
-                                $key = $key + 1;
-                                if ($key <= 2) {
-                                    $runner[] = ['id' => $runnerRec['selectionId'], 'name' => @$runnerRec['name'], 'back' => [['price' => max(0,$manualMatchOddsDetails['team' . $key . '_back'] - 1), 'size' => '']], 'lay' => [['price' => max(0,$manualMatchOddsDetails['team' . $key . '_lay'] - 1), 'size' => '']], 'active' => $manualMatchOddsDetails['active_team' . $key]];
-                                } else {
-                                    $runner[] = ['id' => $runnerRec['selectionId'], 'name' => @$runnerRec['name'], 'back' => [['price' => max(0,$manualMatchOddsDetails['draw_back'] - 1), 'size' => '']], 'lay' => [['price' => max(0,$manualMatchOddsDetails['draw_lay'] - 1), 'size' => '']], 'active' => $manualMatchOddsDetails['active_draw']];
-                                }
-                            }
-                        } */
-
-
-
                         if (!empty($runnerArray)) {
                             foreach ($runnerArray as $key => $runnerRec) {
                                 $key = $key + 1;
                                 if ($key <= 2) {
-                                    $runner[] = ['selectionId' => $runnerRec['selectionId'], 'name' => @$runnerRec['name'], 'ex' =>['availableToBack' => [['price' => max(0,$manualMatchOddsDetails['team' . $key . '_back'] - 1), 'size' => '']], 'availableToLay' => [['price' => max(0,$manualMatchOddsDetails['team' . $key . '_lay'] - 1), 'size' => '']]], 'status' => $manualMatchOddsDetails['active_team' . $key]];
+                                    $runner[] = ['id' => $runnerRec['id'], 'name' => @$runnerRec['name'], 'back' => [['price' => max(0,$manualMatchOddsDetails['team' . $key . '_back'] - 0), 'size' => '']], 'lay' => [['price' => max(0,$manualMatchOddsDetails['team' . $key . '_lay'] - 0), 'size' => '']], 'active' => $manualMatchOddsDetails['active_team' . $key]];
                                 } else {
-                                    $runner[] = ['selectionId' => $runnerRec['selectionId'], 'name' => @$runnerRec['name'],'ex'=>[  'availableToBack' => [['price' => max(0,$manualMatchOddsDetails['draw_back'] - 1), 'size' => '']], 'availableToLay' => [['price' => max(0,$manualMatchOddsDetails['draw_lay'] - 1), 'size' => '']]], 'status' => $manualMatchOddsDetails['active_draw']];
+                                    $runner[] = ['id' => $runnerRec['id'], 'name' => @$runnerRec['name'], 'back' => [['price' => max(0,$manualMatchOddsDetails['draw_back'] - 0), 'size' => '']], 'lay' => [['price' => max(0,$manualMatchOddsDetails['draw_lay'] - 0), 'size' => '']], 'active' => $manualMatchOddsDetails['active_draw']];
                                 }
+
+
                             }
                         }
 
@@ -558,6 +526,7 @@ class Apicontroller extends CI_Controller {
 
             }
             $response["is_manual"] = $mdata['is_manual'];
+            $response["scoreboard_id"] = $scoreboard_id;
 
 
 
@@ -801,7 +770,8 @@ class Apicontroller extends CI_Controller {
         foreach($marketArr as $key=>$marketId){
             $temp = array();
             $temp['marketId'] = $marketId;
-            $runners = $this->Betentrymodel->sumOfOdds($marketId,$post['loginId'],$post['UserTypeId'],$matchId);
+           // $runners = $this->Betentrymodel->sumOfOdds($marketId,$post['loginId'],$post['UserTypeId'],$matchId);
+            $runners = $this->Betentrymodel->getOddsProfitLoss($marketId,$post['loginId'],$post['UserTypeId'],$matchId);
             $formatRunner = array();
             foreach($runners as $runner){
                 $formatRunner[] = array('winValue'=>$runner['winValue'],'lossValue'=>$runner['lossValue'],'selectionId'=>$runner['SelectionId']);
@@ -838,7 +808,8 @@ class Apicontroller extends CI_Controller {
         foreach($marketArr as $key=>$marketId){
             $temp = array();
             $temp['marketId'] = $marketId;
-            $runners = $this->Betentrymodel->sumOfOdds($marketId,$post['loginId'],$post['UserTypeId'],$matchId);
+            //$runners = $this->Betentrymodel->sumOfOdds($marketId,$post['loginId'],$post['UserTypeId'],$matchId);
+            $runners = $this->Betentrymodel->getOddsProfitLoss($marketId,$post['loginId'],$post['UserTypeId'],$matchId);
             $formatRunner = array();
             foreach($runners as $runner){
                 $formatRunner[] = array('winValue'=>$runner['winValue'],'lossValue'=>$runner['lossValue'],'selectionId'=>$runner['SelectionId']);
@@ -872,58 +843,6 @@ class Apicontroller extends CI_Controller {
             $response["message"] = $chk[0]['retMess'];
             $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
         }
-    }
-
-    function listMarketBookOdds($marketIds){
-
-        $bookmarkets = array();
-        $oddmarkets = array();
-
-        $marketArr = explode(',', $marketIds);
-
-        foreach($marketArr as $market){
-            $gameArr = explode('.', $market);
-            if($gameArr[0]=='9991'){
-                $bookmarkets[] = $market;
-            }else{
-                $oddmarkets[] = $market;
-            }
-        }
-
-        if(!empty($oddmarkets)){
-            $oddStr = implode(',', $oddmarkets);
-            $redisCUrl = BETFAIR_ODDS_URL.$oddStr;
-        //  echo $redisCUrl;
-            $response =  $this->httpGetArr($redisCUrl);
-            
-        } 
-
-        if(!empty($bookmarkets)){
-            $bmakerStr = implode(',', $bookmarkets);
-            $redisbmakerCUrl = BETFAIR_BOOKMAKER_ODDS_URL.$bmakerStr;
-        //  echo $redisbmakerCUrl;
-            $bmakerresponse =  $this->httpGetArr($redisbmakerCUrl);
-        //  print_r($bmakerresponse);die;
-            if(!empty($bmakerresponse)){
-                $response[] = $bmakerresponse[0];
-            }
-        } 
-
-    //  print_r($response);die;
-
-        $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
-    } 
-
-/*    function listMarketBookOdds($marketIds){
-        $redisCUrl = BETFAIR_ODDS_URL.$marketIds;
-        $response =  $this->httpGet($redisCUrl);
-        $this->output->set_status_header(200)->set_content_type('application/json')->set_output($response);
-    }  */
-
-    function listBookmakerMarketOdds($marketIds){
-        $redisCUrl = BETFAIR_BOOKMAKER_ODDS_URL.$marketIds;
-        $response =  $this->httpGet($redisCUrl);
-        $this->output->set_status_header(200)->set_content_type('application/json')->set_output($response);
     }
 
     function GetScoreApi($matchId){
@@ -1064,12 +983,72 @@ class Apicontroller extends CI_Controller {
 
         $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
     }
-
-    /**
+/**
      * [get_indian_session get indian session]
      * @return [json] [response]
      */
-    function get_indian_session($matchId=null){
+	 
+	 
+	 function get_indian_session($matchId=null){
+			
+			$this->load->model('Modelmarket');
+			$this->load->model('Modelmatchfancy');
+
+			$response = array();
+			
+			$validateMatchMarket = $this->Modelmarket->checkMarketId($matchId);
+
+			if(!empty($validateMatchMarket)){
+
+				$marketId = $validateMatchMarket['marketId'];
+				$getSessionOdds = $this->getIndianSessionOdds($marketId);
+				$sessOddArr = json_decode($getSessionOdds,true);
+				
+				//print_r($sessOddArr);
+
+				$activeSess = $this->Modelmatchfancy->addedSession($matchId);
+
+
+
+				$checkActive = array();
+
+				$indianSession = array();
+				foreach($activeSess as $aSess){
+					$checkActive[] = $aSess['ind_fancy_selection_id'];		
+					$tempFancy = json_decode($aSess['betfair_session_json'],true);
+				//	$indianSession[] = array_merge($tempFancy,array('is_exists'=>1,'match_id'=>$matchId));	
+				}
+$bddf= $sessOddArr['session'][0]['value']['session'];
+			 //	print_r($indianSession);
+				
+				if(!empty($sessOddArr['session'][0]['value']['session'])){
+					foreach($sessOddArr['session'][0]['value']['session']as $sessOdd){
+						if(in_array($sessOdd['SelectionId'], $checkActive)){
+						//	$sessOdd = array_merge($sessOdd,array('is_exists'=>1,'match_id'=>$matchId));	
+						}else{
+							$sessOdd = array_merge($sessOdd,array('is_exists'=>0,'match_id'=>$matchId));	
+							$indianSession[] = $sessOdd;
+						}
+					}
+					$response["code"] = 0;
+					$response["error"] = false;
+	        		$response["message"] = "Session fancy listing";
+					$response["data"] = $indianSession;
+				}else{
+					$response["code"] = 1;
+					$response["error"] = true;
+        			$response["message"] = 'Session fancy has not been created for this match';
+				}
+			}else{
+				$response["code"] = 1;
+				$response["error"] = true;
+        		$response["message"] = 'Please actived match odd market';
+			}
+
+			$this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
+			
+		}
+    function get_indian_session_old($matchId=null){
 
         $this->load->model('Modelmarket');
         $this->load->model('Modelmatchfancy');
@@ -1077,27 +1056,24 @@ class Apicontroller extends CI_Controller {
         $response = array();
         //$matchData = $this->Modelmarket->getMatchByMarketId($matchId);
 
-    //    print_r($matchId);die();
+      //  print_r($matchId);die();
 
         $matchMarket = $this->Modelmarket->findMarketIdByMatch($matchId);
 
-    //    print_r($matchMarket);die;
-
-
         if(!empty($matchId)){
 
-         //   $marketId = $matchMarket['marketId'];
+            $marketId = $matchMarket['marketId'];
 
             //	$getSessionOdds = $this->getIndFancyByMatchId($matchId);
 
-            $sessOddArr = $this->getIndFancyAdmin($matchId);
+            $sessOddArr = $this->getIndFancyAdmin($marketId);
 
             //	print_r($sessOddArr);die;
 
             //	$sessOddArr = json_decode($getSessionOdds,true);
 
             $activeSess = $this->Modelmatchfancy->addedSession($matchId);
-            //echo "<pre>"; print_r($activeSess);die;
+           // echo "<pre>"; print_r($activeSess);die;
             $checkActive = array();
             $decliredSessionIds = [];
 
@@ -1110,8 +1086,8 @@ class Apicontroller extends CI_Controller {
 
             //	print_r($checkActive);
             $indianSession = array();
-            if(!empty($sessOddArr['session'])){
-                foreach($sessOddArr['session'] as $sessOdd){
+            if(!empty($sessOddArr['data']['session'])){
+                foreach($sessOddArr['data']['session'] as $sessOdd){
                     if(!in_array($sessOdd['SelectionId'], $decliredSessionIds)){
                         if(in_array($sessOdd['SelectionId'], $checkActive)){
                             $sessOdd = array_merge($sessOdd,array('is_exists'=>1,'match_id'=>$matchId));
@@ -1148,8 +1124,8 @@ class Apicontroller extends CI_Controller {
     function save_indian_session(){
 
         $post = $_POST;
-        $data = array('super_admin_fancy_id'=>0,'HeadName'=>$post['RunnerName'],'remarks'=>'INDIAN_SESSION_FANCY','mid'=>$post['match_id'],'fancyType'=>2,'date'=>date('Y-m-d'),'time'=>date('H:i'),'inputYes'=> $post['BackPrice1'],'inputNo'=> $post['LayPrice1'],'sid'=>4,'NoLayRange'=>$post['LaySize1'],'YesLayRange'=>$post['BackSize1'],'RateDiff'=>1,'MaxStake'=>10000000000000000,'PointDiff'=>10,'ind_fancy_selection_id'=>$post['SelectionId']);
-
+        $data = array('super_admin_fancy_id'=>$post['SelectionId'],'HeadName'=>$post['RunnerName'],'remarks'=>'INDIAN_SESSION_FANCY','mid'=>$post['match_id'],'fancyType'=>2,'date'=>date('Y-m-d'),'time'=>date('H:i'),'inputYes'=> $post['BackPrice1'],'inputNo'=> $post['LayPrice1'],'sid'=>4,'NoLayRange'=>$post['LaySize1'],'YesLayRange'=>$post['BackSize1'],'RateDiff'=>1,'MaxStake'=>10000000000000000,'PointDiff'=>10,'ind_fancy_selection_id'=>$post['SelectionId']);
+//print_r($data);
         $this->load->model('Modelcreatemaster');
         $this->load->model('Modelmatchfancy');
 
@@ -1158,8 +1134,16 @@ class Apicontroller extends CI_Controller {
 
         if(empty($chkSession)){
 
-            $result = $this->Modelcreatemaster->mb_saveFancy($data);
+            $id = $this->Modelcreatemaster->mb_saveFancy($data);
 
+            try {
+                $redis = new Redis();
+                $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+                $result = $this->Modelmatchfancy->selectFancyById($id);
+                $redis->set($this->db->database.'ind_' . $post['match_id'] . '_' . $id, json_encode($result));
+                $redis->close();
+            } catch (Exception $e) {
+            }
             if (!empty($result)) {
                 $response["code"] = 0;
                 $response["error"] = false;
@@ -1197,6 +1181,73 @@ class Apicontroller extends CI_Controller {
         $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
     }
 
+    function userScorePosition($fancyId){
+        $userId =$this->globalUserId;
+
+        $fancy_positions = $this->Sessionmodel->userScorePosition($userId,$fancyId);
+
+        $max_exposure=0;
+
+
+        $OddsNumbers=[];
+        $ResultValues=[];
+        if(!empty($fancy_positions)){
+            foreach ($fancy_positions as $fancy_position){
+                $OddsNumbers[]= $fancy_position['OddsNumber']-1;
+            }
+            $OddsNumbers[]=end($fancy_positions)['OddsNumber'];
+            $OddsNumbersOrg = $OddsNumbers;
+            $OddsNumbers =  array_unique($OddsNumbers);
+            $lastPosition = 0;
+            foreach ($OddsNumbers as $OddsNumberKey=>$OddsNumber){
+                $tempTotal = 0;
+                foreach ($fancy_positions as $fancy_position){
+                    if($fancy_position['OddValue']==1){
+                        if($fancy_position['OddsNumber'] <=$OddsNumber){
+
+                            $tempTotal-= $fancy_position['bet_price']*($fancy_position['session_no_size']/100);
+                        }else{
+                            $tempTotal+=$fancy_position['bet_price'];
+                        }
+
+                    }else{
+
+                        if($fancy_position['OddsNumber'] >$OddsNumber){
+
+                            $tempTotal-=$fancy_position['bet_price'];
+
+                        }else{
+                            $tempTotal+=$fancy_position['bet_price']*($fancy_position['session_yes_size']/100);
+                        }
+
+                    }
+
+                }
+                if(count($OddsNumbersOrg)-1 == $OddsNumberKey){
+                    $ResultValues[]=array('SessInptYes'=>$lastPosition.'+','ResultValue'=>$tempTotal);
+                }else{
+                    if($lastPosition==$OddsNumber){
+                        $ResultValues[]=array('SessInptYes'=>$lastPosition,'ResultValue'=>$tempTotal);
+                    }else{
+                        $ResultValues[]=array('SessInptYes'=>$lastPosition.'-'.$OddsNumber,'ResultValue'=>$tempTotal);
+                    }
+
+                }
+
+                $lastPosition = $OddsNumber+1;
+                if($max_exposure> $tempTotal){
+                    $max_exposure= $tempTotal;
+                }
+            }
+
+        }
+
+        $sessionOdd['fancy_position'] = $ResultValues;
+        $sessionOdd['max_exposure'] = $max_exposure;
+
+        $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($sessionOdd));
+    }
+
     /**
      * [matchLstIndianSession indian session match listing]
      * @param  [int] $matchId [match id]
@@ -1210,169 +1261,94 @@ class Apicontroller extends CI_Controller {
         $this->load->model('Modeleventlst');
         $this->load->model('Modelmatchfancy');
         //	$this->load->model('Modelmarket');
-
+        $devicetype = $this->input->request_headers();
         $response["code"] = 0;
         $response["error"] = false;
         $response["message"] = "Session fancy listing";
 
-        //$getSessionOdds = $this->getIndianSessionOdds($marketId);
-        /*	$getSessionOdds = $this->getSuperAdminFancyOdds($marketId);
-            $sessOddArr = json_decode($getSessionOdds,true);
+        //$sessionOdds = $this->Modelmatchfancy->getUserFancyList($userId,$matchId);
+        try {
+            $redis = new Redis();
+            $redis->connect(REDIS_UN_MATCH_BET_SERVER, 6379);
+           $key = $this->db->database.'ind_' . $matchId . '*';
+           $sessionOdds = $redis->mget($redis->keys($key));
 
-            $getSessPrice = array();
-            foreach($sessOddArr['session'] as $sessOdd){
-                $getSessPrice[$sessOdd['SelectionId']] = array('SessInptYes'=> $sessOdd['BackPrice1'] ,'SessInptNo'=>$sessOdd['LayPrice1'],'GameStatus'=>$sessOdd['GameStatus']);
-            }  */
-
-
-        //	$sessionOdds = $this->Modeleventlst->mbdip_matchFancyList($matchId,$userId);
-        //	print_r($sessionOdds);
-
-        $sessionLiveOdds = array();
-        $matchFancyIds = array();
-        $sessOddArr = $this->getIndFancyAdmin($matchId);
-         if(!empty($sessOddArr['session'])){
-            foreach($sessOddArr['session'] as $sessOdd){
-                $matchFancyIds[] = $sessOdd['SelectionId'];
-                $sessionLiveOdds[$sessOdd['SelectionId']] = $sessOdd;
-            }
+            $redis->close();
+        } catch (Exception $e) {
         }
-
-    //    print_r($matchFancyIds);
-
-        $sessionOdds = $this->Modelmatchfancy->getUserFancyList($userId,$matchId,$matchFancyIds);
-
-   //    print_r($sessionOdds);die;
-
-
         $temp = [];
         if(!empty($sessionOdds)){
 
-          
-
             foreach ($sessionOdds as $sessionOdd){
+                $sessionOdd = json_decode($sessionOdd,true);
+                if(!empty($sessionOdd)){
+                    if(!empty($devicetype['devicetype']) && $devicetype['devicetype']=='A') {
+                        $fancy_positions = $this->Sessionmodel->userScorePosition($userId, $sessionOdd['ID']);
+                        $max_exposure = 0;
 
 
-                if(!empty($sessionLiveOdds[$sessionOdd['ind_fancy_selection_id']]['LayPrice1'])){
-                    $sessionOdd['SessInptNo'] = $sessionLiveOdds[$sessionOdd['ind_fancy_selection_id']]['LayPrice1'];    
-                }
-                if(!empty($sessionLiveOdds[$sessionOdd['ind_fancy_selection_id']]['BackPrice1'])){
-                    $sessionOdd['SessInptYes'] = $sessionLiveOdds[$sessionOdd['ind_fancy_selection_id']]['BackPrice1'];    
-                }
-                if(!empty($sessionLiveOdds[$sessionOdd['ind_fancy_selection_id']]['BackSize1'])){
-                    $sessionOdd['YesValume'] = $sessionLiveOdds[$sessionOdd['ind_fancy_selection_id']]['BackSize1'];    
-                }                
-                if(!empty($sessionLiveOdds[$sessionOdd['ind_fancy_selection_id']]['LaySize1'])){
-                    $sessionOdd['NoValume'] = $sessionLiveOdds[$sessionOdd['ind_fancy_selection_id']]['LaySize1'];
-                }                
-                if(!empty($sessionLiveOdds[$sessionOdd['ind_fancy_selection_id']]['GameStatus'])){
-                    $sessionOdd['active'] = 4;  
-                    $sessionOdd['DisplayMsg'] = $sessionLiveOdds[$sessionOdd['ind_fancy_selection_id']]['GameStatus'];    
-                }
+                        $OddsNumbers = [];
+                        $ResultValues = [];
+                        if (!empty($fancy_positions)) {
+                            foreach ($fancy_positions as $fancy_position) {
+                                $OddsNumbers[] = $fancy_position['OddsNumber'] - 1;
+                            }
+                            $OddsNumbers[] = end($fancy_positions)['OddsNumber'];
+                            $OddsNumbersOrg = $OddsNumbers;
+                            $OddsNumbers = array_unique($OddsNumbers);
+                            $lastPosition = 0;
+                            foreach ($OddsNumbers as $OddsNumberKey => $OddsNumber) {
+                                $tempTotal = 0;
+                                foreach ($fancy_positions as $fancy_position) {
+                                    if ($fancy_position['OddValue'] == 1) {
+                                        if ($fancy_position['OddsNumber'] <= $OddsNumber) {
 
-            //    echo $sessionLiveOdds[$sessionOdd['ind_fancy_selection_id']]['LayPrice1'];
-            //    print_r($sessionLiveOdds[$sessionOdd['ind_fancy_selection_id']]);
-            //    print_r($sessionLiveOdds);die;
+                                            $tempTotal -= $fancy_position['bet_price'] * ($fancy_position['session_no_size'] / 100);
+                                        } else {
+                                            $tempTotal += $fancy_position['bet_price'];
+                                        }
 
-                
-                $fancy_positions = $this->Sessionmodel->userScorePosition($userId,$sessionOdd['ID']);
-                $max_exposure=0;
+                                    }
+                                    else {
 
+                                        if ($fancy_position['OddsNumber'] > $OddsNumber) {
 
-                $OddsNumbers=[];
-                $ResultValues=[];
-                if(!empty($fancy_positions)){
-                    foreach ($fancy_positions as $fancy_position){
-                        $OddsNumbers[]= $fancy_position['OddsNumber']-1;
-                    }
-                    $OddsNumbers[]=end($fancy_positions)['OddsNumber'];
-                    $OddsNumbersOrg = $OddsNumbers;
-                    $OddsNumbers =  array_unique($OddsNumbers);
-                    $lastPosition = 0;
-                    foreach ($OddsNumbers as $OddsNumberKey=>$OddsNumber){
-                        $tempTotal = 0;
-                        foreach ($fancy_positions as $fancy_position){
-                            if($fancy_position['OddValue']==1){
-                                if($fancy_position['OddsNumber'] <=$OddsNumber){
+                                            $tempTotal -= $fancy_position['bet_price'];
 
-                                    $tempTotal-= $fancy_position['bet_price']*($fancy_position['session_no_size']/100);
-                                }else{
-                                    $tempTotal+=$fancy_position['bet_price'];
+                                        } else {
+                                            $tempTotal += $fancy_position['bet_price'] * ($fancy_position['session_yes_size'] / 100);
+                                        }
+
+                                    }
+
+                                }
+                                if (count($OddsNumbersOrg) - 1 == $OddsNumberKey) {
+                                    $ResultValues[] = array('SessInptYes' => $lastPosition . '+', 'ResultValue' => $tempTotal);
+                                } else {
+                                    if ($lastPosition == $OddsNumber) {
+                                        $ResultValues[] = array('SessInptYes' => $lastPosition, 'ResultValue' => $tempTotal);
+                                    } else {
+                                        $ResultValues[] = array('SessInptYes' => $lastPosition . '-' . $OddsNumber, 'ResultValue' => $tempTotal);
+                                    }
+
                                 }
 
-                            }else{
-
-                                if($fancy_position['OddsNumber'] >$OddsNumber){
-
-                                    $tempTotal-=$fancy_position['bet_price'];
-
-                                }else{
-                                    $tempTotal+=$fancy_position['bet_price']*($fancy_position['session_yes_size']/100);
+                                $lastPosition = $OddsNumber + 1;
+                                if ($max_exposure > $tempTotal) {
+                                    $max_exposure = $tempTotal;
                                 }
-
                             }
 
                         }
-                        if(count($OddsNumbersOrg)-1 == $OddsNumberKey){
-                            $ResultValues[]=array('SessInptYes'=>$lastPosition.'+','ResultValue'=>$tempTotal);
-                        }else{
-                            if($lastPosition==$OddsNumber){
-                                $ResultValues[]=array('SessInptYes'=>$lastPosition,'ResultValue'=>$tempTotal);
-                            }else{
-                                $ResultValues[]=array('SessInptYes'=>$lastPosition.'-'.$OddsNumber,'ResultValue'=>$tempTotal);
-                            }
-
-                        }
-
-                        $lastPosition = $OddsNumber+1;
-                        if($max_exposure> $tempTotal){
-                            $max_exposure= $tempTotal;
-                        }
+                        $sessionOdd['fancy_position'] = $ResultValues;
+                        $sessionOdd['max_exposure'] = $max_exposure;
                     }
 
+                    $temp[] = $sessionOdd;
                 }
 
-                $sessionOdd['fancy_position'] = $ResultValues;
-                $sessionOdd['max_exposure'] = $max_exposure;
-                //print_r($sessionOdd);die;
-                $temp[] = $sessionOdd;
             }
         }
-        //echo "<pre>";print_r($temp);
-        //die;
-
-        /*	$filterArr = array();
-            foreach($sessionOdds as $sessionOdd){
-                $mFancyId = $sessionOdd['ind_fancy_selection_id'];
-
-                if($sessionOdd['is_indian_fancy'] == 1 && $sessionOdd['fancy_mode'] == 'A'){
-                    if(!empty($getSessPrice[$mFancyId])){
-
-                        if($getSessPrice[$mFancyId]['SessInptYes'] === 0 || $getSessPrice[$mFancyId]['SessInptNo'] === 0){
-                            $sessionOdd['SessInptYes'] = '';
-                            $sessionOdd['SessInptNo'] = '';
-                            $sessionOdd['DisplayMsg'] = 'Result awaiting';
-                            $sessionOdd['active'] = 4;
-                        }else{
-                            $sessionOdd['SessInptYes'] = $getSessPrice[$mFancyId]['SessInptYes'];
-                            $sessionOdd['SessInptNo'] = $getSessPrice[$mFancyId]['SessInptNo'];
-                            if(!empty($getSessPrice[$mFancyId]['GameStatus'])){
-                                $sessionOdd['DisplayMsg'] = $getSessPrice[$mFancyId]['GameStatus'];
-                                $sessionOdd['active'] = 4;
-                            }
-                        }
-
-                    }else{
-                        $sessionOdd['SessInptYes'] = '';
-                        $sessionOdd['SessInptNo'] = '';
-                        $sessionOdd['DisplayMsg'] = 'Result awaiting';
-                        $sessionOdd['active'] = 4;
-                    }
-                }
-                $filterArr[] = $sessionOdd;
-            }
-
-            $response["data"] = $filterArr; */
         $response["data"] = $temp;
         $this->output->set_status_header(200)->set_content_type('application/json')->set_output(json_encode($response));
     }
@@ -1449,12 +1425,13 @@ class Apicontroller extends CI_Controller {
 
         $post = $_POST;
         $betId = $post['FancyId'];
+        $MatchID = $post['MatchID'];
         $udpateArr = array('fancy_mode'=>$post['fancy_mode']);
 
         $response = array();
         $this->load->model('Modelmatchfancy');
 
-        $condition=$this->Modelmatchfancy->update($betId,$udpateArr);
+        $condition=$this->Modelmatchfancy->update($betId,$udpateArr,$MatchID);
         if ($condition) {
             $response["code"] = 0;
             $response["error"] = false;

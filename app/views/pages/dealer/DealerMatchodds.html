@@ -3,6 +3,7 @@
         <div class="load-box" ng-show="loading">
             <img id="mySpinner" src="app/images/loading1.gif"/>
         </div>
+
         <div class="row match-heading">
             <div class="col-md-12 col-xs-12"><h4 class="page-heading">{{matchName}}</h4>
                 <p class="whiteclor pull-right">{{dateForm|date:'EEEE dd MMM, hh:mm a'}}</p></div>
@@ -61,8 +62,9 @@
 
                                 </strong>
                                 <div class="size"
-                                     style='{{getValColor(getSumValPnL((MarketWinLossByMId(marketitem.marketid)|filter:{"selectionId":marketInfo.id})[0].winValue,(MarketWinLossByMId(marketitem.marketid)|filter:{"selectionId":marketInfo.id})[0].lossValue))}}'>
-               {{(getSumValPnL((MarketWinLossByMId(marketitem.marketid)|filter:{"selectionId":marketInfo.id})[0].winValue,(MarketWinLossByMId(marketitem.marketid)|filter:{"selectionId":marketInfo.id})[0].lossValue))|number:2}}
+                                     style='{{getValColor(getSumValPnL((MarketWinLossByMId(marketitem.id)|filter:{"selectionId":marketInfo.id})[0].winValue,(MarketWinLossByMId(marketitem.id)|filter:{"selectionId":marketInfo.id})[0].lossValue))}}'>
+
+                                    {{(getSumValPnL((MarketWinLossByMId(marketitem.id)|filter:{"selectionId":marketInfo.id})[0].winValue,(MarketWinLossByMId(marketitem.id)|filter:{"selectionId":marketInfo.id})[0].lossValue))|number:2}}
 
 
                                     <div ng-if="false">
@@ -71,47 +73,47 @@
                                 </div>
                             </td>
                             <td class="back unhighlighted hidden-xs"
-                                ng-class="{'callYlCss':marketInfo.ex.availableToBack[2].selected}">
-                                <strong class="odds">{{getOddCalcVal(marketInfo.ex.availableToBack[2].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
+                                ng-class="{'callYlCss':marketInfo.back[2].selected}">
+                                <strong class="odds">{{getOddCalcVal(marketInfo.back[2].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
                                 <div class="size">
-                                    <span>{{getOddCalcVal(marketInfo.ex.availableToBack[2].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
+                                    <span>{{getOddCalcVal(marketInfo.back[2].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
                                 </div>
                             </td>
                             <td class="back unhighlighted hidden-xs"
-                                ng-class="{'callYlCss':marketInfo.ex.availableToBack[1].selected}">
-                                <strong class="odds">{{getOddCalcVal(marketInfo.ex.availableToBack[1].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
+                                ng-class="{'callYlCss':marketInfo.back[1].selected}">
+                                <strong class="odds">{{getOddCalcVal(marketInfo.back[1].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
                                 <div class="size">
-                                    <span>{{getOddCalcVal(marketInfo.ex.availableToBack[1].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
+                                    <span>{{getOddCalcVal(marketInfo.back[1].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
                                 </div>
                             </td>
-                            <td class="back" ng-class="{'callYlCss':marketInfo.ex.availableToBack[0].selected}"
-                                ng-click="getOddValue($event,marketInfo.ex.availableToBack[0].price+oddsLimit,FinalArray[0].event.id,0,marketInfo.name,marketInfo.id)">
-                                <strong class="odds">{{getOddCalcVal(marketInfo.ex.availableToBack[0].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
+                            <td class="back" ng-class="{'callYlCss':marketInfo.back[0].selected}"
+                                ng-click="getOddValue($event,marketInfo.back[0].price+oddsLimit,FinalArray[0].event.id,0,marketInfo.name,marketInfo.id)">
+                                <strong class="odds">{{getOddCalcVal(marketInfo.back[0].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
                                 <div class="size">
-                                    <span>{{getOddCalcVal(marketInfo.ex.availableToBack[0].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
+                                    <span>{{getOddCalcVal(marketInfo.back[0].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
                                 </div>
                             </td>
-                            <td class="lay" ng-class="{'callCYanCss':marketInfo.ex.availableToLay[0].selected}"
-                                ng-click="getOddValue($event,marketInfo.ex.availableToLay[0].price+oddsLimit,FinalArray[0].event.id,1,marketInfo.name,marketInfo.id)">
+                            <td class="lay" ng-class="{'callCYanCss':marketInfo.lay[0].selected}"
+                                ng-click="getOddValue($event,marketInfo.lay[0].price+oddsLimit,FinalArray[0].event.id,1,marketInfo.name,marketInfo.id)">
 
-                                <strong class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.ex.availableToLay[0].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
+                                <strong class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.lay[0].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
                                 <div class="size">
-                                    <span>{{getOddCalcVal(marketInfo.ex.availableToLay[0].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
+                                    <span>{{getOddCalcVal(marketInfo.lay[0].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
                                 </div>
                             </td>
                             <td class="lay unhighlighted hidden-xs"
-                                ng-class="{'callCYanCss':marketInfo.ex.availableToLay[1].selected}">
-                                <strong class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.ex.availableToLay[1].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
+                                ng-class="{'callCYanCss':marketInfo.lay[1].selected}">
+                                <strong class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.lay[1].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
                                 <div class="size">
-                                    <span>{{getOddCalcVal(marketInfo.ex.availableToLay[1].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
+                                    <span>{{getOddCalcVal(marketInfo.lay[1].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
                                 </div>
                             </td>
                             <td class="lay unhighlighted hidden-xs"
-                                ng-class="{'callCYanCss':marketInfo.ex.availableToLay[2].selected}">
+                                ng-class="{'callCYanCss':marketInfo.lay[2].selected}">
 
-                                <strong class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.ex.availableToLay[2].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
+                                <strong class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.lay[2].price,1,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</strong>
                                 <div class="size">
-                                    <span>{{getOddCalcVal(marketInfo.ex.availableToLay[2].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
+                                    <span>{{getOddCalcVal(marketInfo.lay[2].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
                                 </div>
                             </td>
 
@@ -162,33 +164,33 @@
                         </td>
 
                         <td class="back td_btn btn_gray unhighlighted hidden-xs "
-                            ng-class="{'callYlCss':marketInfo.ex.availableToBack[1].selected}">
+                            ng-class="{'callYlCss':marketInfo.back[1].selected}">
 
 
                         </td>
                         <td ng-init="SetCommonPropertyForManual(marketInfo.id,Manualdata)"
-                            ng-class="{'betting-disableds':(marketInfo.active==1 || marketInfo.ex.availableToBack==0),'callYlCss':marketInfo.ex.availableToBack[0].selected || priveobj['field_'+marketInfo.uniqueId+'c']}"
+                            ng-class="{'betting-disableds':(marketInfo.active==1 || marketInfo.back==0),'callYlCss':marketInfo.back[0].selected || priveobj['field_'+marketInfo.uniqueId+'c']}"
                             class="back td_btn blue_btn"
-                            ng-click="marketInfo.IsShow=true;getOddValueManual($event,marketInfo.ex.availableToBack,Manualdata.volumeLimit[0].oddsLimit,Manualdata.matchid,0,marketInfo.name+'(B)',marketInfo.id,marketInfo.uniqueId,Manualdata.marketid,$index,marketInfo.active)">
+                            ng-click="marketInfo.IsShow=true;getOddValueManual($event,marketInfo.back,Manualdata.volumeLimit[0].oddsLimit,Manualdata.matchid,0,marketInfo.name+'(B)',marketInfo.id,marketInfo.uniqueId,Manualdata.marketid,$index,marketInfo.active)">
 
-                            <strong class="odds">{{getOddCalcVal(marketInfo.ex.availableToBack,1,Manualdata.volumeLimit[0].oddsLimit,Manualdata.volumeLimit[0].volumeLimit)}}</strong>
+                            <strong class="odds">{{getOddCalcVal(marketInfo.back,1,Manualdata.volumeLimit[0].oddsLimit,Manualdata.volumeLimit[0].volumeLimit)}}</strong>
                             <div class="size">
-                                <span>{{getOddCalcVal(marketInfo.ex.availableToBack[0].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
+                                <span>{{getOddCalcVal(marketInfo.back[0].size,2,marketitem.volumeLimit[0].oddsLimit,marketitem.volumeLimit[0].volumeLimit)}}</span>
                             </div>
                         </td>
-                        <td ng-class="{'betting-disableds':(marketInfo.active==1 || marketInfo.ex.availableToLay==0),'callCYanCss':marketInfo.ex.availableToLay[0].selected || priveobj['field_'+marketInfo.uniqueId+'d']}"
+                        <td ng-class="{'betting-disableds':(marketInfo.active==1 || marketInfo.lay==0),'callCYanCss':marketInfo.lay[0].selected || priveobj['field_'+marketInfo.uniqueId+'d']}"
                             class="lay td_btn pink_btn"
-                            ng-click="marketInfo.IsShow=true;getOddValueManual($event,marketInfo.ex.availableToLay,Manualdata.volumeLimit[0].oddsLimit,Manualdata.matchid,1,marketInfo.name+'(B)',marketInfo.id,marketInfo.uniqueId,Manualdata.marketid,$index,marketInfo.active)">
+                            ng-click="marketInfo.IsShow=true;getOddValueManual($event,marketInfo.lay,Manualdata.volumeLimit[0].oddsLimit,Manualdata.matchid,1,marketInfo.name+'(B)',marketInfo.id,marketInfo.uniqueId,Manualdata.marketid,$index,marketInfo.active)">
 
-                            <strong class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.ex.availableToLay,1)}}</strong>
-
-                        </td>
-                        <td class="lay td_btn btn_gray unhighlighted hidden-xs"
-                            ng-class="{'callCYanCss':marketInfo.ex.availableToLay[1].selected || priveobj['field_'+marketInfo.uniqueId+'e']}">
+                            <strong class="odds" ng-model="testModel">{{getOddCalcVal(marketInfo.lay,1)}}</strong>
 
                         </td>
                         <td class="lay td_btn btn_gray unhighlighted hidden-xs"
-                            ng-class="{'callCYanCss':marketInfo.ex.availableToLay[2].selected || priveobj['field_'+marketInfo.uniqueId+'f']}">
+                            ng-class="{'callCYanCss':marketInfo.lay[1].selected || priveobj['field_'+marketInfo.uniqueId+'e']}">
+
+                        </td>
+                        <td class="lay td_btn btn_gray unhighlighted hidden-xs"
+                            ng-class="{'callCYanCss':marketInfo.lay[2].selected || priveobj['field_'+marketInfo.uniqueId+'f']}">
 
 
                         </td>
@@ -210,9 +212,243 @@
         <!-- {{UserData}} -->
 
 
+        <!-- end the code of Fancy -->
+
+
+        <div class="row livematchodds">
+            <div class="col-sm-12 ">
+                <div class="fancy-collapse-panel">
+                    <div class="panel panel-default match">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <h3 class="panel-title">Matched Bets 
+						<!--	({{(UserData | filter :
+                                {"IsMatched":"1"}).length}})--></h3>
+                        </div>
+                        <div class="panel-body unmatchedScrollTable"
+                             ng-if='(UserData | filter : {"IsMatched":"1"}).length>0'>
+                            <table class="table betslip-table">
+                                <thead>
+                                <tr>
+                                    <th>Runner</th>
+									  <th >Dealer</th>
+                                    <th>Client</th>
+                                    <th>odds</th>
+                                    <th>stack</th>
+                                    <th>P&l</th>
+                                    <th>dateTime</th>
+                                    <!-- <th>IP Address</th> -->
+
+                                </tr>
+                                </thead>
+                                <tbody>
+                               
+ <tr ng-repeat='unMatchedData in (UserData | filter : {"IsMatched":"1"})'  ng-if='unMatchedData.selectionName.length < 23'
+  ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}">
+								
+									
+                                    <td>{{unMatchedData.selectionName}} <span class="red" ng-if="unMatchedData.void==1"><br> -> Void</span></td>
+  <td >{{unMatchedData.ParantName}}</td>
+                                    <td>{{unMatchedData.userName}}</td>
+                                    <td>{{OddReturn(unMatchedData.Odds)}}</td>
+                                    <td>{{unMatchedData.Stack}}</td>
+                                    <td>{{unMatchedData.P_L}}</td>
+                                    <td>{{unMatchedData.MstDate}}</td>
+                                    <!-- <td>{{unMatchedData.ip}}</td> -->
+
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+				
+		<div class="col-sm-12 padding">
+            <div class="fancy-collapse-panel">
+                <div class="panel panel-default match">
+                    <div class="panel-heading" role="tab" id="headingthree">
+                       <!--- <h3 class="panel-title">Fancy Bets ({{(UserData | filter : {"IsMatched":"1"}).length}})</h3>-->
+						 <h3 class="panel-title">Fancy Bets</h3>
+                    </div>
+                    <div class="panel-body login_table unmatchedScrollTable">
+                        <table class="table table-striped  betslip-table">
+                            <thead>
+                               <tr>
+                                   
+                                   <th >Runner</th>                                   
+                                   <th >Dealer</th>
+                                   <th >Client</th>
+                                   <th>odds </th>
+                                   <th>stack</th>
+                                   <th>P&l</th>
+                                   <th>date</th>
+                                    <th>ip</th>
+                                </tr>
+                            </thead>
+                             <tbody>
+                             <!-- ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}"-->
+                                <tr ng-repeat='unMatchedData in (UserData | filter : {"IsMatched":"1"})' ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}" ng-if='unMatchedData.selectionName.length > 22'>
+                                   
+                                    <td title="{{unMatchedData.selectionName}}">{{unMatchedData.selectionName |limitTo: 8}}  
+<span class="red" ng-if="unMatchedData.void==1"><br> -> Void</span></td>
+                                
+                                    <td >{{unMatchedData.ParantName}}</td>
+                                    <td >{{unMatchedData.userName}}</td>
+                                    <td>{{OddReturn(unMatchedData.Odds)}}</td>
+                                    <td>{{unMatchedData.Stack}}</td>
+                                    <td>{{unMatchedData.P_L}}</td>
+                                    <td title="{{unMatchedData.MstDate}}">{{unMatchedData.MstDate }}</td>
+                                    <td>{{unMatchedData.ip}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    </div>
+	
+	
+            <div class="col-sm-12 ">
+                <div class="fancy-collapse-panel devidebox">
+                    <div class="panel panel-default match">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <h3 class="panel-title">Unmatched Bets ({{(UserData | filter :
+                                {"IsMatched":"0"}).length}})</h3>
+                        </div>
+                        <div class="panel-body unmatchedScrollTable"
+                             ng-if='(UserData | filter : {"IsMatched":"0"}).length>0'>
+                            <table class="table betslip-table">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Runner</th>
+                                    <th>Dealer</th>
+                                    <th>Client</th>
+                                    <th>odds</th>
+                                    <th>stack</th>
+                                    <th>P&l</th>
+                                    <th>dateTime</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat='unMatchedData in (UserData | filter : {"IsMatched":"0"})'
+                                    ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}">
+                                    <td><span ng-if="false" class="glyphicon glyphicon-trash"
+                                              ng-click="deleteUser(unMatchedData.MstCode,unMatchedData.UserId)"></span>
+                                    </td>
+                                    <td>{{unMatchedData.selectionName}}</td>
+                                    <td>{{unMatchedData.ParantName}}</td>
+                                    <td>{{unMatchedData.userName}}</td>
+                                    <td>{{OddReturn(unMatchedData.Odds)}}</td>
+                                    <td>{{unMatchedData.Stack}}</td>
+                                    <td>{{unMatchedData.P_L}}</td>
+                                    <td>{{unMatchedData.MstDate}}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="$root.IsShowOtherBet=='Y' && false" class="row livematchodds">
+            <div class="col-sm-12">
+                <div class="fancy-collapse-panel">
+                    <div class="panel panel-default match">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <h3 class="panel-title">Other Matched Bets ({{(alllMatchBetData | filter :
+                                {"IsMatched":"1"}).length}})</h3>
+                        </div>
+                        <div class="panel-body unmatchedScrollTable"
+                             ng-if='(alllMatchBetData | filter : {"IsMatched":"1"}).length>0'>
+                            <table class="table betslip-table">
+                                <thead>
+                                <tr>
+                                    <th>Match</th>
+                                    <th>Runner</th>
+                                    <th>Client</th>
+                                    <th>odds</th>
+                                    <th>stack</th>
+                                    <th>P&l</th>
+                                    <th>dateTime</th>
+                                    <!-- <th>IP Address</th> -->
+
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat='unMatchedData in (alllMatchBetData | filter : {"IsMatched":"1"})'
+                                    ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}">
+                                    <td>{{unMatchedData.matchName}}</td>
+                                    <td>{{unMatchedData.selectionName}}</td>
+
+                                    <td>{{unMatchedData.userName}}</td>
+                                    <td>{{OddReturn(unMatchedData.Odds)}}</td>
+                                    <td>{{unMatchedData.Stack}}</td>
+                                    <td>{{unMatchedData.P_L}}</td>
+                                    <td>{{unMatchedData.MstDate}}</td>
+                                    <!-- <td>{{unMatchedData.ip}}</td> -->
+
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-12 ">
+                <div class="fancy-collapse-panel">
+                    <div class="panel panel-default match">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <h3 class="panel-title">Other Unmatched Bets ({{(alllMatchBetData | filter :
+                                {"IsMatched":"0"}).length}})</h3>
+                        </div>
+                        <div class="panel-body unmatchedScrollTable"
+                             ng-if='(alllMatchBetData | filter : {"IsMatched":"0"}).length>0'>
+                            <table class="table betslip-table">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Match</th>
+                                    <th>Runner</th>
+                                    <th>Dealer</th>
+                                    <th>Client</th>
+                                    <th>odds</th>
+                                    <th>stack</th>
+                                    <th>P&l</th>
+                                    <th>dateTime</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat='unMatchedData in (alllMatchBetData | filter : {"IsMatched":"0"})'
+                                    ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}">
+                                    <td><span class="glyphicon glyphicon-trash"
+                                              ng-click="deleteUser(unMatchedData.MstCode,unMatchedData.UserId)"></span>
+                                    </td>
+                                    <td>{{unMatchedData.matchName}}</td>
+                                    <td>{{unMatchedData.selectionName}}</td>
+                                    <td>{{unMatchedData.ParantName}}</td>
+                                    <td>{{unMatchedData.userName}}</td>
+                                    <td>{{OddReturn(unMatchedData.Odds)}}</td>
+                                    <td>{{unMatchedData.Stack}}</td>
+                                    <td>{{unMatchedData.P_L}}</td>
+                                    <td>{{unMatchedData.MstDate}}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+		
+		
         <!-- start code for Fancy -->
 
-        <div ng-repeat="FancyObject in FancyData">
+        <div class="col-sm-6" ng-repeat="FancyObject in FancyData">
             <div ng-hide="FancyObject.active==2 || FancyData.length==0">
 
                 <div class="fancy">
@@ -405,196 +641,15 @@
                 </div>
             </div>
         </div>
-        <!-- end the code of Fancy -->
-
-
-        <div class="row livematchodds">
-            <div class="col-sm-12 ">
-                <div class="fancy-collapse-panel">
-                    <div class="panel panel-default match">
-                        <div class="panel-heading" role="tab" id="headingOne">
-                            <h3 class="panel-title">Matched Bets ({{(UserData | filter :
-                                {"IsMatched":"1"}).length}})</h3>
-                        </div>
-                        <div class="panel-body unmatchedScrollTable"
-                             ng-if='(UserData | filter : {"IsMatched":"1"}).length>0'>
-                            <table class="table betslip-table">
-                                <thead>
-                                <tr>
-                                    <th>Runner</th>
-                                    <th>Client</th>
-                                    <th>odds</th>
-                                    <th>stack</th>
-                                    <th>P&l</th>
-                                    <th>dateTime</th>
-                                    <!-- <th>IP Address</th> -->
-
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr ng-repeat='unMatchedData in (UserData | filter : {"IsMatched":"1"})'
-                                    ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}">
-                                    <td>{{unMatchedData.selectionName}}</td>
-
-                                    <td>{{unMatchedData.userName}}</td>
-                                    <td>{{unMatchedData.Odds}}</td>
-                                    <td>{{unMatchedData.Stack}}</td>
-                                    <td>{{unMatchedData.P_L}}</td>
-                                    <td>{{unMatchedData.MstDate}}</td>
-                                    <!-- <td>{{unMatchedData.ip}}</td> -->
-
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-12 ">
-                <div class="fancy-collapse-panel">
-                    <div class="panel panel-default match">
-                        <div class="panel-heading" role="tab" id="headingOne">
-                            <h3 class="panel-title">Unmatched Bets ({{(UserData | filter :
-                                {"IsMatched":"0"}).length}})</h3>
-                        </div>
-                        <div class="panel-body unmatchedScrollTable"
-                             ng-if='(UserData | filter : {"IsMatched":"0"}).length>0'>
-                            <table class="table betslip-table">
-                                <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Runner</th>
-                                    <th>Dealer</th>
-                                    <th>Client</th>
-                                    <th>odds</th>
-                                    <th>stack</th>
-                                    <th>P&l</th>
-                                    <th>dateTime</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr ng-repeat='unMatchedData in (UserData | filter : {"IsMatched":"0"})'
-                                    ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}">
-                                    <td><span ng-if="false" class="glyphicon glyphicon-trash"
-                                              ng-click="deleteUser(unMatchedData.MstCode,unMatchedData.UserId)"></span>
-                                    </td>
-                                    <td>{{unMatchedData.selectionName}}</td>
-                                    <td>{{unMatchedData.ParantName}}</td>
-                                    <td>{{unMatchedData.userName}}</td>
-                                    <td>{{unMatchedData.Odds}}</td>
-                                    <td>{{unMatchedData.Stack}}</td>
-                                    <td>{{unMatchedData.P_L}}</td>
-                                    <td>{{unMatchedData.MstDate}}</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div ng-if="$root.IsShowOtherBet=='Y' && false" class="row livematchodds">
-            <div class="col-sm-12">
-                <div class="fancy-collapse-panel">
-                    <div class="panel panel-default match">
-                        <div class="panel-heading" role="tab" id="headingOne">
-                            <h3 class="panel-title">Other Matched Bets ({{(alllMatchBetData | filter :
-                                {"IsMatched":"1"}).length}})</h3>
-                        </div>
-                        <div class="panel-body unmatchedScrollTable"
-                             ng-if='(alllMatchBetData | filter : {"IsMatched":"1"}).length>0'>
-                            <table class="table betslip-table">
-                                <thead>
-                                <tr>
-                                    <th>Match</th>
-                                    <th>Runner</th>
-                                    <th>Client</th>
-                                    <th>odds</th>
-                                    <th>stack</th>
-                                    <th>P&l</th>
-                                    <th>dateTime</th>
-                                    <!-- <th>IP Address</th> -->
-
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr ng-repeat='unMatchedData in (alllMatchBetData | filter : {"IsMatched":"1"})'
-                                    ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}">
-                                    <td>{{unMatchedData.matchName}}</td>
-                                    <td>{{unMatchedData.selectionName}}</td>
-
-                                    <td>{{unMatchedData.userName}}</td>
-                                    <td>{{unMatchedData.Odds}}</td>
-                                    <td>{{unMatchedData.Stack}}</td>
-                                    <td>{{unMatchedData.P_L}}</td>
-                                    <td>{{unMatchedData.MstDate}}</td>
-                                    <!-- <td>{{unMatchedData.ip}}</td> -->
-
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-12 ">
-                <div class="fancy-collapse-panel">
-                    <div class="panel panel-default match">
-                        <div class="panel-heading" role="tab" id="headingOne">
-                            <h3 class="panel-title">Other Unmatched Bets ({{(alllMatchBetData | filter :
-                                {"IsMatched":"0"}).length}})</h3>
-                        </div>
-                        <div class="panel-body unmatchedScrollTable"
-                             ng-if='(alllMatchBetData | filter : {"IsMatched":"0"}).length>0'>
-                            <table class="table betslip-table">
-                                <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Match</th>
-                                    <th>Runner</th>
-                                    <th>Dealer</th>
-                                    <th>Client</th>
-                                    <th>odds</th>
-                                    <th>stack</th>
-                                    <th>P&l</th>
-                                    <th>dateTime</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr ng-repeat='unMatchedData in (alllMatchBetData | filter : {"IsMatched":"0"})'
-                                    ng-class="{'lay-head': unMatchedData.isBack == 1 , 'back-head': unMatchedData.isBack == 0}">
-                                    <td><span class="glyphicon glyphicon-trash"
-                                              ng-click="deleteUser(unMatchedData.MstCode,unMatchedData.UserId)"></span>
-                                    </td>
-                                    <td>{{unMatchedData.matchName}}</td>
-                                    <td>{{unMatchedData.selectionName}}</td>
-                                    <td>{{unMatchedData.ParantName}}</td>
-                                    <td>{{unMatchedData.userName}}</td>
-                                    <td>{{unMatchedData.Odds}}</td>
-                                    <td>{{unMatchedData.Stack}}</td>
-                                    <td>{{unMatchedData.P_L}}</td>
-                                    <td>{{unMatchedData.MstDate}}</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
     </div>
 
 
     <div class="col-sm-4 col-md-4 col-xs-12 padding">
-        <div class=" " id="livetv">
+       <!-- <div class=" " id="livetv">
             <iframe src="http://109.237.26.156:8090/monitoring1.mjpg" allowfullscreen>
 
             </iframe>
-        </div>
+        </div>-->
 
         <div class="fancy-collapse-panel">
             <div class="panel panel-default match">
@@ -604,7 +659,7 @@
         </div>
 
         <div>
-            <div class="fancy-collapse-panel">
+            <div class="fancy-collapse-panel devidebox">
                 <div class="panel panel-default match">
                     <div class="panel-heading" role="tab" id="headingOne">
                         <h3 class="panel-title">Fancy score Position
@@ -645,7 +700,7 @@
         <div class="fancy-collapse-panel">
             <div class="panel panel-default match">
                 <div class="panel-heading" role="tab" id="headingOne">
-                    <h3 class="panel-title">Fancy Bet Lists 
+                    <h3 class="panel-title">Fancy bet list
                         <select name="Fancydrp1" ng-model="FancyVal1" ng-change="Clean();GetSeesionBetData(FancyVal1)"
                                 style="color: RED;">
                             <option ng-repeat="FancyDrp in FancyData" value="{{FancyDrp.ID}}" style="color: RED;">
@@ -675,7 +730,7 @@
                             <td>{{unMatchedData.selectionName}}</td>
 
                             <td>{{unMatchedData.userName}}</td>
-                            <td>{{unMatchedData.Odds}}</td>
+                            <td>{{OddReturn(unMatchedData.Odds)}}</td>
                             <td>{{unMatchedData.Stack}}</td>
                             <td>{{unMatchedData.P_L}}</td>
                             <td>{{unMatchedData.MstDate}}</td>

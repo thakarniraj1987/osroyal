@@ -48,7 +48,7 @@ app.directive('header', ['$location', '$timeout', function ($window, $http, sess
             function OddEvenController($scope, $mdDialog, prntScope, id, Type, MatchName, sportId) {
                 $scope.callFirstTime = function () {
                     $http.get( BASE_URL+'Lstsavemstrcontroller/getFancyByEdit/' + id + '/' + Type).success(function (data, status, headers, config) {
-                        //
+                        //debugger;
                         $scope.oddEven = data.FancyData;
                         $scope.HeadName = data.FancyData[0].HeadName;
                         $scope.ID = data.FancyData[0].ID;

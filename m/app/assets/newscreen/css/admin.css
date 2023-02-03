@@ -930,7 +930,7 @@ width: 100%;margin-top: 8px;
 .form_row .form_box{ display: inline-block;padding: 0px;}
 h5.ng-binding{font-size: 26px;padding: 15px 0px;border-bottom: solid 1px #99a1a4;margin-bottom: 10px;padding-bottom: 7px;color: #cae0e8;}
 .form_box label{color: #fff; font-size: 13px;padding-bottom: 2px;}
-.form_box .form-control {background: rgba(255, 255, 255, 0.2);color: #fff;padding-left: 6px; width: 100%; height: 38px;border-radius: 2px;font-size:13px;}
+.form_box .form-control {background: rgba(255, 255, 255, 0.2);color: #000;padding-left: 6px; width: 100%; height: 38px;border-radius: 2px;font-size:13px;}
 .form_box .form-control::placeholder{ color: #bfbfbf;}
 .content-wrapper .lst_master{ padding:0px;}
 .innerbox{background: rgba(0, 0, 0, 0.4);    padding: 0 13px;    height: auto; padding-bottom: 13px;}
@@ -1155,7 +1155,9 @@ md-content.md-default-theme, md-content {
 
 
 
-
+.form-control:focus {
+    border: 1px solid #111 !important;
+}
 
 
 

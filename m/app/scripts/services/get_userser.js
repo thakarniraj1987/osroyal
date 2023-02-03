@@ -260,20 +260,17 @@ var $promise = $http({ method: 'GET', url: surlArray[indurl].url, headers: { 'Co
 	
         },
         getSocketDataApiDetail:function(market_ids, $callback){
-                    var url='';
-
-            if($rootScope.Provider=='betfair')
-            {
-                url=$rootScope.GApiPath+'listMarketBookOdds/'+market_ids;  
-            }
-            else
-            {
-                url=$rootScope.GApiPath+'listMarketBookOdds/'+market_ids;  
-            }
-            $.ajax({
+            var url='';
+           	
+		if($rootScope.GApiPath=="https://my.betdip.com/ExchangeController/"){
+			
+			url=$rootScope.GApiPath+'get_match_betfair_session?market_id='+market_ids;
+			
+					$.ajax({
                 url:url,
                 type:'GET',
                 dataType:'JSON',
+				 headers: { 'TokenId': sessionService.get('TokenId')},
                 success:function(response){
                     $callback(response);
                 },
@@ -282,22 +279,48 @@ var $promise = $http({ method: 'GET', url: surlArray[indurl].url, headers: { 'Co
 
                 }
             });
+			
+		}else {
+		
+        if($rootScope.Provider=='betfair')
+        {
+            url=$rootScope.GApiPath+'get_match_betfair_session.php?market_id='+market_ids;
+        }
+        else
+        {
+            url=$rootScope.GApiPath+'get_match_betfair_session.php?market_id='+market_ids;
+        }
+
+		$.ajax({
+                url:url,
+                type:'GET',
+                dataType:'JSON',
+				
+                success:function(response){
+                    $callback(response);
+                },
+                error :function(data, status, header, config) {
+                    $callback(data);
+
+                }
+            });
+		
+		
+		}
+           
 
         },
         getSocketDataHomeApi:function(market_ids, $callback){
             var url='';
-            if($rootScope.Provider=='betfairbetfair')
-            {
-                url=$rootScope.GApiPath+'listMarketBookOdds/'+market_ids;  
-            }
-            else
-            {
-                url=$rootScope.GApiPath+'listMarketBookOdds/'+market_ids;  
-            }
-            $.ajax({
+            if($rootScope.GApiPath=="https://my.betdip.com/ExchangeController/"){
+			
+			url=$rootScope.GApiPath+'get_odds_by_market_ids?market_id='+market_ids;
+			
+			$.ajax({
                 url:url,
                 type:'GET',
                 dataType:'JSON',
+				 headers: { 'TokenId': sessionService.get('TokenId')},
                 success:function(response){
                     $callback(response);
                 },
@@ -306,6 +329,32 @@ var $promise = $http({ method: 'GET', url: surlArray[indurl].url, headers: { 'Co
 
                 }
             });
+			
+		}else {
+        if($rootScope.Provider=='betfair')
+        {
+            url=$rootScope.GApiPath+'get_odds_by_market_ids.php?market_id='+market_ids;
+        }
+        else
+        {
+            url=$rootScope.GApiPath+'get_odds_by_market_ids.php?market_id='+market_ids;
+        }
+		
+		
+		$.ajax({
+                url:url,
+                type:'GET',
+                dataType:'JSON',			 
+                success:function(response){
+                    $callback(response);
+                },
+                error :function(data, status, header, config) {
+                    $callback(data);
+
+                }
+            });
+		}
+            
 
         },
         getSelectionList:function(selection_id, $callback){

@@ -842,11 +842,11 @@ $('ff').focus(function () {
                     case "3": return "dashboard.Userdashboard"; break;
                 }
             }
-            $http.get( BASE_URL+'Geteventcntr/GetSportFrmDatabase').success(function (data, status, headers, config) {
+         /*   $http.get( BASE_URL+'Geteventcntr/GetSportFrmDatabase').success(function (data, status, headers, config) {
                 $scope.sprtData = data.sportData;
             }).error(function (data, status, header, config) {
                 $scope.ResponseDetails = "Data: " + data + "<br />status: " + status + "<br />headers: " + jsonFilter(header) + "<br />config: " + jsonFilter(config);
-            });
+            });*/
             $scope.message = "";
             $scope.setNodeToTable = function (node) {
                 $rootScope.$broadcast('test_dir', { userData: node });

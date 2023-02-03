@@ -254,7 +254,7 @@ class CI_Controller {
 
 		$username = $this->input->request_headers('PHP_AUTH_USER');
 		$password = $this->input->request_headers('PHP_AUTH_PW');
-		$http_auth = $this->input->request_headers('authorization');
+		$http_auth = $this->input->request_headers('Authorization');
 
 		if(!empty($http_auth['Authorization'])){
 
@@ -284,7 +284,6 @@ class CI_Controller {
 				exit();
 			}else{
 				$this->globalUserId = $checkUser['mstrid'];
-				$this->globalUserType = $checkUser['usetype'];
 			}
 		}else{
 				$response = array();
@@ -469,14 +468,12 @@ class CI_Controller {
 		}
 
 
-		function getIndFancyAdmin($matchId=0){
+		function getIndFancyAdmin($marketId=0){
 
-		//	$sessionMrktId = $marketId.'_s';
-		//	$sessionMrktId = $marketId;
+			$sessionMrktId = $marketId.'_s';
 			$redisArr = array();
 			//$redisUrl = EXCH_BACK_LAY_BY_MARKETS_URL.'?back_lay_ids='.$sessionMrktId;
-			$redisUrl = BETFAIR_FANCY_URL.$matchId;
-
+			$redisUrl = BR_SUPER_AMDIN_FANCY_URL.$marketId;
 		//	echo $redisUrl;
 			$redisJson = $this->httpGet($redisUrl);
 
@@ -484,13 +481,13 @@ class CI_Controller {
 
 			$redisArr = json_decode($redisJson,true);
 
-			$sessionArr = $redisArr;
+			$sessionArr = $redisArr['data'];
             //echo "<pre>"; print_r($sessionArr);die;
 		//	print_r($sessionArr);
 		//	print_r($redisArr[$sessionMrktId]);
 		//	die;
 
-			$response['session'] = !empty($sessionArr) ? $sessionArr : '';
+			$response["data"]['session'] = !empty($sessionArr) ? $sessionArr : '';
 			return $response;
 
 
@@ -535,7 +532,7 @@ class CI_Controller {
 		}
 
 		function getMatchOdds($marketId){
-			$url = BETFAIR_ODDS_URL.$marketId;
+			$url = BR_LIVE_ODDS_URL.'market_id='.$marketId;
 			$result = $this->httpGet($url);
 			$jsonResp = json_decode($result,true);
 			return $jsonResp;
@@ -764,34 +761,20 @@ class CI_Controller {
 		function updateMarketRunners($marketId=NULL){
 
 			$this->load->model('Modelmarket');
-			$marketUrl = BETFAIR_SELECTION_URL.$marketId;
+			$marketUrl = BETFAIR_SELECTION_URL.''.$marketId;
 			$marketJson = $this->httpGet($marketUrl);
 			$marketArr = json_decode($marketJson,true);
 
 			if(!empty($marketArr)){
                 $runners=[];
 				foreach($marketArr[0]['runners'] as $runner){
-					
                    // print_r($runner);die;
-					$temp = array();
-					$temp['selectionId'] = (int)$runner['selectionId'];
-					$temp['handicap'] = 0;
-					$temp['status'] = "ACTIVE";
-					$temp['lastPriceTraded'] = 0;
-					$temp['totalMatched'] = 0;
-					$temp['ex']['availableToBack'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-					$temp['ex']['availableToLay'] = array('0'=>array('price'=>'--','size'=>'--'),'1'=>array('price'=>'--','size'=>'--'),'2'=>array('price'=>'--','size'=>'--'));
-					$temp['ex']['tradedVolume'] = [];
-					$temp['name'] = $runner['runnerName'];
-					$runners[] = $temp;
-
-                /*    $runner['id']= $runner['selectionId'];
+                    $runner['id']= $runner['selectionId'];
                     $runner['name']=$runner['runnerName'];
                     $runner['back'] = [["size"=>"--","price"=>"--"],["size"=>"--","price"=>"--"],["size"=>"--","price"=>"--"]];
                     $runner['lay'] = [["size"=>"--","price"=>"--"],["size"=>"--","price"=>"--"],["size"=>"--","price"=>"--"]];
-                    $runners[]= $runner; */
+                    $runners[]= $runner;
 
-				
 				}
 
                 $this->Modelmarket->update($marketId,array('market_runner_json'=>json_encode($runners)));

@@ -52,43 +52,49 @@ angular.module('ApsilonApp').directive('headerNotificationmaster', ['$timeout', 
             $scope.upBal="";
             $scope.callbal=1;
             $scope.UpdateBalance = function()
-		{
-            $scope.upBal = $timeout(function(){
-			      $http.get('Chipscntrl/getChipDataById/' + localStorage.user_id).success(function (data, status, headers, config) {
-                $scope.cipsData = data.betLibility;
-                sessionService.set('FreeChips', $scope.cipsData[0].FreeChip);
-                sessionService.set('ChipInOut', $scope.cipsData[0].Chip);
-                sessionService.set('Liability', $scope.cipsData[0].Liability);
-                sessionService.set('Balance', $scope.cipsData[0].Balance);
-                sessionService.set('P_L', $scope.cipsData[0].P_L);
-                sessionService.set('IsShowTv',$scope.cipsData[0].ShowVideoTv);
-                sessionService.set('IsSettlementBtn',$scope.cipsData[0].ShowSettlementButton);
-                sessionService.set('IsShowOtherBet',$scope.cipsData[0].ShowOtherBets);
-                $scope.$watch('sessionService', function (newVal, oldVal) {
-                    $scope.FreeChips = $scope.cipsData[0].FreeChip;
-                    $scope.ChipInOut = $scope.cipsData[0].Chip;
-                    $scope.Liability = $scope.cipsData[0].Liability;
-                    $scope.Balance = $scope.cipsData[0].Balance;
-                    $scope.P_L = $scope.cipsData[0].P_L;
-                });
-		
-                $rootScope.user = sessionService.get('slctUseName');
-                $rootScope.Balance = sessionService.get('Balance');
-                $rootScope.Liability = sessionService.get('Liability');
-                $rootScope.IsShowTv= sessionService.get('IsShowTv');
-                $rootScope.IsSettlementBtn= sessionService.get('IsSettlementBtn');
-                $rootScope.IsShowOtherBet= sessionService.get('IsShowOtherBet');
-                      $scope.callbal=2;
-                      if(!data.is_login) {
-                          loginService.logout();
-                      }
-                      else
-                      {
-                          $scope.UpdateBalance();
-                      }
-                  });
+		    {
+            if(sessionService.get('user_id')!=angular.isUndefinedOrNull) {
+                $scope.upBal = $timeout(function () {
+                    $http.get('Chipscntrl/getChipDataById/' + sessionService.get('user_id')).success(function (data, status, headers, config) {
+                        $scope.cipsData = data.betLibility;
+                        if($scope.cipsData !=angular.isUndefinedOrNull) {
+                            sessionService.set('FreeChips', $scope.cipsData[0].FreeChip);
+                            sessionService.set('ChipInOut', $scope.cipsData[0].Chip);
+                            sessionService.set('Liability', $scope.cipsData[0].Liability);
+                            sessionService.set('Balance', $scope.cipsData[0].Balance);
+                            sessionService.set('P_L', $scope.cipsData[0].P_L);
+                            sessionService.set('IsShowTv', $scope.cipsData[0].ShowVideoTv);
+                            sessionService.set('IsSettlementBtn', $scope.cipsData[0].ShowSettlementButton);
+                            sessionService.set('IsShowOtherBet', $scope.cipsData[0].ShowOtherBets);
+                        }
+                        $scope.$watch('sessionService', function (newVal, oldVal) {
+                            $scope.FreeChips = $scope.cipsData[0].FreeChip;
+                            $scope.ChipInOut = $scope.cipsData[0].Chip;
+                            $scope.Liability = $scope.cipsData[0].Liability;
+                            $scope.Balance = $scope.cipsData[0].Balance;
+                            $scope.P_L = $scope.cipsData[0].P_L;
+                        });
 
-            },$scope.callbal==1 ? 0 : 5000)
+                        $rootScope.user = sessionService.get('slctUseName');
+                        $rootScope.Balance = sessionService.get('Balance');
+                        $rootScope.Liability = sessionService.get('Liability');
+                        $rootScope.IsShowTv = sessionService.get('IsShowTv');
+                        $rootScope.IsSettlementBtn = sessionService.get('IsSettlementBtn');
+                        $rootScope.IsShowOtherBet = sessionService.get('IsShowOtherBet');
+                        $scope.callbal = 2;
+                        if (!data.is_login) {
+                            loginService.logout();
+                        } else {
+                            $scope.UpdateBalance();
+                        }
+                    });
+
+                }, $scope.callbal == 1 ? 0 : 5000)
+            }
+            else
+            {
+                loginService.logout();
+            }
 		}
 	    $scope.UpdateBalance();
   		var chkBals = function () { $scope.UpdateBalance()};

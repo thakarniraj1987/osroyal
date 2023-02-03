@@ -63,15 +63,16 @@ defined('BASEPATH') or exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = true;
 
+
 $db['default'] = array(
     'dsn' => '',
     'hostname' => 'localhost',
     'username' => 'dev',
-    'password' => '7HiWdDmVh',
-    'database' => 'osgplay',
+    'password' => '5LWvgk<>e*{:L~Y',
+    'database' => 'mexch',
     'dbdriver' => 'mysqli',
     'dbprefix' => '',
-    'pconnect' => true,
+    'pconnect' => false,
     'db_debug' => false,
     'cache_on' => true,
     'cachedir' => '',

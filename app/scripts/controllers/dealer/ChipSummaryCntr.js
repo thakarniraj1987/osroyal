@@ -1,5 +1,8 @@
-app.controller('ChipSummaryCntr', function ($scope, $http, $filter, sessionService, $mdDialog, $rootScope, $location) {
+app.controller('ChipSummaryCntr', function ($scope, $http, $filter, sessionService, $mdDialog, $rootScope, $location,Base64) {
     $scope.backopti = false;
+    var authdata = Base64.encode(sessionService.get('user') + ':' +    sessionService.get('lgPassword'));
+    var Bauthdata='Basic ' + authdata;
+    $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata;
     if ($rootScope.HelperAllRights != angular.isUndefinedOrNull && $rootScope.HelperAllRights.ChipSummary == 0) { $location.path('/dashboard/Home'); }//170213
     $scope.doTheBack = function (GTuserType, GTUseruserId, GTUserName) {
         $http.get('Lstsavemstrcontroller/getParentData/' + GTUseruserId).success(function (data, status, headers, config) {
